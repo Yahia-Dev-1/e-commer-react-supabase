@@ -171,6 +171,7 @@ function AppContent() {
     return () => {
       window.removeEventListener('productsUpdated', handleProductsUpdate)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Additional effect to listen for localStorage changes

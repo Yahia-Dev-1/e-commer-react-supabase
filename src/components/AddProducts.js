@@ -2,48 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddProducts.css';
 import emailjs from 'emailjs-com';
-import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase, subscribeToProducts } from '../utils/supabase';
-
-// دالة لإرسال بريد إلكتروني عند رفض الطلب (مثال باستخدام EmailJS)
-function sendRejectionEmail(userEmail, productTitle) {
-  // إعداد بيانات البريد
-  const templateParams = {
-    to_email: userEmail,
-    message: `تم رفض طلبك لإضافة المنتج: ${productTitle}. إذا كان لديك أي استفسار تواصل مع الإدارة.`
-  };
-  // استبدل هذه القيم بقيمك من EmailJS
-  const serviceID = 'YOUR_SERVICE_ID';
-  const templateID = 'YOUR_TEMPLATE_ID';
-  const userID = 'YOUR_USER_ID';
-
-  emailjs.send(serviceID, templateID, templateParams, userID)
-    .then((response) => {
-      console.log('Email sent successfully!', response.status, response.text);
-    }, (err) => {
-      console.error('Failed to send email:', err);
-    });
-}
-
-
-function EditProductModal({ product, onClose, onSave }) {
-  const [formData, setFormData] = useState({
-    title: product.attributes.title,
-    description: product.attributes.description,
-    price: product.attributes.price,
-    stock: product.attributes.stock,
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // تم حذف كود التعديل المرتبط بـ updateProduct
-    onSave(formData);
-    onClose();
-  };
-
-  // ...existing code...
-  // تم حذف أو تعليق أي استخدام لـ ProductItem
-  // ...existing code...
-}
+import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase } from '../utils/supabase';
 
 export default function AddProducts({ darkMode = false }) {
   const [productList,setProductList]= useState([])
@@ -64,7 +23,6 @@ export default function AddProducts({ darkMode = false }) {
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [showStats, setShowStats] = useState(false)
   const [showCategoriesSection, setShowCategoriesSection] = useState(false)
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)

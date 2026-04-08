@@ -10,14 +10,14 @@ export default function Admin({ darkMode = true }) {
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
-  const [showAllUsers, setShowAllUsers] = useState(true); // Changed to true to show all users by default
+  const [showAllUsers] = useState(true); // Changed to true to show all users by default
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [newAdmin, setNewAdmin] = useState({
     email: '',
     password: '',
     name: ''
   });
-  const [addAdminError, setAddAdminError] = useState('');
+  const [addAdminError] = useState('');
 
   const checkAuthorization = useCallback(() => {
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');

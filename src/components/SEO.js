@@ -57,10 +57,11 @@ const SEO = ({
     updateCanonicalUrl(url || window.location.href);
 
     // Add structured data for current page
+    // eslint-disable-next-line no-use-before-define
     addStructuredData();
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, description, keywords, image, url, type, author, publishedTime, modifiedTime, section, tags, location, addStructuredData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, description, keywords, image, url, type, author, publishedTime, modifiedTime, section, tags, location]);
 
   const updateMetaTag = (name, content) => {
     if (!content) return;
