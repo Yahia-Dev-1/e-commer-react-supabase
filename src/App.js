@@ -70,6 +70,20 @@ function AppContent() {
 
   // Load products from Supabase (real-time sync!)
   useEffect(() => {
+    // First, fetch existing products from Supabase
+    const fetchProducts = async () => {
+      try {
+        const { getProductsFromSupabase } = await import('./utils/supabase')
+        const products = await getProductsFromSupabase()
+        console.log('📥 Initial fetch:', products.length, 'products')
+        setProducts(products)
+        localStorage.setItem('ecommerce_products', JSON.stringify(products))
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      }
+    }
+    fetchProducts()
+
     // Subscribe to real-time updates from Supabase
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
       console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
