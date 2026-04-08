@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import '../styles/cart.css'
 
-export default function Cart({ cartItems, updateQuantity, clearCart, createOrder, darkMode = false }) {
+export default function Cart({ cartItems, updateQuantity, clearCart, createOrder, darkMode = false, products = [] }) {
   const navigate = useNavigate()
   const [showAnimation, setShowAnimation] = useState(false)
   const [showShippingForm, setShowShippingForm] = useState(false)
@@ -17,30 +17,42 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
     addressInCountry: '',
     additionalInfo: ''
   })
+  // Check cart items against Supabase products (real-time stock)
   useEffect(() => {
-    const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
     cartItems.forEach(item => {
-      const product = existingProducts.find(p => p.id === item.id);
+      const product = products.find(p => p.id === item.id);
+      // If product not found in Supabase or quantity is 0, remove from cart
       if (!product || product.quantity === 0) {
         updateQuantity(item.id, 0);
+      } else if (item.quantity > product.quantity) {
+        // If cart quantity exceeds available stock, adjust it
+        updateQuantity(item.id, product.quantity);
       }
     });
-  }, [cartItems, updateQuantity]);
+  }, [cartItems, updateQuantity, products]);
 
 
 
-  // دالة للتحقق من الكمية المتاحة
+  // دالة للتحقق من الكمية المتاحة (from Supabase products)
   const checkAvailableQuantity = (itemId, requestedQuantity) => {
     try {
-      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
-      const product = existingProducts.find(p => p.id === itemId)
+      // First check Supabase products (real-time)
+      const product = products.find(p => p.id === itemId)
       if (product) {
-        return Math.min(requestedQuantity, product.quantity || 1)
+        return Math.min(requestedQuantity || 1, product.quantity || 0)
       }
-      return requestedQuantity
+      
+      // Fallback to localStorage if not in Supabase yet
+      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
+      const localProduct = existingProducts.find(p => p.id === itemId)
+      if (localProduct) {
+        return Math.min(requestedQuantity || 1, localProduct.quantity || 0)
+      }
+      
+      return 0
     } catch (error) {
       console.error('Error checking available quantity:', error)
-      return requestedQuantity
+      return 0
     }
   }
 

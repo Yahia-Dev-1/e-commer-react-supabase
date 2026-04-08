@@ -655,6 +655,7 @@ function AppContent() {
                 clearCart={clearCart}
                 createOrder={createOrder}
                 darkMode={true}
+                products={products}
               />
             </Suspense>
           ) : (
