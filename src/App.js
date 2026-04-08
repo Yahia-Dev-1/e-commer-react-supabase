@@ -590,58 +590,72 @@ function AppContent() {
     }
   }
 
-  const handleLogin = (userData) => {
+  const handleLogin = async (userData) => {
     setUser(userData)
     // Save current user email to localStorage for admin access
     localStorage.setItem('currentUserEmail', userData.email)
-    // Check if there's a pending product to add to cart
-    if (pendingProduct) {
-      // Add the pending product to cart first
-      const existingItem = cartItems.find(item => item.id === pendingProduct.id)
-      
-      if (existingItem) {
-        setCartItems(prevItems => {
-          const updatedItems = prevItems.map(item => 
-            item.id === pendingProduct.id 
-              ? { ...item, quantity: item.quantity + 1 }
-              : item
-          )
-          
-          // Save to localStorage immediately
-          try {
-            localStorage.setItem('cartItems', JSON.stringify(updatedItems))
-          } catch (error) {
-            if (error.name === 'QuotaExceededError') {
-              console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
-              cleanupLocalStorage()
-              showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
-            }
-          }
-          
-          return updatedItems
-        })
-      } else {
-        setCartItems(prevItems => {
-          const updatedItems = [...prevItems, { ...pendingProduct, quantity: 1 }]
-          
-          // Save to localStorage immediately
-          try {
-            localStorage.setItem('cartItems', JSON.stringify(updatedItems))
-          } catch (error) {
-            if (error.name === 'QuotaExceededError') {
-              console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
-              cleanupLocalStorage()
-              showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
-            }
-          }
-          
-          return updatedItems
-        })
-      }
-      
-      // Then show the modal
-      setShowAddToCartModal(true)
+    
+    // Save user to Supabase
+    try {
+      await addUserToSupabase(userData)
+      console.log(' User saved to Supabase:', userData.email)
+    } catch (error) {
+      console.warn(' Could not save user to Supabase:', error.message)
     }
+    
+    // Merge cart items from this user with existing cart
+    const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]')
+    const userOrders = userData.orders || []
+    
+    if (userOrders.length > 0) {
+      const orderItems = userOrders.flatMap(order => order.items || [])
+      
+      const mergedItems = [...existingCart]
+      orderItems.forEach(orderItem => {
+        const existingItem = mergedItems.find(item => item.id === orderItem.id)
+        if (existingItem) {
+          setCartItems(prevItems => {
+            const updatedItems = prevItems.map(item => 
+              item.id === orderItem.id 
+                ? { ...item, quantity: item.quantity + (orderItem.quantity || 1) }
+                : item
+            )
+            
+            // Save to localStorage immediately
+            try {
+              localStorage.setItem('cartItems', JSON.stringify(updatedItems))
+            } catch (error) {
+              if (error.name === 'QuotaExceededError') {
+                console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
+                cleanupLocalStorage()
+                showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+              }
+            }
+            
+            return updatedItems
+          })
+        } else {
+          setCartItems(prevItems => {
+            const updatedItems = [...prevItems, { ...orderItem, quantity: orderItem.quantity || 1 }]
+            
+            // Save to localStorage immediately
+            try {
+              localStorage.setItem('cartItems', JSON.stringify(updatedItems))
+            } catch (error) {
+              if (error.name === 'QuotaExceededError') {
+                console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
+                cleanupLocalStorage()
+                showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+              }
+            }
+            
+            return updatedItems
+          })
+        }
+      })
+    }
+    // Then show the modal
+    setShowAddToCartModal(true)
   }
 
   const handleLogout = () => {
