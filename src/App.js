@@ -296,34 +296,21 @@ function AppContent() {
   // دالة للتحقق من الكمية المتاحة
   const checkAvailableQuantity = (productId) => {
     try {
+      // الأول نشوف في products state (من Supabase)
+      const productFromState = products.find(p => p.id === productId)
+      if (productFromState) {
+        return Math.max(0, productFromState.quantity || 0)
+      }
+      
+      // لو مش لقينا، نشوف في localStorage
       const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
       const product = existingProducts.find(p => p.id === productId)
       
-      // إذا لم نجد المنتج في localStorage، نستخدم الكمية الافتراضية
-      if (!product) {
-        // الكميات الافتراضية للمنتجات
-        const defaultQuantities = {
-          1: 10, // Hoodie
-          2: 20, // T-Shirt
-          3: 5,  // Jeans
-          4: 0,  // Sneakers (out of stock)
-          5: 15, // Running Shoes
-          6: 8,  // Watch
-          7: 25, // Backpack
-          8: 12  // Cap
-        }
-        return defaultQuantities[productId] || 0
+      if (product) {
+        return Math.max(0, product.quantity || 0)
       }
       
-      // التحقق من أن الكمية صحيحة وليست سالبة
-      const quantity = Math.max(0, product.quantity || 0)
-      
-      // إذا كانت الكمية 0، المنتج نفذ مخزونه
-      if (quantity === 0) {
-        console.log(`Product ${product.title} is out of stock`)
-      }
-      
-      return quantity
+      return 0
     } catch (error) {
       console.error('Error checking available quantity:', error)
       return 0
