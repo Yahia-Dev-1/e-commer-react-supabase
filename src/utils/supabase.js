@@ -9,12 +9,16 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Products table operations
 export const addProductToSupabase = async (product) => {
   try {
+    // Generate ID if not provided
+    const productWithId = {
+      ...product,
+      id: product.id || crypto.randomUUID(),
+      created_at: new Date().toISOString()
+    };
+    
     const { data, error } = await supabase
       .from('products')
-      .insert([{
-        ...product,
-        created_at: new Date().toISOString()
-      }])
+      .insert([productWithId])
       .select();
     
     if (error) throw error;
