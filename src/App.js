@@ -77,7 +77,11 @@ function AppContent() {
         const products = await getProductsFromSupabase()
         console.log('📥 Initial fetch:', products.length, 'products')
         setProducts(products)
-        localStorage.setItem('ecommerce_products', JSON.stringify(products))
+        try {
+          localStorage.setItem('ecommerce_products', JSON.stringify(products.slice(0, 20)))
+        } catch (e) {
+          console.warn('localStorage quota exceeded, skipping cache')
+        }
       } catch (error) {
         console.error('Error fetching products:', error)
       }
@@ -88,8 +92,12 @@ function AppContent() {
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
       console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
       setProducts(supabaseProducts)
-      // Also save to localStorage for offline support
-      localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts))
+      // Also save to localStorage for offline support (limit to 20 items)
+      try {
+        localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
+      } catch (e) {
+        console.warn('localStorage quota exceeded in realtime sync')
+      }
     })
 
     // Cleanup subscription on unmount

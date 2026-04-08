@@ -475,11 +475,11 @@ export default function AddProducts({ darkMode = false }) {
         </div>
       )}
 
-      {/* Strapi Products (read-only) */}
+      {/* All Products from Supabase */}
       {!showCategoriesSection && productList && productList.length > 0 && (
         <div className="products-section" style={{ marginTop: '16px' }}>
           <div className="products-header">
-            <h2>Strapi Products ({productList.length})</h2>
+            <h2>All Products ({productList.length})</h2>
           </div>
           <div className='products-grid'>
                 {/* تم حذف استخدام ProductItem لعدم تعريفه */}
