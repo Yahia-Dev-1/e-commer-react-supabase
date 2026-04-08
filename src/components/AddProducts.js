@@ -268,17 +268,26 @@ export default function AddProducts({ darkMode = false }) {
 
     try {
       // Save to Supabase - will sync to all devices automatically!
-      await addProductToSupabase(productData)
+      const savedProduct = await addProductToSupabase(productData)
+      console.log('✅ Saved to Supabase:', savedProduct)
+      
+      // Add to local state with Supabase ID
+      if (savedProduct && savedProduct.id) {
+        const updatedProducts = [...products, savedProduct]
+        setProducts(updatedProducts)
+        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
+      }
+      
       setMessage(`✅ Product "${productData.title}" added! All devices will see it.`)
       clearForm()
     } catch (error) {
       console.error('Supabase error:', error)
-      // Fallback: save locally only
-      const localProduct = { ...productData, id: Date.now() }
+      // Fallback: save locally only with text ID
+      const localProduct = { ...productData, id: String(Date.now()) }
       const updatedProducts = [...products, localProduct]
       setProducts(updatedProducts)
       localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
-      setMessage(`⚠️ Saved locally only. Firebase setup needed.`)
+      setMessage(`⚠️ Saved locally only. Check Supabase setup.`)
     }
   }
 
