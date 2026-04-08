@@ -3,7 +3,7 @@ import Nav from './components/nav';
 import Cart from './components/cart';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async';
-import { useState, useEffect, Suspense, lazy, useRef } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
 import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase } from './utils/supabase'
 import React from 'react';
@@ -66,7 +66,6 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [products, setProducts] = useState([])
   const [productsVersion, setProductsVersion] = useState(0) // For forcing re-renders
-  const recentlyUpdatedProducts = useRef({}) // Track products we just updated to avoid double subtraction
   // Dark mode is always enabled
 
   // Load products from Supabase (real-time sync!)
@@ -78,29 +77,10 @@ function AppContent() {
         const supabaseProducts = await getProductsFromSupabase()
         console.log('📥 Initial fetch:', supabaseProducts.length, 'products')
         
-        // 🆕 احسب الكميات المحجوزة في السلة الحالية
-        const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
-        const reservedQuantities = {}
-        currentCartItems.forEach(item => {
-          reservedQuantities[item.id] = (reservedQuantities[item.id] || 0) + item.quantity
-        })
-        
-        // 🆕 طبق الحجز على المنتجات الجاية من Supabase
-        const adjustedProducts = supabaseProducts.map(product => {
-          const reserved = reservedQuantities[product.id] || 0
-          if (reserved > 0) {
-            return {
-              ...product,
-              quantity: Math.max(0, (product.quantity || 0) - reserved)
-            }
-          }
-          return product
-        })
-        
-        console.log('📊 Applied reserved quantities on load:', reservedQuantities)
-        setProducts(adjustedProducts)
+        // ✅ استخدم قيمة Supabase مباشرة
+        setProducts(supabaseProducts)
         try {
-          localStorage.setItem('ecommerce_products', JSON.stringify(adjustedProducts.slice(0, 20)))
+          localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
         } catch (e) {
           console.warn('localStorage quota exceeded, skipping cache')
         }
@@ -114,38 +94,12 @@ function AppContent() {
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
       console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
       
-      // 🆕 احسب الكميات المحجوزة في السلة الحالية
-      const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
-      const reservedQuantities = {}
-      currentCartItems.forEach(item => {
-        reservedQuantities[item.id] = (reservedQuantities[item.id] || 0) + item.quantity
-      })
-      
-      // 🆕 طبق الحجز على المنتجات الجاية من Supabase
-      const adjustedProducts = supabaseProducts.map(product => {
-        const reserved = reservedQuantities[product.id] || 0
-        const justUpdated = recentlyUpdatedProducts.current[product.id]
-        
-        if (reserved > 0 && !justUpdated) {
-          // ✅ نطبق الحجز بس لو المنتج مش أنا اللي حدثته للتو
-          return {
-            ...product,
-            quantity: Math.max(0, (product.quantity || 0) - reserved)
-          }
-        }
-        return product
-      })
-      
-      console.log('📊 Applied reserved quantities:', reservedQuantities)
-      console.log('🚫 Skipped recently updated:', Object.keys(recentlyUpdatedProducts.current))
-      setProducts(adjustedProducts)
-      
-      // 🆕 امسح الـ tracking بعد ما نستخدمه
-      recentlyUpdatedProducts.current = {}
+      // ✅ استخدم قيمة Supabase مباشرة - هيها اللي فيها الحجز فعلاً
+      setProducts(supabaseProducts)
       
       // Also save to localStorage for offline support (limit to 20 items)
       try {
-        localStorage.setItem('ecommerce_products', JSON.stringify(adjustedProducts.slice(0, 20)))
+        localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
       } catch (e) {
         console.warn('localStorage quota exceeded in realtime sync')
       }
@@ -395,9 +349,6 @@ function AppContent() {
         existingProducts[productIndex].quantity = newQuantity
         localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
         
-        // 🆕 علم المنتج إنه أنا اللي حدثته (عشان الـ Subscription متطرحش الحجز تاني)
-        recentlyUpdatedProducts.current[productId] = true
-        
         // Update Supabase for real-time sync
         try {
           await updateProductInSupabase(productId, { quantity: newQuantity })
@@ -427,9 +378,6 @@ function AppContent() {
         
         existingProducts[productIndex].quantity = newQuantity
         localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
-        
-        // 🆕 علم المنتج إنه أنا اللي حدثته (عشان الـ Subscription متضفش الكمية تاني)
-        recentlyUpdatedProducts.current[productId] = true
         
         // Update Supabase for real-time sync
         try {
@@ -659,8 +607,8 @@ function AppContent() {
       setOrders(prevOrders => [savedOrder, ...prevOrders])
     }
     
-    // طرح الكمية المباعة من المنتجات
-    updateProductQuantities(cartItems)
+    // ✅ الكمية محجوزة فعلاً، بنعمل sync بس مع Supabase
+    await updateProductQuantities(cartItems)
     
     setCartItems([])
     localStorage.removeItem('cartItems')
