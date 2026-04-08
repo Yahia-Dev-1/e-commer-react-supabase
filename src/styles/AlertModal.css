@@ -1,0 +1,147 @@
+.alert-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+.alert-modal-content {
+  background: #1a1a2e;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+  border: 1px solid #2d2d44;
+}
+
+.alert-modal-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #2d2d44;
+  position: relative;
+}
+
+.alert-modal-icon {
+  font-size: 24px;
+  margin-right: 12px;
+}
+
+.alert-modal-header h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.alert-modal-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.alert-modal-close:hover {
+  background: #2d2d44;
+  color: #fff;
+}
+
+.alert-modal-success { border-left: 4px solid #4CAF50; }
+.alert-modal-error { border-left: 4px solid #f44336; }
+.alert-modal-warning { border-left: 4px solid #ff9800; }
+.alert-modal-info { border-left: 4px solid #2196F3; }
+
+.alert-modal-body {
+  padding: 20px;
+}
+
+.alert-modal-body p {
+  margin: 0;
+  color: #ccc;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.alert-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #2d2d44;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.alert-modal-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.alert-modal-btn-confirm {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.alert-modal-btn-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.alert-modal-btn-cancel {
+  background: #2d2d44;
+  color: #ccc;
+}
+
+.alert-modal-btn-cancel:hover {
+  background: #3d3d54;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .alert-modal-content {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .alert-modal-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}

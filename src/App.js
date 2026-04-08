@@ -18,6 +18,7 @@ const Cards = lazy(() => import('./components/cards'))
 const Login = lazy(() => import('./components/Login'))
 const Orders = lazy(() => import('./components/Orders'))
 const Modal = lazy(() => import('./components/Modal'))
+const AlertModal = lazy(() => import('./components/AlertModal'))
 const Admin = lazy(() => import('./components/Admin'))
 const Footer = lazy(() => import('./components/Footer'))
 
@@ -66,6 +67,52 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [products, setProducts] = useState([])
   const [productsVersion, setProductsVersion] = useState(0) // For forcing re-renders
+  
+  // 🆕 Alert Modal state
+  const [alertModal, setAlertModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    onConfirm: null,
+    showConfirm: false
+  })
+  
+  // 🆕 دالة مساعدة لعرض الـ Alert
+  const showAlert = (title, message, type = 'info') => {
+    setAlertModal({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm: null,
+      showConfirm: false
+    })
+  }
+  
+  // 🆕 دالة مساعدة لعرض Confirm
+  const showConfirm = (title, message, onConfirm, type = 'warning') => {
+    setAlertModal({
+      isOpen: true,
+      title,
+      message,
+      type,
+      onConfirm,
+      showConfirm: true
+    })
+  }
+  
+  const closeAlert = () => {
+    setAlertModal(prev => ({ ...prev, isOpen: false }))
+  }
+  
+  const handleAlertConfirm = () => {
+    if (alertModal.onConfirm) {
+      alertModal.onConfirm()
+    }
+    closeAlert()
+  }
+  
   // Dark mode is always enabled
 
   // Load products from Supabase (real-time sync!)
@@ -266,7 +313,7 @@ function AppContent() {
     // 🆕 Check stock availability first
     const availableQuantity = checkAvailableQuantity(product.id)
     if (availableQuantity <= 0) {
-      alert('Sorry, this product is out of stock!')
+      showAlert('Out of Stock', 'Sorry, this product is out of stock!', 'error')
       return
     }
     
@@ -277,7 +324,7 @@ function AppContent() {
       const newQuantity = existingItem.quantity + 1
       // Check if we can add more
       if (newQuantity > availableQuantity) {
-        alert(`Sorry, only ${availableQuantity} items available.`)
+        showAlert('Limited Stock', `Sorry, only ${availableQuantity} items available.`, 'warning')
         return
       }
       
@@ -294,7 +341,7 @@ function AppContent() {
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
             cleanupLocalStorage()
-            alert('Storage was full. Please try again.')
+            showAlert('Storage Full', 'Storage was full. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -309,7 +356,7 @@ function AppContent() {
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
             cleanupLocalStorage()
-            alert('Storage was full. Please try again.')
+            showAlert('Storage Full', 'Storage was full. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -358,7 +405,7 @@ function AppContent() {
           if (error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded, clearing old data...')
             cleanupLocalStorage()
-            alert('Storage was full, some data was cleared. Please try again.')
+            showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -367,7 +414,7 @@ function AppContent() {
       // 🆕 Check stock availability
       const availableQuantity = checkAvailableQuantity(id)
       if (newQuantity > availableQuantity) {
-        alert(`Sorry, only ${availableQuantity} items available.`)
+        showAlert('Limited Stock', `Sorry, only ${availableQuantity} items available.`, 'warning')
         return
       }
       
@@ -385,7 +432,7 @@ function AppContent() {
           if (error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded, clearing old data...')
             cleanupLocalStorage()
-            alert('Storage was full, some data was cleared. Please try again.')
+            showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -479,7 +526,7 @@ function AppContent() {
     
     // If any items are out of stock, show error and don't create order
     if (outOfStockItems.length > 0) {
-      alert(`❌ Cannot complete order. The following items are no longer available:\n\n${outOfStockItems.join('\n')}\n\nPlease update your cart.`)
+      showAlert('Cannot Complete Order', `The following items are no longer available:\n\n${outOfStockItems.join('\n')}\n\nPlease update your cart.`, 'error')
       return
     }
     
@@ -567,7 +614,7 @@ function AppContent() {
             if (error.name === 'QuotaExceededError') {
               console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
               cleanupLocalStorage()
-              alert('Storage was full, some data was cleared. Please try again.')
+              showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
             }
           }
           
@@ -584,7 +631,7 @@ function AppContent() {
             if (error.name === 'QuotaExceededError') {
               console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
               cleanupLocalStorage()
-              alert('Storage was full, some data was cleared. Please try again.')
+              showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
             }
           }
           
@@ -759,6 +806,17 @@ function AppContent() {
           showAddToCart={true}
         />
       </Suspense>
+
+      {/* 🆕 Alert Modal for replacing alert() */}
+      <AlertModal
+        isOpen={alertModal.isOpen}
+        onClose={closeAlert}
+        title={alertModal.title}
+        message={alertModal.message}
+        type={alertModal.type}
+        onConfirm={handleAlertConfirm}
+        showConfirm={alertModal.showConfirm}
+      />
       
     </div>
   );
