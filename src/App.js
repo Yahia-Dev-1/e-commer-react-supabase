@@ -256,33 +256,30 @@ function AppContent() {
     }
   }, [])
 
-  const addToCart = async (product) => {
+  const addToCart = (product) => {
     if (!user) {
       setPendingProduct(product)
       setShowModal(true)
       return
     }
     
-    // التحقق من الكمية المتاحة
+    // 🆕 Check stock availability first
     const availableQuantity = checkAvailableQuantity(product.id)
     if (availableQuantity <= 0) {
-      alert('Sorry, this product is out of stock and cannot be added to cart!')
+      alert('Sorry, this product is out of stock!')
       return
     }
     
-    // Add product to cart first, then show modal
+    // Add product to cart (no reservation!)
     const existingItem = cartItems.find(item => item.id === product.id)
     
     if (existingItem) {
-      // التحقق من أن الكمية المطلوبة لا تتجاوز المتاح
       const newQuantity = existingItem.quantity + 1
+      // Check if we can add more
       if (newQuantity > availableQuantity) {
-        alert(`Sorry, only ${availableQuantity} items available for this product.`)
+        alert(`Sorry, only ${availableQuantity} items available.`)
         return
       }
-      
-      // 🆕 حجز كمية 1 إضافية
-      await reserveProductQuantity(product.id, 1)
       
       setCartItems(prevItems => {
         const updatedItems = prevItems.map(item => 
@@ -290,132 +287,46 @@ function AppContent() {
             ? { ...item, quantity: newQuantity }
             : item
         )
-        
-        // Save to localStorage immediately after updating state
         try {
-          // Limit cart items to prevent memory issues
           const limitedItems = updatedItems.slice(-20)
           localStorage.setItem('cartItems', JSON.stringify(limitedItems))
           return limitedItems
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded in addToCart, clearing old data...')
             cleanupLocalStorage()
-            alert('Storage was full, some data was cleared. Please try adding the product again.')
+            alert('Storage was full. Please try again.')
           }
           return updatedItems
         }
       })
     } else {
-      // 🆕 حجز كمية 1 للمنتج الجديد
-      await reserveProductQuantity(product.id, 1)
-      
       setCartItems(prevItems => {
         const updatedItems = [...prevItems, { ...product, quantity: 1 }]
-        
-        // Save to localStorage immediately after updating state
         try {
-          // Limit cart items to prevent memory issues
           const limitedItems = updatedItems.slice(-20)
           localStorage.setItem('cartItems', JSON.stringify(limitedItems))
           return limitedItems
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded in addToCart, clearing old data...')
             cleanupLocalStorage()
-            alert('Storage was full, some data was cleared. Please try adding the product again.')
+            alert('Storage was full. Please try again.')
           }
           return updatedItems
         }
       })
     }
     
-    // Show modal asking if user wants to go to cart or continue shopping
     setShowAddToCartModal(true)
   }
 
 
-
-  // 🆕 دالة لحجز الكمية (عند الإضافة للسلة)
-  const reserveProductQuantity = async (productId, quantity) => {
-    try {
-      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
-      const productIndex = existingProducts.findIndex(p => p.id === productId)
-      
-      if (productIndex !== -1) {
-        const oldQuantity = existingProducts[productIndex].quantity || 0
-        const newQuantity = Math.max(0, oldQuantity - quantity)
-        
-        existingProducts[productIndex].quantity = newQuantity
-        localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
-        
-        // Update Supabase for real-time sync
-        try {
-          await updateProductInSupabase(productId, { quantity: newQuantity })
-          console.log(`✅ Reserved ${quantity} items from product ${productId}, remaining: ${newQuantity}`)
-        } catch (error) {
-          console.warn('Could not update Supabase:', error.message)
-        }
-        
-        // Update local state
-        setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQuantity } : p))
-        window.dispatchEvent(new Event('productsUpdated'))
-      }
-    } catch (error) {
-      console.error('Error reserving quantity:', error)
-    }
-  }
-
-  // 🆕 دالة لإرجاع الكمية المحجوزة (عند الإزالة من السلة أو رفض الأوردر)
-  const releaseProductQuantity = async (productId, quantity) => {
-    try {
-      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
-      const productIndex = existingProducts.findIndex(p => p.id === productId)
-      
-      if (productIndex !== -1) {
-        const oldQuantity = existingProducts[productIndex].quantity || 0
-        const newQuantity = oldQuantity + quantity
-        
-        existingProducts[productIndex].quantity = newQuantity
-        localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
-        
-        // Update Supabase for real-time sync
-        try {
-          await updateProductInSupabase(productId, { quantity: newQuantity })
-          console.log(`✅ Released ${quantity} items back to product ${productId}, new total: ${newQuantity}`)
-        } catch (error) {
-          console.warn('Could not update Supabase:', error.message)
-        }
-        
-        // Update local state
-        setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQuantity } : p))
-        window.dispatchEvent(new Event('productsUpdated'))
-      }
-    } catch (error) {
-      console.error('Error releasing quantity:', error)
-    }
-  }
-
-  // 🆕 دالة لإرجاع كميات متعددة (للأوردر كامل)
-  const releaseOrderQuantities = async (items) => {
-    for (const item of items) {
-      await releaseProductQuantity(item.id, item.quantity)
-    }
-  }
-
-  // دالة للتحقق من الكمية المتاحة (مع حساب المحجوز في السلة)
+  // دالة للتحقق من الكمية المتاحة (بدون حجز)
   const checkAvailableQuantity = (productId) => {
     try {
-      // 🆕 احسب الكمية المحجوزة في السلة لهذا المنتج
-      const reservedInCart = cartItems
-        .filter(item => item.id === productId)
-        .reduce((sum, item) => sum + item.quantity, 0)
-      
       // الأول نشوف في products state (من Supabase)
       const productFromState = products.find(p => p.id === productId)
       if (productFromState) {
-        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
-        return Math.max(0, (productFromState.quantity || 0) + reservedInCart)
+        return Math.max(0, productFromState.quantity || 0)
       }
       
       // لو مش لقينا، نشوف في localStorage
@@ -423,8 +334,7 @@ function AppContent() {
       const product = existingProducts.find(p => p.id === productId)
       
       if (product) {
-        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
-        return Math.max(0, (product.quantity || 0) + reservedInCart)
+        return Math.max(0, product.quantity || 0)
       }
       
       return 0
@@ -434,23 +344,13 @@ function AppContent() {
     }
   }
 
-  const updateCartItemQuantity = async (id, newQuantity) => {
-    // 🆕 احصل على الكمية الحالية في السلة قبل التغيير
-    const currentItem = cartItems.find(item => item.id === id)
-    const currentQuantity = currentItem ? currentItem.quantity : 0
-    
+  const updateCartItemQuantity = (id, newQuantity) => {
     if (newQuantity <= 0) {
-      // 🆕 إرجاع الكمية المحجوزة بالكامل عند إزالة المنتج
-      if (currentQuantity > 0) {
-        await releaseProductQuantity(id, currentQuantity)
-      }
-      
       setCartItems(prevItems => {
         const updatedItems = prevItems.filter(item => item.id !== id)
         
         // Save to localStorage immediately
         try {
-          // Limit cart items to prevent memory issues
           const limitedItems = updatedItems.slice(-20)
           localStorage.setItem('cartItems', JSON.stringify(limitedItems))
           return limitedItems
@@ -464,22 +364,11 @@ function AppContent() {
         }
       })
     } else {
-      // 🆕 حساب الفرق في الكمية
-      const quantityDiff = newQuantity - currentQuantity
-      
-      // لو الكمية زادت، نحجز الفرق
-      if (quantityDiff > 0) {
-        const totalAvailable = checkAvailableQuantity(id)
-        const additionalAvailable = totalAvailable - currentQuantity
-        if (quantityDiff > additionalAvailable) {
-          alert(`Sorry, you can only add ${additionalAvailable} more of this product. You already have ${currentQuantity} in your cart.`)
-          return
-        }
-        await reserveProductQuantity(id, quantityDiff)
-      }
-      // لو الكمية قلت، نرجع الفرق
-      else if (quantityDiff < 0) {
-        await releaseProductQuantity(id, Math.abs(quantityDiff))
+      // 🆕 Check stock availability
+      const availableQuantity = checkAvailableQuantity(id)
+      if (newQuantity > availableQuantity) {
+        alert(`Sorry, only ${availableQuantity} items available.`)
+        return
       }
       
       setCartItems(prevItems => {
@@ -489,7 +378,6 @@ function AppContent() {
         
         // Save to localStorage immediately
         try {
-          // Limit cart items to prevent memory issues
           const limitedItems = updatedItems.slice(-20)
           localStorage.setItem('cartItems', JSON.stringify(limitedItems))
           return limitedItems
@@ -571,18 +459,29 @@ function AppContent() {
     }
   }
 
-  const clearCart = async () => {
-    // 🆕 إرجاع كل الكميات المحجوزة قبل مسح السلة
-    for (const item of cartItems) {
-      await releaseProductQuantity(item.id, item.quantity)
-    }
-    
+  const clearCart = () => {
+    // 🆕 بس نمسح السلة (مفيش حجز فمش لازم نرجع حاجة)
     setCartItems([])
     localStorage.removeItem('cartItems')
   }
 
   const createOrder = async (shippingData = null) => {
     if (cartItems.length === 0) return
+    
+    // 🆕 Check stock availability for all items BEFORE creating order
+    const outOfStockItems = []
+    for (const item of cartItems) {
+      const availableQuantity = checkAvailableQuantity(item.id)
+      if (item.quantity > availableQuantity) {
+        outOfStockItems.push(`${item.title} (requested: ${item.quantity}, available: ${availableQuantity})`)
+      }
+    }
+    
+    // If any items are out of stock, show error and don't create order
+    if (outOfStockItems.length > 0) {
+      alert(`❌ Cannot complete order. The following items are no longer available:\n\n${outOfStockItems.join('\n')}\n\nPlease update your cart.`)
+      return
+    }
     
     const newOrder = {
       orderNumber: `ORD-${Date.now().toString().slice(-6)}`,
@@ -615,39 +514,32 @@ function AppContent() {
       setOrders(prevOrders => [savedOrder, ...prevOrders])
     }
     
-    // ✅ الكمية محجوزة فعلاً، بنعمل sync بس مع Supabase
-    await updateProductQuantities(cartItems)
+    // 🆕 Subtract quantities from Supabase after successful order
+    await subtractProductQuantities(cartItems)
     
     setCartItems([])
     localStorage.removeItem('cartItems')
   }
 
-  // 🔄 دالة م同步 للكميات مع Supabase بعد الشراء (الكمية محجوزة فعلاً)
-  const updateProductQuantities = async (purchasedItems) => {
+  // 🆕 دالة طرح الكمية من Supabase بعد الشراء الناجح
+  const subtractProductQuantities = async (purchasedItems) => {
     try {
-      // 📝 الكمية محجوزة فعلاً في السلة، فنحن بس بنـ Sync مع Supabase
-      // مش بنطرح تاني عشان نتجنب الـ Double Subtraction
-      
       for (const item of purchasedItems) {
         try {
-          // Get current quantity from localStorage
-          const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
-          const product = existingProducts.find(p => p.id === item.id)
-          
+          // Get current quantity from Supabase (latest)
+          const product = products.find(p => p.id === item.id)
           if (product) {
-            // Sync with Supabase (quantity already reserved in cart)
-            await updateProductInSupabase(item.id, { quantity: product.quantity })
-            console.log(`✅ Synced product ${item.id} quantity: ${product.quantity}`)
+            const newQuantity = Math.max(0, (product.quantity || 0) - item.quantity)
+            await updateProductInSupabase(item.id, { quantity: newQuantity })
+            console.log(`✅ Subtracted ${item.quantity} from product ${item.id}, new quantity: ${newQuantity}`)
           }
         } catch (error) {
-          console.warn(`Could not sync product ${item.id}:`, error.message)
+          console.warn(`Could not update product ${item.id}:`, error.message)
         }
       }
-      
-      console.log('Product quantities synced after purchase')
-      
+      console.log('Product quantities updated after purchase')
     } catch (error) {
-      console.error('Error syncing product quantities:', error)
+      console.error('Error updating product quantities:', error)
     }
   }
 

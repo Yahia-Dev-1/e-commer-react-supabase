@@ -21,49 +21,32 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
   useEffect(() => {
     cartItems.forEach(item => {
       const product = products.find(p => p.id === item.id);
-      // احسب الكمية المحجوزة في السلة
-      const reservedInCart = cartItems
-        .filter(i => i.id === item.id)
-        .reduce((sum, i) => sum + i.quantity, 0)
-      
-      // المخزون الفعلي = المخزون في Supabase + المحجوز في السلة
-      const actualStock = (product?.quantity || 0) + reservedInCart
-      
-      // If product not found in Supabase or actual quantity is 0, remove from cart
-      if (!product || actualStock === 0) {
+      // If product not found in Supabase or quantity is 0, remove from cart
+      if (!product || product.quantity === 0) {
         updateQuantity(item.id, 0);
-      } else if (item.quantity > actualStock) {
-        // If cart quantity exceeds actual available stock, adjust it
-        updateQuantity(item.id, actualStock);
+      } else if (item.quantity > product.quantity) {
+        // If cart quantity exceeds available stock, adjust it
+        updateQuantity(item.id, product.quantity);
       }
     });
   }, [cartItems, updateQuantity, products]);
 
 
 
-  // دالة للتحقق من الكمية المتاحة (مع حساب المحجوز في السلة)
+  // دالة للتحقق من الكمية المتاحة (بدون حجز)
   const checkAvailableQuantity = (itemId, requestedQuantity) => {
     try {
-      // 🆕 احسب الكمية المحجوزة في السلة لهذا المنتج
-      const reservedInCart = cartItems
-        .filter(item => item.id === itemId)
-        .reduce((sum, item) => sum + item.quantity, 0)
-      
       // First check Supabase products (real-time)
       const product = products.find(p => p.id === itemId)
       if (product) {
-        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
-        const totalAvailable = (product.quantity || 0) + reservedInCart
-        return Math.min(requestedQuantity || 1, totalAvailable)
+        return Math.min(requestedQuantity || 1, product.quantity || 0)
       }
       
       // Fallback to localStorage if not in Supabase yet
       const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
       const localProduct = existingProducts.find(p => p.id === itemId)
       if (localProduct) {
-        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
-        const totalAvailable = (localProduct.quantity || 0) + reservedInCart
-        return Math.min(requestedQuantity || 1, totalAvailable)
+        return Math.min(requestedQuantity || 1, localProduct.quantity || 0)
       }
       
       return 0
