@@ -99,7 +99,6 @@ export default function Admin({ darkMode = true }) {
     
     setUsers(usersToShow);
     setOrders(allOrders);
-    setLastSaveTime(database.getLastSaveTime());
     setLoading(false);
   }, [showAllUsers]);
 
