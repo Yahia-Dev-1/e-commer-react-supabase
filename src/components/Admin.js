@@ -19,7 +19,7 @@ export default function Admin({ darkMode = true }) {
 
   const checkAuthorization = useCallback(() => {
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    const defaultAdminEmails = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+    const defaultAdminEmails = ['yahiapro400@gmail.com'];
     const adminEmails = savedAdminEmails.length > 0 ? savedAdminEmails : defaultAdminEmails;
     
     const currentUserEmail = localStorage.getItem('currentUserEmail');
@@ -64,11 +64,6 @@ export default function Admin({ darkMode = true }) {
         email: 'yahiapro400@gmail.com',
         password: 'ylyr5767ykm34562',
         name: 'Yahia Pro'
-      },
-      {
-        email: 'yahiacool2009@gmail.com',
-        password: 'yahia2009',
-        name: 'Yahia Cool'
       }
     ];
 
@@ -99,7 +94,7 @@ export default function Admin({ darkMode = true }) {
     const updatedUsers = database.getUsers();
     
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    const defaultAdminEmails = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+    const defaultAdminEmails = ['yahiapro400@gmail.com'];
     const finalAdminEmails = savedAdminEmails.length > 0 ? savedAdminEmails : defaultAdminEmails;
     const filteredUsers = updatedUsers.filter(user => finalAdminEmails.includes(user.email));
     
@@ -117,11 +112,6 @@ export default function Admin({ darkMode = true }) {
           email: 'yahiapro400@gmail.com',
           password: 'ylyr5767ykm34562',
           name: 'Yahia Pro'
-        },
-        {
-          email: 'yahiacool2009@gmail.com',
-          password: 'yahia2009',
-          name: 'Yahia Cool'
         }
       ];
 
@@ -542,7 +532,9 @@ export default function Admin({ darkMode = true }) {
       <div className="admin-header">
         <h1>Admin Dashboard</h1>
         <p>Welcome back, Admin! Manage your e-commerce platform.</p>
-        <div className="admin-tabs">
+      </div>
+      
+      <div className="admin-tabs">
         <button 
           className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
