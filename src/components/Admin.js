@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../styles/AdminResponsive.css';
-import '../styles/UsersList.css';
+import '../styles/AdminNew.css';
 import database from '../utils/database';
 import UsersList from './UsersList';
 import UsersSummary from './UsersSummary';
