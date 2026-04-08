@@ -142,8 +142,8 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
       {/* Brand/Logo - Right Side */}
       <Link to='/' className={`nav-brand ${user && ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com', 'admin-test@gmail.com', 'admin@gmail.com'].includes(user.email) ? 'admin-brand' : ''}`} onClick={closeMenu}>
         <img 
-          src={require('../Modern E-Shop Logo Design.png')} 
-          alt="Modern E-Shop Logo" 
+          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23667eea'/%3E%3Ctext x='50' y='50' font-size='40' text-anchor='middle' fill='white' dy='.3em'%3EYS%3C/text%3E%3C/svg%3E"
+          alt="Yahia Store Logo" 
           className="nav-logo"
         />
         <span className={`nav-brand-text ${user && ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com', 'admin-test@gmail.com', 'admin@gmail.com'].includes(user.email) ? 'admin-text' : ''}`}>

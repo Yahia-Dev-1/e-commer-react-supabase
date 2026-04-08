@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
+import { subscribeToProducts } from './utils/supabase'
 import React from 'react';
 // import { ProductsProvider } from './context/ProductsContext';
 
@@ -12,7 +13,6 @@ import React from 'react';
 const About = lazy(() => import('./components/About'))
 const Services = lazy(() => import('./components/Services'))
 const AddProducts = lazy(() => import('./components/AddProducts'))
-const ProductsApi = lazy(() => import('./components/ProductsApi'))
 const CategoryManagement = lazy(() => import('./components/CategoryManagement'))
 const Cards = lazy(() => import('./components/cards'))
 const Login = lazy(() => import('./components/Login'))
@@ -62,67 +62,36 @@ function AppContent() {
   const [productsVersion, setProductsVersion] = useState(0) // For forcing re-renders
   // Dark mode is always enabled
 
-  // Load products function
+  // Load products from Supabase (real-time sync!)
+  useEffect(() => {
+    // Subscribe to real-time updates from Supabase
+    const unsubscribe = subscribeToProducts((supabaseProducts) => {
+      console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
+      setProducts(supabaseProducts)
+      // Also save to localStorage for offline support
+      localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts))
+    })
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe()
+  }, [])
+
+  // Fallback: load from localStorage initially (for faster UI)
   const loadProducts = () => {
-    // جلب المنتجات من Strapi أولاً
-    fetch('http://localhost:1337/api/products?populate=*')
-      .then(res => res.json())
-      .then(data => {
-        const productsFromStrapi = Array.isArray(data.data)
-          ? data.data.map(item => {
-              let imageUrl = '';
-              // استخدم img بدلاً من image
-              if (
-                item.attributes.img &&
-                item.attributes.img.url
-              ) {
-                imageUrl = item.attributes.img.url.startsWith('http')
-                  ? item.attributes.img.url
-                  : `http://localhost:1337${item.attributes.img.url}`;
-              } else if (
-                item.attributes.img &&
-                item.attributes.img.formats &&
-                item.attributes.img.formats.thumbnail &&
-                item.attributes.img.formats.thumbnail.url
-              ) {
-                imageUrl = item.attributes.img.formats.thumbnail.url.startsWith('http')
-                  ? item.attributes.img.formats.thumbnail.url
-                  : `http://localhost:1337${item.attributes.img.formats.thumbnail.url}`;
-              }
-              return {
-                id: item.id,
-                title: item.attributes.title,
-                price: item.attributes.price,
-                quantity: item.attributes.stock || 1,
-                image: imageUrl,
-                description: item.attributes.description || '',
-                category: item.attributes.category && item.attributes.category.name ? item.attributes.category.name : 'other',
-                createdAt: item.attributes.createdAt || '',
-                updatedAt: item.attributes.updatedAt || '',
-              };
-            })
+    try {
+      const localStorageData = localStorage.getItem('ecommerce_products');
+      if (localStorageData) {
+        const allProducts = JSON.parse(localStorageData);
+        const validProducts = Array.isArray(allProducts)
+          ? allProducts.filter(p => p && p.id && p.title && p.price !== undefined)
           : [];
-        setProducts(productsFromStrapi);
-        localStorage.setItem('ecommerce_products', JSON.stringify(productsFromStrapi));
-      })
-      .catch(err => {
-        // إذا فشل الجلب من Strapi استخدم البيانات المحلية
-        try {
-          const localStorageData = localStorage.getItem('ecommerce_products');
-          if (localStorageData) {
-            const allProducts = JSON.parse(localStorageData);
-            const validProducts = Array.isArray(allProducts)
-              ? allProducts.filter(p => p && p.id && p.title && p.price !== undefined && p.quantity !== undefined && p.category && p.createdAt)
-              : [];
-            setProducts(validProducts);
-          } else {
-            setProducts([]);
-          }
-        } catch (error) {
-          setProducts([]);
-          console.error('خطأ في قراءة المنتجات من localStorage:', error);
+        if (validProducts.length > 0) {
+          setProducts(validProducts);
         }
-      });
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
   }
 
   // Handle products update
@@ -714,11 +683,6 @@ function AppContent() {
               products={products}
               productsVersion={productsVersion}
             />
-          </Suspense>
-        } />
-        <Route path='/products-api' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <ProductsApi />
           </Suspense>
         } />
         <Route path='/category-management' element={

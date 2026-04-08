@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddProducts.css';
 import emailjs from 'emailjs-com';
-// import { updateProduct, createProduct, getProducts, getProduct, deleteProduct } from '../apis/ProductApis';
-// import ProductItem from './ProductItem';
-// import { normalizeStrapiProduct } from '../apis/normalizeProduct';
+import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase, subscribeToProducts } from '../utils/supabase';
 
 // دالة لإرسال بريد إلكتروني عند رفض الطلب (مثال باستخدام EmailJS)
 function sendRejectionEmail(userEmail, productTitle) {
@@ -26,9 +24,6 @@ function sendRejectionEmail(userEmail, productTitle) {
     });
 }
 
-// import { updateProduct, createProduct, getProducts, getProduct, deleteProduct } from '../apis/ProductApis';
-// import ProductItem from './ProductItem'
-// import { normalizeStrapiProduct } from '../apis/normalizeProduct'
 
 function EditProductModal({ product, onClose, onSave }) {
   const [formData, setFormData] = useState({
@@ -294,105 +289,39 @@ export default function AddProducts({ darkMode = false }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!newProduct.title || !newProduct.price || !newProduct.image || !newProduct.quantity) {
       setMessage('Please fill in all required fields')
       return
     }
 
+    setMessage('⏳ Saving to cloud...')
 
-    const product = {
-      id: Date.now(),
-      title: newProduct.title || '',
-      price: parseFloat(newProduct.price) || 0,
-      quantity: parseInt(newProduct.quantity) || 1,
-      image: newProduct.image || '',
+    const productData = {
+      title: newProduct.title,
+      price: parseFloat(newProduct.price),
+      quantity: parseInt(newProduct.quantity),
+      image: newProduct.image,
       description: newProduct.description || '',
       category: newProduct.category || 'other',
-      createdAt: new Date().toISOString(),
-      createdBy: `${localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail') || 'Admin'} (Admin)`,
+      createdBy: `${localStorage.getItem('currentUserEmail') || 'Admin'}`,
       isProtected: isProtectedAdmin()
     }
 
-    // حفظ المنتج الجديد محلياً فقط
-
-    // إضافة المنتج الجديد إلى المنتجات الموجودة
-    const updatedProducts = [...products, product]
-    setProducts(updatedProducts)
-    
-    // تحسين التخزين مع ضغط البيانات
     try {
-      // تحسين البيانات قبل التخزين
-      const optimizedProducts = updatedProducts.map(product => ({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        quantity: product.quantity,
-        image: product.image,
-        description: product.description,
-        category: product.category,
-        createdAt: product.createdAt
-      }))
-      
-      // Limit products before saving to prevent memory issues
-      const limitedProducts = optimizedProducts.slice(-50) // Keep only last 50 products
-      const compressedData = JSON.stringify(limitedProducts)
-      
-      // محاولة التخزين مع معالجة الأخطاء
-      try {
-        localStorage.setItem('ecommerce_products', compressedData)
-      } catch (storageError) {
-        console.warn('Storage error, trying to clear old data:', storageError)
-        
-        // محاولة تنظيف التخزين وإعادة المحاولة
-        try {
-          localStorage.removeItem('ecommerce_products')
-          localStorage.setItem('ecommerce_products', compressedData)
-        } catch (retryError) {
-          console.error('Failed to store even after cleanup:', retryError)
-          throw new Error('Storage is full or not available')
-        }
-      }
-      
-      // التحقق من نجاح التخزين
-      const storedData = localStorage.getItem('ecommerce_products')
-      if (!storedData) {
-        throw new Error('Failed to store products')
-      }
-      
-      console.log(`✅ Successfully stored ${limitedProducts.length} products in localStorage`)
-      
-      // إضافة تأكيد إضافي للتخزين
-      const verificationData = JSON.parse(storedData)
-      if (verificationData.length !== limitedProducts.length) {
-        console.warn('Storage verification failed, data may be corrupted')
-      }
-      
+      // Save to Supabase - will sync to all devices automatically!
+      await addProductToSupabase(productData)
+      setMessage(`✅ Product "${productData.title}" added! All devices will see it.`)
+      clearForm()
     } catch (error) {
-      console.error('Error storing products:', error)
-      
-      // محاولة حفظ في sessionStorage كبديل
-      try {
-        const fallbackData = JSON.stringify(updatedProducts.slice(-20))
-        sessionStorage.setItem('ecommerce_products_fallback', fallbackData)
-        console.log('✅ Saved to sessionStorage as fallback')
-        setMessage('⚠️ Warning: Product added to temporary storage. Data may be lost on page refresh.')
-      } catch (fallbackError) {
-        console.error('Fallback storage also failed:', fallbackError)
-        setMessage('❌ Error: Unable to save product. Please try again or clear browser data.')
-      }
-      
-      setTimeout(() => setMessage(''), 8000)
+      console.error('Supabase error:', error)
+      // Fallback: save locally only
+      const localProduct = { ...productData, id: Date.now() }
+      const updatedProducts = [...products, localProduct]
+      setProducts(updatedProducts)
+      localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
+      setMessage(`⚠️ Saved locally only. Firebase setup needed.`)
     }
-    
-    // إرسال حدث مخصص لتحديث المنتجات في الصفحة الرئيسية
-    window.dispatchEvent(new Event('productsUpdated'))
-    
-    setMessage(`✅ Product "${product.title}" with ${product.quantity} pieces added successfully!`)
-    
-    // Clear form and redirect to products page
-    clearForm()
-    navigate('/')
   }
 
   const handleEditSubmit = async (e) => {
@@ -408,23 +337,40 @@ export default function AddProducts({ darkMode = false }) {
       return
     }
 
-    // تحديث المنتج محلياً فقط
-    const updatedProductLocal = {
-          ...editingProduct,
-          price: parseFloat(editingProduct.price),
-          quantity: parseInt(editingProduct.quantity),
-          updatedAt: new Date().toISOString(),
-          updatedBy: `${localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail') || 'Admin'} (Admin)`
-        }
-        const updatedProductsLocal = products.map(product => product.id === editingProduct.id ? updatedProductLocal : product)
-        setProducts(updatedProductsLocal)
-        try { localStorage.setItem('ecommerce_products', JSON.stringify(updatedProductsLocal)) } catch {}
+    // تحديث المنتج في Supabase ومحلياً
+    const updatedProductData = {
+      price: parseFloat(editingProduct.price),
+      quantity: parseInt(editingProduct.quantity),
+      title: editingProduct.title,
+      image: editingProduct.image,
+      description: editingProduct.description,
+      category: editingProduct.category,
+      updated_at: new Date().toISOString(),
+      updated_by: `${localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail') || 'Admin'} (Admin)`
+    }
 
-        window.dispatchEvent(new Event('productsUpdated'))
-        setMessage(`✅ Product "${editingProduct.title}" updated`)
-        setEditingProduct(null)
-        setShowForm(false)
-        setTimeout(() => setMessage(''), 3000)
+    // Update in Supabase
+    try {
+      await updateProductInSupabase(editingProduct.id, updatedProductData)
+      console.log('✅ Updated in Supabase:', editingProduct.id)
+    } catch (error) {
+      console.error('Supabase update error:', error)
+    }
+
+    // Update locally
+    const updatedProductLocal = {
+      ...editingProduct,
+      ...updatedProductData
+    }
+    const updatedProductsLocal = products.map(product => product.id === editingProduct.id ? updatedProductLocal : product)
+    setProducts(updatedProductsLocal)
+    try { localStorage.setItem('ecommerce_products', JSON.stringify(updatedProductsLocal)) } catch {}
+
+    window.dispatchEvent(new Event('productsUpdated'))
+    setMessage(`✅ Product "${editingProduct.title}" updated`)
+    setEditingProduct(null)
+    setShowForm(false)
+    setTimeout(() => setMessage(''), 3000)
   }
 
   // Function to clear form manually
@@ -894,41 +840,34 @@ export default function AddProducts({ darkMode = false }) {
                     >
                       ✏️ Edit
                     </button>
-                  <button 
+                  <button
                     className="delete-btn"
-                      onClick={() => {
+                      onClick={async () => {
                         const productToDelete = products.find(p => p.id === product.id)
-                        
+
                         // Check if trying to delete a protected product
                         if (productToDelete && productToDelete.isProtected && !canModifyProtectedAdmin()) {
                           alert('❌ Cannot delete protected products!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can delete protected products.')
                           return
                         }
-                        
+
                         if (window.confirm('Are you sure you want to delete this product?')) {
+                          // Delete from Supabase (syncs to all devices!)
+                          if (productToDelete.id) {
+                            try {
+                              await deleteProductFromSupabase(productToDelete.id)
+                              console.log('✅ Deleted from Supabase:', productToDelete.id)
+                            } catch (sbError) {
+                              console.warn('⚠️ Could not delete from Supabase:', sbError.message)
+                            }
+                          }
+
+                          // Also delete locally
                           const updatedProducts = products.filter(p => p.id !== product.id)
                           setProducts(updatedProducts)
-                          
-                          try {
-                            const limitedProducts = updatedProducts.slice(-50)
-                            const compressedData = JSON.stringify(limitedProducts)
-                            localStorage.setItem('ecommerce_products', compressedData)
-                            
-                            const storedData = localStorage.getItem('ecommerce_products')
-                            if (!storedData) {
-                              throw new Error('Failed to store products')
-                            }
-                            
-                            console.log(`✅ Successfully deleted product. ${limitedProducts.length} products remaining in localStorage`)
-                          } catch (error) {
-                            console.error('Error deleting product:', error)
-                            setMessage('⚠️ Warning: Product deleted but storage may be limited.')
-                            setTimeout(() => setMessage(''), 5000)
-                          }
-                          
-                          window.dispatchEvent(new Event('productsUpdated'))
-                          
-                          setMessage(`Product "${productToDelete.title}" deleted successfully! Remaining products: ${updatedProducts.length}`)
+                          localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
+
+                          setMessage(`✅ Product "${productToDelete.title}" deleted from all devices!`)
                           setTimeout(() => setMessage(''), 3000)
                         }
                       }}

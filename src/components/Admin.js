@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import '../styles/Admin.css';
 import '../styles/AdminResponsive.css';
 import '../styles/UsersList.css';
 import database from '../utils/database';
