@@ -623,9 +623,6 @@ export default function Admin({ darkMode = true }) {
                         <p className="user-date"><strong>Registration Date:</strong> {formatDate(user.createdAt)}</p>
                         <p className="user-orders"><strong>Number of Orders:</strong> {user.orders?.length || 0}</p>
                         <p className="user-id"><strong>User ID:</strong> {user.id}</p>
-                        {user.password && (
-                          <p className="user-password"><strong>Password:</strong> {user.password}</p>
-                        )}
                       </div>
                       <div className="user-actions">
                         {!isProtected && (
