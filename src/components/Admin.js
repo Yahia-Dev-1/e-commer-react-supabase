@@ -64,7 +64,7 @@ export default function Admin({ darkMode = true }) {
     const protectedAdmins = [
       {
         email: 'yahiapro400@gmail.com',
-        password: 'yahia2024',
+        password: 'ylyr5767ykm34562',
         name: 'Yahia Pro'
       },
       {
@@ -117,7 +117,7 @@ export default function Admin({ darkMode = true }) {
       const protectedAdmins = [
         {
           email: 'yahiapro400@gmail.com',
-          password: 'yahia2024',
+          password: 'ylyr5767ykm34562',
           name: 'Yahia Pro'
         },
         {
@@ -344,7 +344,7 @@ export default function Admin({ darkMode = true }) {
       const protectedAdmins = [
         {
           email: 'yahiapro400@gmail.com',
-          password: 'yahia2024',
+          password: 'ylyr5767ykm34562',
           name: 'Yahia Pro'
         },
         {
@@ -402,7 +402,7 @@ export default function Admin({ darkMode = true }) {
       try {
         const success = database.resetProtectedAdmins();
         if (success) {
-          alert('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / yahia2024\n• yahiacool2009@gmail.com / yahia2009');
+          alert('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / ylyr5767ykm34562\n• yahiacool2009@gmail.com / yahia2009');
           loadData();
         } else {
           alert('❌ Failed to fix login issues. Please try again.');

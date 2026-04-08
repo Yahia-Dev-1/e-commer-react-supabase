@@ -24,7 +24,7 @@ class Database {
           {
             id: 1,
             email: 'yahiapro400@gmail.com',
-            password: 'yahia2024',
+            password: 'ylyr5767ykm34562',
             name: 'Yahia Pro',
             createdAt: new Date().toISOString(),
             orders: [],
@@ -261,7 +261,7 @@ class Database {
       if (this.isProtectedAdmin(userData.email)) {
         // Check if this is a protected admin trying to register with correct password
         const protectedAdminPasswords = {
-          'yahiapro400@gmail.com': 'yahia2024',
+          'yahiapro400@gmail.com': 'ylyr5767ykm34562',
           'yahiacool2009@gmail.com': 'yahia2009'
         };
         
