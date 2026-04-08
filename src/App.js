@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
-import { subscribeToProducts } from './utils/supabase'
+import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase } from './utils/supabase'
 import React from 'react';
 // import { ProductsProvider } from './context/ProductsContext';
 
@@ -179,6 +179,29 @@ function AppContent() {
         // Load products initially
         loadProducts()
         
+        // Load orders from Supabase (or localStorage as fallback)
+        try {
+          const supabaseOrders = await getOrdersFromSupabase()
+          if (supabaseOrders && supabaseOrders.length > 0) {
+            setOrders(supabaseOrders)
+            // Sync to localStorage for offline
+            localStorage.setItem('ecommerce_orders', JSON.stringify(supabaseOrders))
+            console.log('📦 Loaded', supabaseOrders.length, 'orders from Supabase')
+          } else {
+            // Fallback to localStorage
+            const localOrders = localStorage.getItem('ecommerce_orders')
+            if (localOrders) {
+              setOrders(JSON.parse(localOrders))
+            }
+          }
+        } catch (error) {
+          console.log('Using localStorage orders:', error.message)
+          const localOrders = localStorage.getItem('ecommerce_orders')
+          if (localOrders) {
+            setOrders(JSON.parse(localOrders))
+          }
+        }
+        
         // Listen for product updates
         window.addEventListener('productsUpdated', handleProductsUpdate)
         
@@ -195,9 +218,18 @@ function AppContent() {
 
     initializeApp()
     
+    // Subscribe to orders real-time updates
+    const unsubscribeOrders = subscribeToOrders((supabaseOrders) => {
+      console.log('🔄 Supabase: Orders updated!', supabaseOrders.length, 'orders')
+      setOrders(supabaseOrders)
+      // Sync to localStorage for offline
+      localStorage.setItem('ecommerce_orders', JSON.stringify(supabaseOrders))
+    })
+    
     // Cleanup function for event listeners
     return () => {
       window.removeEventListener('productsUpdated', handleProductsUpdate)
+      unsubscribeOrders()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -441,7 +473,7 @@ function AppContent() {
     localStorage.removeItem('cartItems')
   }
 
-  const createOrder = (shippingData = null) => {
+  const createOrder = async (shippingData = null) => {
     if (cartItems.length === 0) return
     
     const newOrder = {
@@ -461,9 +493,19 @@ function AppContent() {
       shipping: shippingData || {}
     }
     
-    // حفظ الطلب في قاعدة البيانات
-    const savedOrder = database.saveOrder(newOrder)
-    setOrders(prevOrders => [savedOrder, ...prevOrders])
+    // حفظ الطلب في Supabase أولاً
+    try {
+      const supabaseOrder = await addOrderToSupabase(newOrder)
+      console.log('✅ Order saved to Supabase:', supabaseOrder.orderNumber)
+      // Also save to localStorage for offline backup
+      database.saveOrder(newOrder)
+      setOrders(prevOrders => [supabaseOrder, ...prevOrders])
+    } catch (error) {
+      console.warn('⚠️ Could not save to Supabase, using localStorage only:', error.message)
+      // Fallback to localStorage only
+      const savedOrder = database.saveOrder(newOrder)
+      setOrders(prevOrders => [savedOrder, ...prevOrders])
+    }
     
     // طرح الكمية المباعة من المنتجات
     updateProductQuantities(cartItems)

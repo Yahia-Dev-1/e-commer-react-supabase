@@ -170,4 +170,61 @@ export const subscribeToUsers = (callback) => {
   };
 };
 
+// Order functions
+export const addOrderToSupabase = async (order) => {
+  try {
+    const orderWithId = {
+      ...order,
+      id: order.id || crypto.randomUUID(),
+      created_at: new Date().toISOString()
+    };
+    
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([orderWithId])
+      .select();
+    
+    if (error) throw error;
+    return data[0];
+  } catch (error) {
+    console.error('Error adding order:', error);
+    throw error;
+  }
+};
+
+export const getOrdersFromSupabase = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('Error getting orders:', error);
+    throw error;
+  }
+};
+
+export const subscribeToOrders = (callback) => {
+  const subscription = supabase
+    .channel('orders_changes')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'orders' },
+      async (payload) => {
+        const { data } = await supabase
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        callback(data || []);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    subscription.unsubscribe();
+  };
+};
+
 export { supabase };
