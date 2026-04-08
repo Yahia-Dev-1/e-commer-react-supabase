@@ -176,7 +176,9 @@ class Database {
   getUsers() {
     try {
       const users = localStorage.getItem(this.usersKey);
-      return users ? JSON.parse(users) : [];
+      const parsed = users ? JSON.parse(users) : [];
+      // Ensure we always return an array
+      return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       console.error('Error reading user data:', error);
       return [];
@@ -187,7 +189,7 @@ class Database {
   async getUsersAsync() {
     try {
       const supabaseUsers = await getUsersFromSupabase();
-      if (supabaseUsers && supabaseUsers.length > 0) {
+      if (Array.isArray(supabaseUsers) && supabaseUsers.length > 0) {
         // Sync to localStorage for offline
         localStorage.setItem(this.usersKey, JSON.stringify(supabaseUsers));
         return supabaseUsers;
