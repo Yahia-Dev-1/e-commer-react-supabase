@@ -4,7 +4,18 @@ import '../styles/AddProducts.css';
 import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase } from '../utils/supabase';
 
 export default function AddProducts({ darkMode = false }) {
+  const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [message, setMessage] = useState('')
+  const [showForm, setShowForm] = useState(false)
+  const [showCategoriesSection, setShowCategoriesSection] = useState(false)
+  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [products, setProducts] = useState([])
   const [productList,setProductList]= useState([])
+  const [categories, setCategories] = useState(['electronics', 'clothing', 'books', 'home', 'sports', 'other'])
+  const [newCategory, setNewCategory] = useState('')
   
   // Sync productList with products from Supabase
   useEffect(()=>{
@@ -25,18 +36,7 @@ export default function AddProducts({ darkMode = false }) {
       setProductList(products)
     }
   }, [products])
-	
-  const navigate = useNavigate()
-  const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [message, setMessage] = useState('')
-  const [showForm, setShowForm] = useState(false)
-  const [showCategoriesSection, setShowCategoriesSection] = useState(false)
-  const [showCategoryForm, setShowCategoryForm] = useState(false)
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
-  const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState(['electronics', 'clothing', 'books', 'home', 'sports', 'other'])
-  const [newCategory, setNewCategory] = useState('')
+  
   const [newProduct, setNewProduct] = useState({
     title: '',
     price: '',
