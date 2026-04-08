@@ -48,8 +48,8 @@ const LoadingSpinner = () => (
         animation: 'spin 1s linear infinite',
         margin: '0 auto 20px'
       }}></div>
-      <h2 style={{color: '#ffffff', margin: 0}}>Yahia Store</h2>
-      <p style={{color: '#ffffff', marginTop: '10px'}}>Loading...</p>
+      <h2 style={{color: '#ffffff', margin: 0, fontSize: '28px', fontWeight: '700'}}>E-Commerce</h2>
+      <p style={{color: '#ffffff', marginTop: '10px', opacity: 0.9}}>Loading...</p>
     </div>
   </div>
 )

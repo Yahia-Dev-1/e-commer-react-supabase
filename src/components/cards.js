@@ -177,7 +177,7 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
   return (
     <>
       <SEO 
-        title="Yahia Store - Advanced E-commerce Store | Safe and Fast Shopping"
+        title="E-Commerce Store - Safe and Fast Shopping"
         description="Discover a wide range of clothing, shoes, and accessories in our e-commerce store. Safe and fast shopping with excellent customer service and competitive prices."
         keywords="e-commerce store, clothing, shoes, accessories, online shopping, offers, discounts, hoodie, t-shirt, jeans, running shoes, watch, backpack, cap"
         url="https://yahia-dev-1.github.io/E-Commer-React"

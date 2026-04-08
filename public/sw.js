@@ -1,5 +1,5 @@
 // Service Worker for Performance Optimization
-const CACHE_NAME = 'yahia-store-v1.0.0';
+const CACHE_NAME = 'e-commerce-v1.0.0';
 const urlsToCache = [
   '/',
   '/static/js/bundle.js',
@@ -91,7 +91,7 @@ self.addEventListener('push', event => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Yahia Store', options)
+    self.registration.showNotification('E-Commerce Store', options)
   );
 });
 

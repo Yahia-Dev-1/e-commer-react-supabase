@@ -1,7 +1,9 @@
-# Robots.txt for Yahia Store
+# Robots.txt for E-Commerce Store
 # Enhanced SEO configuration
 
 User-agent: *
+
+# Allow all content
 Allow: /
 
 # Allow all search engines to crawl the site

@@ -7,7 +7,7 @@ export default function Services({ darkMode = false }) {
   return (
     <>
       <SEO 
-        title="Our Services - Yahia Store | Safe and Fast Shopping with Premium Service"
+        title="Our Services - E-Commerce Store | Premium Service"
         description="Discover our premium services: secure online shopping, fast delivery, secure payments, easy returns, personalized experience, and 24/7 support."
         keywords="store services, online shopping, fast delivery, secure payments, easy returns, customer support, personalized experience"
         url="https://yahia-dev-1.github.io/E-Commer-React/services"

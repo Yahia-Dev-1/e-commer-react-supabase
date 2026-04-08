@@ -7,8 +7,8 @@ export default function About({ darkMode = false }) {
   return (
     <>
       <SEO 
-        title="About Us - Yahia Store | Learn About Our Story and Mission"
-        description="Learn about Yahia Store's story and our mission to provide an exceptional shopping experience. Discover our achievements, values, and commitment to quality and excellent service."
+        title="About Us - Learn About Our Story and Mission"
+        description="Learn about our story and mission to provide an exceptional shopping experience. Discover our achievements, values, and commitment to quality and excellent service."
         keywords="about us, store story, store mission, achievements, happy customers, customer service, product quality"
         url="https://yahia-dev-1.github.io/E-Commer-React/about"
       />

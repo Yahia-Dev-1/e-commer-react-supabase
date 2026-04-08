@@ -9,7 +9,7 @@ const SEO = ({
   image, 
   url, 
   type = 'website',
-  author = 'Yahia Store',
+  author = 'E-Commerce',
   publishedTime,
   modifiedTime,
   section,
@@ -124,7 +124,7 @@ const SEO = ({
           "url": url,
           "brand": {
             "@type": "Brand",
-            "name": "Yahia Store"
+            "name": "E-Commerce"
           },
           "offers": {
             "@type": "Offer",
@@ -133,7 +133,7 @@ const SEO = ({
             "availability": "https://schema.org/InStock",
             "seller": {
               "@type": "Organization",
-              "name": "Yahia Store"
+              "name": "E-Commerce"
             }
           },
           "aggregateRating": {
@@ -170,7 +170,7 @@ const SEO = ({
           },
           "publisher": {
             "@type": "Organization",
-            "name": "Yahia Store",
+            "name": "E-Commerce",
             "logo": {
               "@type": "ImageObject",
               "url": `${baseUrl}/Modern%20E-Shop%20Logo%20Design.png`
@@ -193,7 +193,7 @@ const SEO = ({
           "url": url,
           "mainEntity": {
             "@type": "Organization",
-            "name": "Yahia Store",
+            "name": "E-Commerce",
             "url": baseUrl
           }
         };
@@ -206,50 +206,50 @@ const SEO = ({
 // SEO configurations for different pages
 export const SEOConfigs = {
   home: {
-    title: 'Yahia Store - Advanced E-commerce Store for Clothing, Shoes, and Accessories',
-    description: 'Yahia Store - Advanced e-commerce store for clothing, shoes, and accessories. Safe and fast shopping with excellent customer service. Exclusive offers and discounts on all products',
-    keywords: 'e-commerce store, clothing, shoes, accessories, online shopping, offers, discounts, yahia store',
+    title: 'E-Commerce Store - Clothing, Shoes, and Accessories',
+    description: 'Advanced e-commerce store for clothing, shoes, and accessories. Safe and fast shopping with excellent customer service. Exclusive offers and discounts on all products',
+    keywords: 'e-commerce store, clothing, shoes, accessories, online shopping, offers, discounts',
     type: 'website'
   },
   
   products: {
-    title: 'Products - Yahia Store',
-    description: 'Browse a wide range of high-quality products at Yahia Store. Clothing, shoes, accessories and more',
+    title: 'Products - E-Commerce Store',
+    description: 'Browse a wide range of high-quality products. Clothing, shoes, accessories and more',
     keywords: 'products, clothing, shoes, accessories, shopping, buy',
     type: 'website'
   },
   
   cart: {
-    title: 'Shopping Cart - Yahia Store',
-    description: 'Review your shopping cart and complete your purchase easily and securely at Yahia Store',
+    title: 'Shopping Cart - E-Commerce Store',
+    description: 'Review your shopping cart and complete your purchase easily and securely',
     keywords: 'shopping cart, buy, payment, order',
     type: 'website'
   },
   
   login: {
-    title: 'Login - Yahia Store',
-    description: 'Sign in to your account at Yahia Store to access all features and services',
+    title: 'Login - E-Commerce Store',
+    description: 'Sign in to your account to access all features and services',
     keywords: 'login, account, user, sign in',
     type: 'website'
   },
   
   about: {
-    title: 'About Us - Yahia Store',
-    description: 'Learn about Yahia Store, our vision, mission, and values in providing the best shopping experience',
+    title: 'About Us - E-Commerce Store',
+    description: 'Learn about our vision, mission, and values in providing the best shopping experience',
     keywords: 'about us, company, vision, mission, values',
     type: 'website'
   },
   
   contact: {
-    title: 'Contact Us - Yahia Store',
-    description: 'Contact our customer service team at Yahia Store. We are here to help you with any inquiry',
+    title: 'Contact Us - E-Commerce Store',
+    description: 'Contact our customer service team. We are here to help you with any inquiry',
     keywords: 'contact us, contact, customer service, support',
     type: 'website'
   },
   
   offers: {
-    title: 'Offers and Discounts - Yahia Store',
-    description: 'Discover the latest exclusive offers and discounts at Yahia Store. Save money with the best prices',
+    title: 'Offers and Discounts - E-Commerce Store',
+    description: 'Discover the latest exclusive offers and discounts. Save money with the best prices',
     keywords: 'offers, discounts, sales, low prices',
     type: 'website'
   }

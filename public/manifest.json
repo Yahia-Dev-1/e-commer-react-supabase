@@ -1,6 +1,6 @@
 {
-  "short_name": "Yahia Store",
-  "name": "Yahia Store - Advanced E-commerce Store for Clothing, Shoes, and Accessories",
+  "short_name": "E-Commerce",
+  "name": "E-Commerce Store - Clothing, Shoes, and Accessories",
   "description": "Advanced e-commerce store for clothing, shoes, and accessories with excellent customer service. Safe and fast shopping with exclusive offers and discounts",
   "icons": [
     {
@@ -39,14 +39,14 @@
       "sizes": "1280x720",
       "type": "image/x-icon",
       "form_factor": "wide",
-      "label": "Yahia Store - Homepage"
+      "label": "E-Commerce Store - Homepage"
     },
     {
       "src": "favicon.ico",
       "sizes": "750x1334",
       "type": "image/x-icon",
       "form_factor": "narrow",
-      "label": "Yahia Store - Mobile App"
+      "label": "E-Commerce Store - Mobile App"
     }
   ],
   "shortcuts": [
