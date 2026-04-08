@@ -74,11 +74,32 @@ function AppContent() {
     const fetchProducts = async () => {
       try {
         const { getProductsFromSupabase } = await import('./utils/supabase')
-        const products = await getProductsFromSupabase()
-        console.log('📥 Initial fetch:', products.length, 'products')
-        setProducts(products)
+        const supabaseProducts = await getProductsFromSupabase()
+        console.log('📥 Initial fetch:', supabaseProducts.length, 'products')
+        
+        // 🆕 احسب الكميات المحجوزة في السلة الحالية
+        const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
+        const reservedQuantities = {}
+        currentCartItems.forEach(item => {
+          reservedQuantities[item.id] = (reservedQuantities[item.id] || 0) + item.quantity
+        })
+        
+        // 🆕 طبق الحجز على المنتجات الجاية من Supabase
+        const adjustedProducts = supabaseProducts.map(product => {
+          const reserved = reservedQuantities[product.id] || 0
+          if (reserved > 0) {
+            return {
+              ...product,
+              quantity: Math.max(0, (product.quantity || 0) - reserved)
+            }
+          }
+          return product
+        })
+        
+        console.log('📊 Applied reserved quantities on load:', reservedQuantities)
+        setProducts(adjustedProducts)
         try {
-          localStorage.setItem('ecommerce_products', JSON.stringify(products.slice(0, 20)))
+          localStorage.setItem('ecommerce_products', JSON.stringify(adjustedProducts.slice(0, 20)))
         } catch (e) {
           console.warn('localStorage quota exceeded, skipping cache')
         }
@@ -91,10 +112,32 @@ function AppContent() {
     // Subscribe to real-time updates from Supabase
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
       console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
-      setProducts(supabaseProducts)
+      
+      // 🆕 احسب الكميات المحجوزة في السلة الحالية
+      const currentCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]')
+      const reservedQuantities = {}
+      currentCartItems.forEach(item => {
+        reservedQuantities[item.id] = (reservedQuantities[item.id] || 0) + item.quantity
+      })
+      
+      // 🆕 طبق الحجز على المنتجات الجاية من Supabase
+      const adjustedProducts = supabaseProducts.map(product => {
+        const reserved = reservedQuantities[product.id] || 0
+        if (reserved > 0) {
+          return {
+            ...product,
+            quantity: Math.max(0, (product.quantity || 0) - reserved)
+          }
+        }
+        return product
+      })
+      
+      console.log('📊 Applied reserved quantities:', reservedQuantities)
+      setProducts(adjustedProducts)
+      
       // Also save to localStorage for offline support (limit to 20 items)
       try {
-        localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
+        localStorage.setItem('ecommerce_products', JSON.stringify(adjustedProducts.slice(0, 20)))
       } catch (e) {
         console.warn('localStorage quota exceeded in realtime sync')
       }
