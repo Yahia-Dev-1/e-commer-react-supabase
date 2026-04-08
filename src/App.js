@@ -27,23 +27,29 @@ const LoadingSpinner = () => (
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '50vh',
-    background: '#1a1a2e'
+    height: '100vh',
+    width: '100vw',
+    background: '#667eea',
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    zIndex: 9999
   }}>
     <div style={{
       textAlign: 'center',
-      color: '#e0e0e0'
+      color: '#ffffff'
     }}>
       <div style={{
-        width: '40px',
-        height: '40px',
-        border: '4px solid #f3f3f3',
-        borderTop: '4px solid #667eea',
+        width: '50px',
+        height: '50px',
+        border: '5px solid #ffffff',
+        borderTop: '5px solid #1a1a2e',
         borderRadius: '50%',
         animation: 'spin 1s linear infinite',
         margin: '0 auto 20px'
       }}></div>
-      <p>Loading...</p>
+      <h2 style={{color: '#ffffff', margin: 0}}>Yahia Store</h2>
+      <p style={{color: '#ffffff', marginTop: '10px'}}>Loading...</p>
     </div>
   </div>
 )
