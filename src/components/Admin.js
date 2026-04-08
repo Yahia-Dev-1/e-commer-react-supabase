@@ -542,26 +542,7 @@ export default function Admin({ darkMode = true }) {
       <div className="admin-header">
         <h1>Admin Dashboard</h1>
         <p>Welcome back, Admin! Manage your e-commerce platform.</p>
-        <div className="admin-stats">
-          <div className="stat-card">
-            <span className="stat-icon">👤</span>
-            <h3>{users.length}</h3>
-            <p>Total Users</p>
-          </div>
-          <div className="stat-card">
-            <span className="stat-icon">🛒</span>
-            <h3>{orders.length}</h3>
-            <p>Total Orders</p>
-          </div>
-          <div className="stat-card">
-            <span className="stat-icon">🛡️</span>
-            <h3>{users.filter(u => ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(u.email)).length}</h3>
-            <p>Protected Admins</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="admin-tabs">
+        <div className="admin-tabs">
         <button 
           className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
