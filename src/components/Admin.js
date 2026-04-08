@@ -580,12 +580,6 @@ export default function Admin({ darkMode = true }) {
         >
           📊 Advanced Stats
         </button>
-        <button 
-          className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analytics')}
-        >
-          📈 Analytics
-        </button>
 
       </div>
 
