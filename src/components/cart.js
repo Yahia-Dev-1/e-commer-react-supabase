@@ -17,21 +17,14 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
     addressInCountry: '',
     additionalInfo: ''
   })
-  const [removedItems, setRemovedItems] = useState([]);
-
   useEffect(() => {
     const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
-    const removed = [];
     cartItems.forEach(item => {
       const product = existingProducts.find(p => p.id === item.id);
       if (!product || product.quantity === 0) {
-        removed.push(item.title);
         updateQuantity(item.id, 0);
       }
     });
-    if (removed.length > 0) {
-      setRemovedItems(removed);
-    }
   }, [cartItems, updateQuantity]);
 
 

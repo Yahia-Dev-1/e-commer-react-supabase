@@ -59,7 +59,8 @@ const SEO = ({
     // Add structured data for current page
     addStructuredData();
 
-  }, [title, description, keywords, image, url, type, author, publishedTime, modifiedTime, section, tags, location]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, description, keywords, image, url, type, author, publishedTime, modifiedTime, section, tags, location, addStructuredData]);
 
   const updateMetaTag = (name, content) => {
     if (!content) return;
