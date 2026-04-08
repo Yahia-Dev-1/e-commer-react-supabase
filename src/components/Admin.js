@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import UsersList from './UsersList';
-import UsersSummary from './UsersSummary';
-import { subscribeToUsers, deleteUserFromSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState('users');
+  const [activeTab, setActiveTab] = useState('orders');
   const [loading, setLoading] = useState(true);
   const [showAllUsers] = useState(true); // Changed to true to show all users by default
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -246,7 +244,7 @@ export default function Admin({ darkMode = true }) {
     }
   };
 
-  const rejectOrder = (orderId) => {
+  const rejectOrder = async (orderId) => {
     const orderToReject = orders.find(order => order.id === orderId);
     if (!orderToReject) return;
 
@@ -256,8 +254,11 @@ export default function Admin({ darkMode = true }) {
     setOrders(updatedOrders);
     localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
     
+    // Restore product quantities to Supabase (sync across all devices)
+    await restoreProductQuantities(orderToReject);
+    
     addRejectionNotification(orderToReject);
-    alert(`Order #${orderToReject.orderNumber} has been rejected.`);
+    alert(`Order #${orderToReject.orderNumber} has been rejected. Products returned to stock.`);
   };
 
   const approveOrder = (orderId) => {
@@ -312,8 +313,9 @@ export default function Admin({ darkMode = true }) {
     localStorage.setItem('order_notifications', JSON.stringify(notifications));
   };
 
-  const restoreProductQuantities = (order) => {
+  const restoreProductQuantities = async (order) => {
     try {
+      // Update localStorage
       const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
       
       order.items.forEach(item => {
@@ -324,7 +326,23 @@ export default function Admin({ darkMode = true }) {
       });
       
       localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts));
-      console.log('Product quantities restored after order deletion');
+      
+      // Update Supabase for real-time sync across all devices
+      for (const item of order.items) {
+        try {
+          const product = existingProducts.find(p => p.id === item.id);
+          if (product) {
+            await updateProductInSupabase(item.id, { quantity: product.quantity });
+          }
+        } catch (error) {
+          console.warn('Could not update quantity in Supabase:', error.message);
+        }
+      }
+      
+      // Trigger update event
+      window.dispatchEvent(new Event('productsUpdated'));
+      
+      console.log('Product quantities restored after order rejection/deletion');
     } catch (error) {
       console.error('Error restoring product quantities:', error);
     }
@@ -545,12 +563,6 @@ export default function Admin({ darkMode = true }) {
 
       <div className="admin-tabs">
         <button 
-          className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
-        >
-          Users Management
-        </button>
-        <button 
           className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
           onClick={() => setActiveTab('orders')}
         >
@@ -578,72 +590,6 @@ export default function Admin({ darkMode = true }) {
       </div>
 
       <div className="admin-content">
-        {activeTab === 'users' && (
-          <div className="users-section">
-            <UsersSummary 
-              users={users}
-              adminEmails={JSON.parse(localStorage.getItem('admin_emails') || '[]')}
-            />
-            <UsersList 
-              users={users}
-              onEditUser={handleEditUser}
-              onDeleteUser={handleDeleteUser}
-              adminEmails={JSON.parse(localStorage.getItem('admin_emails') || '[]')}
-            />
-            
-            {users.length === 0 ? (
-              <div className="no-data">
-                <p>No users found</p>
-              </div>
-            ) : (
-              <div className="users-list">
-                <div className="users-summary">
-                  <h3>📊 Users Summary</h3>
-                  <p>Total Users: <strong>{users.length}</strong></p>
-                  <p>Protected Admins: <strong>{users.filter(u => ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(u.email)).length}</strong></p>
-                  <p>Regular Users: <strong>{users.filter(u => !['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(u.email)).length}</strong></p>
-                </div>
-                
-                {users.map((user, index) => {
-                  const isProtected = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(user.email);
-                  const isAdmin = JSON.parse(localStorage.getItem('admin_emails') || '[]').includes(user.email);
-                  return (
-                    <div key={user.id} className={`user-card ${isProtected ? 'protected' : ''} ${isAdmin ? 'admin' : 'regular'}`}>
-                      <div className="user-info">
-                        <div className="user-header">
-                          <h3>
-                            #{index + 1} - {user.name}
-                            {isProtected && <span className="protected-badge">🛡️ Protected Admin</span>}
-                            {isAdmin && !isProtected && <span className="admin-badge">👑 Admin</span>}
-                            {!isAdmin && <span className="user-badge">👤 User</span>}
-                          </h3>
-                        </div>
-                        <p className="user-email"><strong>Email:</strong> {user.email}</p>
-                        <p className="user-date"><strong>Registration Date:</strong> {formatDate(user.createdAt)}</p>
-                        <p className="user-orders"><strong>Number of Orders:</strong> {user.orders?.length || 0}</p>
-                        <p className="user-id"><strong>User ID:</strong> {user.id}</p>
-                      </div>
-                      <div className="user-actions">
-                        {!isProtected && (
-                          <button 
-                            className="delete-btn"
-                            onClick={() => deleteUser(user.id)}
-                          >
-                            Delete
-                          </button>
-                        )}
-                        {isProtected && (
-                          <span className="protected-message">Protected Admin - Cannot Delete</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        )}
-
         {activeTab === 'orders' && (
           <div className="orders-section">
             <div className="section-header">
