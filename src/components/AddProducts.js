@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddProducts.css';
-import emailjs from 'emailjs-com';
 import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase } from '../utils/supabase';
 
 export default function AddProducts({ darkMode = false }) {
@@ -59,6 +58,7 @@ export default function AddProducts({ darkMode = false }) {
   return currentUserEmail && protectedAdmins.includes(currentUserEmail)
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Preload images for faster loading
     const preloadImages = () => {
