@@ -569,6 +569,12 @@ export default function Admin({ darkMode = true }) {
           Orders Management
         </button>
         <button 
+          className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          👥 Users
+        </button>
+        <button 
           className={`tab-btn ${activeTab === 'manage-admins' ? 'active' : ''}`}
           onClick={() => setActiveTab('manage-admins')}
         >
@@ -745,6 +751,59 @@ export default function Admin({ darkMode = true }) {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'users' && (
+          <div className="users-section">
+            <div className="section-header">
+              <h2>👥 Users List</h2>
+              <button className="refresh-btn" onClick={loadData}>
+                Refresh Data
+              </button>
+            </div>
+
+            <div className="users-stats-card">
+              <div className="stat-item">
+                <span className="stat-label">Total Users</span>
+                <span className="stat-value">{users.length}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">With Orders</span>
+                <span className="stat-value">{users.filter(u => u.orders?.length > 0).length}</span>
+              </div>
+            </div>
+
+            <div className="users-list">
+              {users.length === 0 ? (
+                <p className="no-data">No users found</p>
+              ) : (
+                <table className="users-table">
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Joined Date</th>
+                      <th>Orders Count</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id}>
+                        <td className="user-email">{user.email}</td>
+                        <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                        <td>{user.orders?.length || 0}</td>
+                        <td>
+                          <span className={`status-badge ${user.orders?.length > 0 ? 'active' : 'inactive'}`}>
+                            {user.orders?.length > 0 ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         )}
