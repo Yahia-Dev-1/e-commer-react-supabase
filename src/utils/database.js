@@ -172,21 +172,8 @@ class Database {
     }
   }
 
-  // Get all users - Try Supabase first, then localStorage
-  async getUsers() {
-    try {
-      // Try Supabase first
-      const supabaseUsers = await getUsersFromSupabase();
-      if (supabaseUsers && supabaseUsers.length > 0) {
-        // Sync to localStorage for offline
-        localStorage.setItem(this.usersKey, JSON.stringify(supabaseUsers));
-        return supabaseUsers;
-      }
-    } catch (error) {
-      console.log('Supabase users fetch failed, using localStorage:', error.message);
-    }
-    
-    // Fallback to localStorage
+  // Get all users - Synchronous (from localStorage only)
+  getUsers() {
     try {
       const users = localStorage.getItem(this.usersKey);
       return users ? JSON.parse(users) : [];
@@ -194,6 +181,23 @@ class Database {
       console.error('Error reading user data:', error);
       return [];
     }
+  }
+
+  // Get all users from Supabase (async)
+  async getUsersAsync() {
+    try {
+      const supabaseUsers = await getUsersFromSupabase();
+      if (supabaseUsers && supabaseUsers.length > 0) {
+        // Sync to localStorage for offline
+        localStorage.setItem(this.usersKey, JSON.stringify(supabaseUsers));
+        return supabaseUsers;
+      }
+    } catch (error) {
+      console.log('Supabase users fetch failed:', error.message);
+    }
+    
+    // Fallback to localStorage
+    return this.getUsers();
   }
 
   // Get all orders

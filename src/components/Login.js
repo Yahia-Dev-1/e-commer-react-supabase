@@ -67,7 +67,7 @@ export default function Login({ onLogin, darkMode = false }) {
         try {
           // Check if user exists in Supabase
           const existingUsers = await getUsersFromSupabase();
-          if (existingUsers.some(user => user.email === formData.email)) {
+          if (Array.isArray(existingUsers) && existingUsers.some(user => user.email === formData.email)) {
             setError('User already exists');
             return;
           }

@@ -4,7 +4,7 @@ import '../styles/UsersList.css';
 import database from '../utils/database';
 import UsersList from './UsersList';
 import UsersSummary from './UsersSummary';
-import { getUsersFromSupabase, subscribeToUsers, deleteUserFromSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
@@ -50,10 +50,10 @@ export default function Admin({ darkMode = true }) {
   const loadData = useCallback(async () => {
     setLoading(true);
     
-    // Try to get users from Supabase first
+    // Get users from Supabase (with localStorage fallback)
     let allUsers = [];
     try {
-      allUsers = await getUsersFromSupabase();
+      allUsers = await database.getUsersAsync();
       console.log('Users loaded from Supabase:', allUsers.length);
     } catch (error) {
       console.log('Using localStorage users:', error.message);
