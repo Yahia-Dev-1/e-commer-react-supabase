@@ -734,7 +734,7 @@ function AppContent() {
 function App() {
   return (
     <HelmetProvider>
-      <BrowserRouter basename="/E-Commer-React">
+      <BrowserRouter>
         <AppContent />
       </BrowserRouter>
     </HelmetProvider>
