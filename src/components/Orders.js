@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import database from '../utils/database';
+import { updateProductInSupabase } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -50,6 +51,49 @@ export default function Orders({ user, orders = [], darkMode = false }) {
   const closeTracking = () => {
     setShowTracking(false);
     setSelectedOrder(null);
+  };
+
+  // 🆕 دالة إلغاء الطلب للمستخدم
+  const cancelOrder = async (orderId) => {
+    const orderToCancel = userOrders.find(order => order.id === orderId);
+    if (!orderToCancel) return;
+
+    // فقط الطلبات في حالة Processing ممكن تتCancel
+    if (orderToCancel.status !== 'Processing') {
+      alert('❌ You can only cancel orders that are still being processed.');
+      return;
+    }
+
+    if (window.confirm('Are you sure you want to cancel this order?')) {
+      // 1. إرجاع الكميات للمخزون
+      for (const item of orderToCancel.items || []) {
+        try {
+          const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
+          const productIndex = existingProducts.findIndex(p => p.id === item.id);
+          
+          if (productIndex !== -1) {
+            const currentQty = existingProducts[productIndex].quantity || 0;
+            existingProducts[productIndex].quantity = currentQty + (item.quantity || 1);
+            localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts));
+            
+            // Update Supabase
+            await updateProductInSupabase(item.id, { quantity: existingProducts[productIndex].quantity });
+          }
+        } catch (error) {
+          console.warn('Could not restore quantity for item:', item.id, error.message);
+        }
+      }
+
+      // 2. حذف الطلب من localStorage
+      const allOrders = JSON.parse(localStorage.getItem('ecommerce_orders') || '[]');
+      const updatedOrders = allOrders.filter(o => o.id !== orderId);
+      localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
+
+      // 3. Update local state
+      setUserOrders(prev => prev.filter(o => o.id !== orderId));
+
+      alert('✅ Order cancelled successfully. Products returned to stock.');
+    }
   };
 
   const getTrackingSteps = (status) => {
@@ -128,12 +172,22 @@ export default function Orders({ user, orders = [], darkMode = false }) {
                   <span>Total:</span>
                   <strong>${order.total.toFixed(2)}</strong>
                 </div>
-                <button 
-                  className="track-order-btn"
-                  onClick={() => handleTrackOrder(order)}
-                >
-                  Track Order
-                </button>
+                <div className="order-actions">
+                  <button 
+                    className="track-order-btn"
+                    onClick={() => handleTrackOrder(order)}
+                  >
+                    Track Order
+                  </button>
+                  {order.status === 'Processing' && (
+                    <button 
+                      className="cancel-order-btn"
+                      onClick={() => cancelOrder(order.id)}
+                    >
+                      Cancel Order
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
