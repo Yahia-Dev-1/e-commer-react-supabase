@@ -5,8 +5,10 @@ import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabas
 
 export default function AddProducts({ darkMode = false }) {
   const [productList,setProductList]= useState([])
+  
+  // Sync productList with products from Supabase
   useEffect(()=>{
-    // تحميل المنتجات من localStorage فقط
+    // تحميل المنتجات من localStorage
     try {
       const storedProducts = localStorage.getItem('ecommerce_products')
       if (storedProducts) {
@@ -16,6 +18,13 @@ export default function AddProducts({ darkMode = false }) {
       setProductList([])
     }
   },[])
+  
+  // Update productList whenever products change
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setProductList(products)
+    }
+  }, [products])
 	
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
