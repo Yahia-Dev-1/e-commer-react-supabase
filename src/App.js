@@ -403,13 +403,19 @@ function AppContent() {
     }
   }
 
-  // دالة للتحقق من الكمية المتاحة
+  // دالة للتحقق من الكمية المتاحة (مع حساب المحجوز في السلة)
   const checkAvailableQuantity = (productId) => {
     try {
+      // 🆕 احسب الكمية المحجوزة في السلة لهذا المنتج
+      const reservedInCart = cartItems
+        .filter(item => item.id === productId)
+        .reduce((sum, item) => sum + item.quantity, 0)
+      
       // الأول نشوف في products state (من Supabase)
       const productFromState = products.find(p => p.id === productId)
       if (productFromState) {
-        return Math.max(0, productFromState.quantity || 0)
+        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
+        return Math.max(0, (productFromState.quantity || 0) + reservedInCart)
       }
       
       // لو مش لقينا، نشوف في localStorage
@@ -417,7 +423,8 @@ function AppContent() {
       const product = existingProducts.find(p => p.id === productId)
       
       if (product) {
-        return Math.max(0, product.quantity || 0)
+        // 🆕 أضف المحجوز للمتاح عشان نعرف الأصل
+        return Math.max(0, (product.quantity || 0) + reservedInCart)
       }
       
       return 0
@@ -462,9 +469,10 @@ function AppContent() {
       
       // لو الكمية زادت، نحجز الفرق
       if (quantityDiff > 0) {
-        const availableQuantity = checkAvailableQuantity(id)
-        if (quantityDiff > availableQuantity) {
-          alert(`Sorry, only ${availableQuantity} more items available for this product.`)
+        const totalAvailable = checkAvailableQuantity(id)
+        const additionalAvailable = totalAvailable - currentQuantity
+        if (quantityDiff > additionalAvailable) {
+          alert(`Sorry, you can only add ${additionalAvailable} more of this product. You already have ${currentQuantity} in your cart.`)
           return
         }
         await reserveProductQuantity(id, quantityDiff)
