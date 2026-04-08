@@ -64,7 +64,14 @@ class Database {
   // Ensure protected admins exist
   ensureProtectedAdminsExist() {
     try {
-      const users = this.getUsers();
+      let users = this.getUsers();
+      
+      // Ensure users is an array
+      if (!Array.isArray(users)) {
+        console.warn('Users is not an array, resetting');
+        users = [];
+      }
+      
       const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
       let updated = false;
 
@@ -176,11 +183,22 @@ class Database {
   getUsers() {
     try {
       const users = localStorage.getItem(this.usersKey);
-      const parsed = users ? JSON.parse(users) : [];
+      if (!users) return [];
+      
+      const parsed = JSON.parse(users);
+      
       // Ensure we always return an array
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) {
+        console.warn('Users data corrupted, resetting to empty array');
+        localStorage.removeItem(this.usersKey);
+        return [];
+      }
+      
+      return parsed;
     } catch (error) {
       console.error('Error reading user data:', error);
+      // Clear corrupted data
+      localStorage.removeItem(this.usersKey);
       return [];
     }
   }
