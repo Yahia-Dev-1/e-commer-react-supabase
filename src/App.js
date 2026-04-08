@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
-import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase } from './utils/supabase'
+import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase } from './utils/supabase'
 import React from 'react';
 // import { ProductsProvider } from './context/ProductsContext';
 
@@ -251,7 +251,7 @@ function AppContent() {
     }
   }, [])
 
-  const addToCart = (product) => {
+  const addToCart = async (product) => {
     if (!user) {
       setPendingProduct(product)
       setShowModal(true)
@@ -276,6 +276,9 @@ function AppContent() {
         return
       }
       
+      // 🆕 حجز كمية 1 إضافية
+      await reserveProductQuantity(product.id, 1)
+      
       setCartItems(prevItems => {
         const updatedItems = prevItems.map(item => 
           item.id === product.id 
@@ -299,6 +302,9 @@ function AppContent() {
         }
       })
     } else {
+      // 🆕 حجز كمية 1 للمنتج الجديد
+      await reserveProductQuantity(product.id, 1)
+      
       setCartItems(prevItems => {
         const updatedItems = [...prevItems, { ...product, quantity: 1 }]
         
@@ -325,6 +331,73 @@ function AppContent() {
 
 
 
+  // 🆕 دالة لحجز الكمية (عند الإضافة للسلة)
+  const reserveProductQuantity = async (productId, quantity) => {
+    try {
+      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
+      const productIndex = existingProducts.findIndex(p => p.id === productId)
+      
+      if (productIndex !== -1) {
+        const oldQuantity = existingProducts[productIndex].quantity || 0
+        const newQuantity = Math.max(0, oldQuantity - quantity)
+        
+        existingProducts[productIndex].quantity = newQuantity
+        localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
+        
+        // Update Supabase for real-time sync
+        try {
+          await updateProductInSupabase(productId, { quantity: newQuantity })
+          console.log(`✅ Reserved ${quantity} items from product ${productId}, remaining: ${newQuantity}`)
+        } catch (error) {
+          console.warn('Could not update Supabase:', error.message)
+        }
+        
+        // Update local state
+        setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQuantity } : p))
+        window.dispatchEvent(new Event('productsUpdated'))
+      }
+    } catch (error) {
+      console.error('Error reserving quantity:', error)
+    }
+  }
+
+  // 🆕 دالة لإرجاع الكمية المحجوزة (عند الإزالة من السلة أو رفض الأوردر)
+  const releaseProductQuantity = async (productId, quantity) => {
+    try {
+      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
+      const productIndex = existingProducts.findIndex(p => p.id === productId)
+      
+      if (productIndex !== -1) {
+        const oldQuantity = existingProducts[productIndex].quantity || 0
+        const newQuantity = oldQuantity + quantity
+        
+        existingProducts[productIndex].quantity = newQuantity
+        localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts))
+        
+        // Update Supabase for real-time sync
+        try {
+          await updateProductInSupabase(productId, { quantity: newQuantity })
+          console.log(`✅ Released ${quantity} items back to product ${productId}, new total: ${newQuantity}`)
+        } catch (error) {
+          console.warn('Could not update Supabase:', error.message)
+        }
+        
+        // Update local state
+        setProducts(prev => prev.map(p => p.id === productId ? { ...p, quantity: newQuantity } : p))
+        window.dispatchEvent(new Event('productsUpdated'))
+      }
+    } catch (error) {
+      console.error('Error releasing quantity:', error)
+    }
+  }
+
+  // 🆕 دالة لإرجاع كميات متعددة (للأوردر كامل)
+  const releaseOrderQuantities = async (items) => {
+    for (const item of items) {
+      await releaseProductQuantity(item.id, item.quantity)
+    }
+  }
+
   // دالة للتحقق من الكمية المتاحة
   const checkAvailableQuantity = (productId) => {
     try {
@@ -349,8 +422,17 @@ function AppContent() {
     }
   }
 
-  const updateCartItemQuantity = (id, newQuantity) => {
+  const updateCartItemQuantity = async (id, newQuantity) => {
+    // 🆕 احصل على الكمية الحالية في السلة قبل التغيير
+    const currentItem = cartItems.find(item => item.id === id)
+    const currentQuantity = currentItem ? currentItem.quantity : 0
+    
     if (newQuantity <= 0) {
+      // 🆕 إرجاع الكمية المحجوزة بالكامل عند إزالة المنتج
+      if (currentQuantity > 0) {
+        await releaseProductQuantity(id, currentQuantity)
+      }
+      
       setCartItems(prevItems => {
         const updatedItems = prevItems.filter(item => item.id !== id)
         
@@ -370,18 +452,26 @@ function AppContent() {
         }
       })
     } else {
-      // التحقق من الكمية المتاحة
-      const availableQuantity = checkAvailableQuantity(id)
-      let finalQuantity = newQuantity
+      // 🆕 حساب الفرق في الكمية
+      const quantityDiff = newQuantity - currentQuantity
       
-      if (newQuantity > availableQuantity) {
-        alert(`Sorry, only ${availableQuantity} items available for this product.`)
-        finalQuantity = availableQuantity
+      // لو الكمية زادت، نحجز الفرق
+      if (quantityDiff > 0) {
+        const availableQuantity = checkAvailableQuantity(id)
+        if (quantityDiff > availableQuantity) {
+          alert(`Sorry, only ${availableQuantity} more items available for this product.`)
+          return
+        }
+        await reserveProductQuantity(id, quantityDiff)
+      }
+      // لو الكمية قلت، نرجع الفرق
+      else if (quantityDiff < 0) {
+        await releaseProductQuantity(id, Math.abs(quantityDiff))
       }
       
       setCartItems(prevItems => {
         const updatedItems = prevItems.map(item => 
-          item.id === id ? { ...item, quantity: finalQuantity } : item
+          item.id === id ? { ...item, quantity: newQuantity } : item
         )
         
         // Save to localStorage immediately
@@ -468,7 +558,12 @@ function AppContent() {
     }
   }
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    // 🆕 إرجاع كل الكميات المحجوزة قبل مسح السلة
+    for (const item of cartItems) {
+      await releaseProductQuantity(item.id, item.quantity)
+    }
+    
     setCartItems([])
     localStorage.removeItem('cartItems')
   }
@@ -514,51 +609,32 @@ function AppContent() {
     localStorage.removeItem('cartItems')
   }
 
-  // دالة جديدة لطرح الكمية المباعة من المنتجات
-  const updateProductQuantities = (purchasedItems) => {
+  // 🔄 دالة م同步 للكميات مع Supabase بعد الشراء (الكمية محجوزة فعلاً)
+  const updateProductQuantities = async (purchasedItems) => {
     try {
-      // جلب المنتجات الحالية من localStorage
-      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
+      // 📝 الكمية محجوزة فعلاً في السلة، فنحن بس بنـ Sync مع Supabase
+      // مش بنطرح تاني عشان نتجنب الـ Double Subtraction
       
-      // قائمة المنتجات التي نفدت مخزونها
-      const outOfStockProducts = []
-      
-      // تحديث الكميات لكل منتج تم شراؤه
-      const updatedProducts = existingProducts.map(product => {
-        const purchasedItem = purchasedItems.find(item => item.id === product.id)
-        if (purchasedItem) {
-          const oldQuantity = product.quantity || 1
-          const newQuantity = Math.max(0, oldQuantity - purchasedItem.quantity)
+      for (const item of purchasedItems) {
+        try {
+          // Get current quantity from localStorage
+          const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
+          const product = existingProducts.find(p => p.id === item.id)
           
-          // إذا كان المنتج نفذ مخزونه بعد الطلب
-          if (oldQuantity > 0 && newQuantity === 0) {
-            outOfStockProducts.push(product.title)
+          if (product) {
+            // Sync with Supabase (quantity already reserved in cart)
+            await updateProductInSupabase(item.id, { quantity: product.quantity })
+            console.log(`✅ Synced product ${item.id} quantity: ${product.quantity}`)
           }
-          
-          return {
-            ...product,
-            quantity: newQuantity
-          }
+        } catch (error) {
+          console.warn(`Could not sync product ${item.id}:`, error.message)
         }
-        return product
-      })
+      }
       
-      // حفظ المنتجات المحدثة
-      localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts))
-      
-      // إرسال حدث مخصص لتحديث المنتجات في الصفحة الرئيسية
-      window.dispatchEvent(new Event('productsUpdated'))
-      
-      console.log('Product quantities updated after purchase')
-      
-      // إظهار رسالة للمنتجات التي نفدت مخزونها (تم إزالتها)
-      // if (outOfStockProducts.length > 0) {
-      //   const message = `تم إغلاق المنتجات التالية لانتهاء مخزونها:\n${outOfStockProducts.join('\n')}\n\nسيتم إعادة فتحها عند إضافة كمية جديدة من Admin.`
-      //   alert(message)
-      // }
+      console.log('Product quantities synced after purchase')
       
     } catch (error) {
-      console.error('Error updating product quantities:', error)
+      console.error('Error syncing product quantities:', error)
     }
   }
 

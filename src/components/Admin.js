@@ -270,7 +270,7 @@ export default function Admin({ darkMode = true }) {
     alert('Order has been approved.');
   };
 
-  const deleteOrder = (orderId) => {
+  const deleteOrder = async (orderId) => {
     const orderToDelete = orders.find(order => order.id === orderId);
     if (!orderToDelete) return;
 
@@ -280,8 +280,8 @@ export default function Admin({ darkMode = true }) {
       localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
       
       addDeletionNotification(orderToDelete);
-      restoreProductQuantities(orderToDelete);
-      alert(`Order #${orderToDelete.orderNumber} has been deleted.`);
+      await restoreProductQuantities(orderToDelete);
+      alert(`Order #${orderToDelete.orderNumber} has been deleted. Products returned to stock.`);
     }
   };
 
