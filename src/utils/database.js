@@ -1,5 +1,6 @@
 // Enhanced database using the new storage system
 // import { get, set, remove, initializeStorage, getStorageUsage, getStorageHealth } from './enhancedStorage.js'
+import { addUserToSupabase, getUsersFromSupabase, deleteUserFromSupabase } from './supabase';
 
 class Database {
   constructor() {
@@ -171,8 +172,21 @@ class Database {
     }
   }
 
-  // Get all users
-  getUsers() {
+  // Get all users - Try Supabase first, then localStorage
+  async getUsers() {
+    try {
+      // Try Supabase first
+      const supabaseUsers = await getUsersFromSupabase();
+      if (supabaseUsers && supabaseUsers.length > 0) {
+        // Sync to localStorage for offline
+        localStorage.setItem(this.usersKey, JSON.stringify(supabaseUsers));
+        return supabaseUsers;
+      }
+    } catch (error) {
+      console.log('Supabase users fetch failed, using localStorage:', error.message);
+    }
+    
+    // Fallback to localStorage
     try {
       const users = localStorage.getItem(this.usersKey);
       return users ? JSON.parse(users) : [];

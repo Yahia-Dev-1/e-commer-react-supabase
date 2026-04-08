@@ -4,6 +4,7 @@ import '../styles/UsersList.css';
 import database from '../utils/database';
 import UsersList from './UsersList';
 import UsersSummary from './UsersSummary';
+import { getUsersFromSupabase, subscribeToUsers, deleteUserFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
@@ -46,9 +47,19 @@ export default function Admin({ darkMode = true }) {
     }
   }, []);
 
-  const loadData = useCallback(() => {
+  const loadData = useCallback(async () => {
     setLoading(true);
-    const allUsers = database.getUsers();
+    
+    // Try to get users from Supabase first
+    let allUsers = [];
+    try {
+      allUsers = await getUsersFromSupabase();
+      console.log('Users loaded from Supabase:', allUsers.length);
+    } catch (error) {
+      console.log('Using localStorage users:', error.message);
+      allUsers = database.getUsers();
+    }
+    
     const allOrders = database.getOrders();
     
     const protectedAdmins = [
@@ -158,7 +169,19 @@ export default function Admin({ darkMode = true }) {
     }
   }, [showAllUsers, isAuthorized, loadData]);
 
-  const deleteUser = (userId) => {
+  // Subscribe to users changes from Supabase
+  useEffect(() => {
+    if (!isAuthorized) return;
+    
+    const unsubscribe = subscribeToUsers((supabaseUsers) => {
+      console.log('Users updated from Supabase:', supabaseUsers.length);
+      setUsers(supabaseUsers);
+    });
+    
+    return () => unsubscribe();
+  }, [isAuthorized]);
+
+  const deleteUser = async (userId) => {
     const userToDelete = users.find(user => user.id === userId);
     
     if (!userToDelete) {
@@ -182,6 +205,15 @@ export default function Admin({ darkMode = true }) {
     }
 
     if (window.confirm(`Are you sure you want to delete user: ${userToDelete.email}?`)) {
+      try {
+        // Delete from Supabase first
+        await deleteUserFromSupabase(userId);
+        console.log('✅ Deleted from Supabase');
+      } catch (error) {
+        console.warn('⚠️ Could not delete from Supabase:', error.message);
+      }
+      
+      // Delete from localStorage
       const success = database.deleteUser(userId);
       if (success) {
         alert(`✅ User ${userToDelete.email} has been deleted successfully!`);
@@ -206,10 +238,10 @@ export default function Admin({ darkMode = true }) {
     // مثل فتح نافذة منبثقة للتعديل
   };
 
-  const handleDeleteUser = (user) => {
+  const handleDeleteUser = async (user) => {
     const userId = user.id || users.find(u => u.email === user.email)?.id;
     if (userId) {
-      deleteUser(userId);
+      await deleteUser(userId);
     } else {
       alert('Could not find user ID');
     }

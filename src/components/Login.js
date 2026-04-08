@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 import database from '../utils/database';
+import { addUserToSupabase, getUsersFromSupabase } from '../utils/supabase';
 
 
 export default function Login({ onLogin, darkMode = false }) {
@@ -62,23 +63,54 @@ export default function Login({ onLogin, darkMode = false }) {
           setError('Invalid email or password');
         }
       } else {
-        // Register new user
+        // Register new user - Try Supabase first
         try {
-          const newUser = database.registerUser({
+          // Check if user exists in Supabase
+          const existingUsers = await getUsersFromSupabase();
+          if (existingUsers.some(user => user.email === formData.email)) {
+            setError('User already exists');
+            return;
+          }
+          
+          // Add to Supabase
+          const newUser = await addUserToSupabase({
+            email: formData.email,
+            password: formData.password,
+            name: formData.email.split('@')[0],
+            isAdmin: false
+          });
+          
+          // Also add to localStorage for offline
+          database.registerUser({
             email: formData.email,
             password: formData.password,
             name: formData.email.split('@')[0]
           });
           
           setSuccess('Account created successfully!');
-          // Save current user email to localStorage for admin access
           localStorage.setItem('currentUserEmail', newUser.email);
           setTimeout(() => {
             onLogin(newUser);
             navigate('/');
           }, 1000);
         } catch (error) {
-          setError(error.message);
+          console.error('Registration error:', error);
+          // Fallback to localStorage only
+          try {
+            const newUser = database.registerUser({
+              email: formData.email,
+              password: formData.password,
+              name: formData.email.split('@')[0]
+            });
+            setSuccess('Account created locally!');
+            localStorage.setItem('currentUserEmail', newUser.email);
+            setTimeout(() => {
+              onLogin(newUser);
+              navigate('/');
+            }, 1000);
+          } catch (localError) {
+            setError(localError.message);
+          }
         }
       }
     } catch (error) {
