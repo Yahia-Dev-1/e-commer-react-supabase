@@ -20,6 +20,7 @@ const Orders = lazy(() => import('./components/Orders'))
 const Modal = lazy(() => import('./components/Modal'))
 const AlertModal = lazy(() => import('./components/AlertModal'))
 const Admin = lazy(() => import('./components/Admin'))
+const FloatingButtons = lazy(() => import('./components/FloatingButtons'))
 const Footer = lazy(() => import('./components/Footer'))
 
 // Loading component
@@ -792,6 +793,18 @@ function AppContent() {
           </Suspense>
         } />
       </Routes>
+      
+      {/* 🆕 Floating Action Buttons (Cart & Notifications) */}
+      {location.pathname !== '/login' && (
+        <Suspense fallback={null}>
+          <FloatingButtons 
+            cartItemsCount={cartItems.length}
+            unreadNotifications={notifications.filter(n => !n.read).length}
+            onNotificationClick={() => setShowNotifications(!showNotifications)}
+          />
+        </Suspense>
+      )}
+      
       {/* إظهار الفوتر في كل الصفحات ما عدا صفحة اللوجين و My Orders والأدمن والسلة */}
       {location.pathname !== '/login' && 
        location.pathname !== '/orders' && 
