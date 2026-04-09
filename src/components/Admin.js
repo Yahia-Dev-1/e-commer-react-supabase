@@ -902,6 +902,7 @@ export default function Admin({ darkMode = true }) {
                       <th>Joined Date</th>
                       <th>Orders Count</th>
                       <th>Status</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -914,6 +915,14 @@ export default function Admin({ darkMode = true }) {
                           <span className={`status-badge ${user.orders?.length > 0 ? 'active' : 'inactive'}`}>
                             {user.orders?.length > 0 ? 'Active' : 'Inactive'}
                           </span>
+                        </td>
+                        <td>
+                          <button 
+                            className="delete-user-btn"
+                            onClick={() => handleDeleteUser(user)}
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
