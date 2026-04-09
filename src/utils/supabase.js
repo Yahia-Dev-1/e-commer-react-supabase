@@ -177,16 +177,18 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // 🆕 Only basic columns - items as JSONB string
+    // Ensure all required fields with proper types
     const orderData = {
       orderNumber: order.orderNumber,
       status: order.status || 'pending',
-      userEmail: order.userEmail,
-      items: JSON.stringify(order.items || []),
-      total: parseFloat(order.total) || 0
+      userEmail: order.userEmail || null,
+      items: order.items || [],
+      total: parseFloat(order.total) || 0,
+      userId: order.userId || null,
+      shipping: order.shipping || {}
     };
     
-    console.log('📝 Inserting order:', orderData);
+    console.log('Inserting order:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -194,14 +196,14 @@ export const addOrderToSupabase = async (order) => {
       .select();
     
     if (error) {
-      console.error('❌ Supabase insert error:', error);
+      console.error('Supabase insert error:', error);
       throw error;
     }
     
-    console.log('✅ Order inserted:', data);
+    console.log('Order inserted:', data);
     return data[0];
   } catch (error) {
-    console.error('❌ Error adding order to Supabase:', error);
+    console.error('Error adding order to Supabase:', error);
     throw error;
   }
 };
