@@ -59,6 +59,10 @@ export const deleteProductFromSupabase = async (productId) => {
 
 export const updateProductInSupabase = async (productId, updates) => {
   try {
+    console.log('=== UPDATING PRODUCT IN SUPABASE ===');
+    console.log('Product ID:', productId);
+    console.log('Updates:', updates);
+    
     const { data, error } = await supabase
       .from('products')
       .update(updates)
@@ -66,9 +70,12 @@ export const updateProductInSupabase = async (productId, updates) => {
       .select();
     
     if (error) throw error;
+    
+    console.log('✅ Product updated successfully in Supabase:', data[0]);
     return data[0];
   } catch (error) {
     console.error('❌ Error updating product in Supabase:', error);
+    console.error('Error details:', error.message);
     throw error;
   }
 };
