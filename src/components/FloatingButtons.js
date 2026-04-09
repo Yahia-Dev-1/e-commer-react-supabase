@@ -39,3 +39,5 @@ const FloatingButtons = memo(function FloatingButtons({
     </div>
   );
 }
+
+export default FloatingButtons;
