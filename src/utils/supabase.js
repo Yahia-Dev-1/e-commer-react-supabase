@@ -177,13 +177,13 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use only basic columns that definitely exist
+    // Use only basic columns that definitely exist - NO orderNumber
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0
     };
     
-    console.log('=== FINAL DEBUG: Inserting order ===');
+    console.log('=== FINAL FIX: Inserting order ===');
     console.log('Original order:', order);
     console.log('Final orderData:', orderData);
     
@@ -205,7 +205,7 @@ export const addOrderToSupabase = async (order) => {
     
     console.log('✅ Order inserted successfully:', data);
     
-    // Add orderNumber to the returned data for UI
+    // Add orderNumber to the returned data for UI only
     if (data && data[0]) {
       data[0].orderNumber = order.orderNumber;
       data[0].userEmail = order.userEmail;
