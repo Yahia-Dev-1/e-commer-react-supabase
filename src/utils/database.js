@@ -232,11 +232,11 @@ class Database {
   }
 
   // Register new user
-  registerUser(userData) {
+  async registerUser(userData) {
     try {
       const users = this.getUsers();
       
-      // Check if user already exists
+      // Check if user already exists in localStorage
       if (users.some(user => user.email === userData.email)) {
         throw new Error('User already exists');
       }
@@ -277,21 +277,34 @@ class Database {
         }
       }
 
-      const newUser = {
-        id: Date.now() + Math.random(),
+      // Import addUserToSupabase dynamically to avoid circular dependency
+      const { addUserToSupabase } = await import('./supabase');
+      
+      // Save to Supabase
+      const newUser = await addUserToSupabase({
         email: userData.email,
         password: userData.password,
+        name: userData.name
+      });
+      
+      console.log(' User registered to Supabase:', newUser);
+      
+      // Also save to localStorage for fallback
+      const localStorageUser = {
+        id: newUser.id,
+        email: newUser.email,
+        password: userData.password,
         name: userData.name,
-        createdAt: new Date().toISOString(),
+        createdAt: newUser.createdAt || new Date().toISOString(),
         orders: [],
         isProtected: false
       };
 
-      users.push(newUser);
+      users.push(localStorageUser);
       localStorage.setItem(this.usersKey, JSON.stringify(users));
       this.saveLastSaveTime();
       
-      return newUser;
+      return localStorageUser;
     } catch (error) {
       console.error('Error registering user:', error);
       throw error;
