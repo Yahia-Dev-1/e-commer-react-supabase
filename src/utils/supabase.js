@@ -177,15 +177,15 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use only basic columns that should exist
+    // Use only basic columns that definitely exist
     const orderData = {
-      status: order.status || 'pending',
+      status: 'pending',
       total: parseFloat(order.total) || 0
     };
     
-    console.log('=== DEBUG: Inserting order ===');
+    console.log('=== FINAL DEBUG: Inserting order ===');
     console.log('Original order:', order);
-    console.log('Cleaned orderData:', orderData);
+    console.log('Final orderData:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -203,21 +203,13 @@ export const addOrderToSupabase = async (order) => {
       throw error;
     }
     
-    console.log('Order inserted successfully:', data);
+    console.log('✅ Order inserted successfully:', data);
     
-    // Update with orderNumber after successful insert
-    if (data && data[0] && order.orderNumber) {
-      const { error: updateError } = await supabase
-        .from('orders')
-        .update({ orderNumber: order.orderNumber })
-        .eq('id', data[0].id);
-        
-      if (updateError) {
-        console.error('Failed to update orderNumber:', updateError);
-      } else {
-        console.log('OrderNumber updated successfully');
-        data[0].orderNumber = order.orderNumber;
-      }
+    // Add orderNumber to the returned data for UI
+    if (data && data[0]) {
+      data[0].orderNumber = order.orderNumber;
+      data[0].userEmail = order.userEmail;
+      data[0].items = order.items;
     }
     
     return data[0];
