@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
@@ -172,6 +172,18 @@ export default function Admin({ darkMode = true }) {
     const unsubscribe = subscribeToUsers((supabaseUsers) => {
       console.log('Users updated from Supabase:', supabaseUsers.length);
       setUsers(supabaseUsers);
+    });
+    
+    return () => unsubscribe();
+  }, [isAuthorized]);
+
+  // Subscribe to orders changes from Supabase
+  useEffect(() => {
+    if (!isAuthorized) return;
+    
+    const unsubscribe = subscribeToOrders((supabaseOrders) => {
+      console.log('Orders updated from Supabase:', supabaseOrders.length);
+      setOrders(supabaseOrders || []);
     });
     
     return () => unsubscribe();

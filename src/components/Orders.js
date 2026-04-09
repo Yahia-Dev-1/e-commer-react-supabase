@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -38,6 +38,24 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     };
     
     loadOrders();
+
+    // Real-time subscription for orders
+    const unsubscribe = subscribeToOrders((supabaseOrders) => {
+      if (!user) return;
+      
+      console.log('🔄 Orders updated from Supabase:', supabaseOrders.length);
+      
+      // Filter orders for current user (by userEmail)
+      const currentUserEmail = localStorage.getItem('currentUserEmail') || user.email;
+      const filteredOrders = supabaseOrders.filter(order => 
+        order.userEmail === currentUserEmail
+      );
+      
+      console.log('📦 User orders updated:', filteredOrders.length);
+      setUserOrders(filteredOrders || []);
+    });
+
+    return () => unsubscribe();
   }, [user]);
 
   const getStatusColor = (status) => {
