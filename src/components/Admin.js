@@ -239,7 +239,7 @@ export default function Admin({ darkMode = true }) {
   };
 
   const handleEditUser = (user) => {
-    // التحقق من صلاحيات التعديل
+    // Check edit permissions
     const protectedAdmins = ['yahiapro400@gmail.com'];
     const currentUserEmail = localStorage.getItem('currentUserEmail');
     
@@ -248,8 +248,8 @@ export default function Admin({ darkMode = true }) {
       return;
     }
 
-    // هنا يمكنك إضافة منطق تعديل المستخدم
-    // مثل فتح نافذة منبثقة للتعديل
+    // Here you can add user edit logic
+    // Like opening a modal for editing
   };
 
   const handleDeleteUser = async (user) => {
@@ -576,13 +576,13 @@ export default function Admin({ darkMode = true }) {
                     setTimeout(() => {
                       checkAuthorization();
                     }, 500);
-                    showToast(`تم إضافة ${currentUserEmail} كمدير بنجاح!`, 'success');
+                    showToast(`Successfully added ${currentUserEmail} as admin!`, 'success');
                   } else {
-                    showToast('يرجى تسجيل الدخول أولاً', 'warning');
+                    showToast('Please login first', 'warning');
                   }
                 }}
               >
-                إصلاح الوصول
+                Fix Access
               </button>
               <button 
                 className="back-btn" 
