@@ -184,15 +184,16 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use ONLY essential columns that definitely exist
+    // Use essential columns including userEmail
     const orderData = {
       status: 'pending',
-      total: parseFloat(order.total) || 0
+      total: parseFloat(order.total) || 0,
+      userEmail: order.userEmail
     };
     
-    console.log('=== MINIMAL SOLUTION: Inserting order ===');
+    console.log('=== INSERTING ORDER WITH userEmail ===');
     console.log('Original order:', order);
-    console.log('Minimal orderData:', orderData);
+    console.log('Order data:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -215,7 +216,6 @@ export const addOrderToSupabase = async (order) => {
     // Add all order data for UI only (not stored in database)
     if (data && data[0]) {
       data[0].orderNumber = order.orderNumber;
-      data[0].userEmail = order.userEmail;
       data[0].items = order.items;
     }
     
@@ -245,7 +245,7 @@ export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
 };
 
 export const subscribeToOrders = (callback) => {
-  const subscription = supabase
+  const channel = supabase
     .channel('orders_changes')
     .on('postgres_changes', 
       { event: '*', schema: 'public', table: 'orders' },
@@ -259,7 +259,7 @@ export const subscribeToOrders = (callback) => {
     .subscribe();
 
   return () => {
-    subscription.unsubscribe();
+    supabase.removeChannel(channel);
   };
 };
 
