@@ -87,6 +87,12 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
   const handleShippingSubmit = (e) => {
     e.preventDefault()
     
+    // Check if cart is empty
+    if (!cartItems || cartItems.length === 0) {
+      showToast('⚠️ Please add products to your cart before placing an order', 'warning')
+      return
+    }
+    
     // Validate form data
     if (!shippingData.fullName || !shippingData.phone || !shippingData.governorate || 
         !shippingData.city || !shippingData.street || !shippingData.building) {
