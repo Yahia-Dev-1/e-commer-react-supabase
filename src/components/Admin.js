@@ -665,20 +665,6 @@ export default function Admin({ darkMode = true }) {
                           )}
                         </div>
                       )}
-                      
-                      {order.shipping && order.shipping && Object.keys(order.shipping).length > 0 && (
-                        <div className="shipping-info">
-                          <h4>Shipping Details:</h4>
-                          <p><strong>Name:</strong> {order.shipping.fullName}</p>
-                          <p><strong>Phone:</strong> {order.shipping.phone}</p>
-                          <p><strong>Address:</strong> {order.shipping.street}, {order.shipping.building}</p>
-                          <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
-                          <p><strong>City:</strong> {order.shipping.city}, {order.shipping.governorate}</p>
-                          {order.shipping.additionalInfo && (
-                            <p><strong>Notes:</strong> {order.shipping.additionalInfo}</p>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <div className="order-items">
                       {order.items && order.items.map((item, index) => (
