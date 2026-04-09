@@ -142,12 +142,16 @@ function AppContent() {
         let localProducts = []
         try {
           const localData = localStorage.getItem('ecommerce_products')
+          console.log('🔍 RAW localStorage data:', localData ? localData.substring(0, 100) + '...' : 'null')
           if (localData) {
             localProducts = JSON.parse(localData)
             console.log('💾 localStorage has:', localProducts.length, 'products')
+            console.log('📋 Product titles in localStorage:', localProducts.map(p => p.title))
+          } else {
+            console.log('⚠️ No localStorage data found')
           }
         } catch (e) {
-          console.warn('Could not parse localStorage products')
+          console.warn('❌ Could not parse localStorage products:', e.message)
         }
         
         // 🆕 Merge: Supabase + localStorage products (avoid duplicates by ID)

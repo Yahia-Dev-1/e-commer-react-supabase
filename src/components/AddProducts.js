@@ -286,9 +286,21 @@ export default function AddProducts({ darkMode = false }) {
         console.log('✅ Product has ID, adding to state:', savedProduct.id)
         const updatedProducts = [...products, savedProduct]
         setProducts(updatedProducts)
-        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
-        console.log('💾 Saved to localStorage, total products:', updatedProducts.length)
-        setMessage(`✅ Product "${productData.title}" added!`)
+        
+        // 🆕 DEBUG: Save to localStorage and verify
+        const storageKey = 'ecommerce_products'
+        const dataToStore = JSON.stringify(updatedProducts.slice(-50))
+        console.log('� Saving to localStorage key:', storageKey)
+        console.log('📝 Data length:', dataToStore.length, 'characters')
+        localStorage.setItem(storageKey, dataToStore)
+        
+        // 🆕 DEBUG: Verify it was saved
+        const verifyData = localStorage.getItem(storageKey)
+        const parsedVerify = JSON.parse(verifyData)
+        console.log('✅ Verification - localStorage has:', parsedVerify.length, 'products')
+        console.log('✅ Product titles:', parsedVerify.map(p => p.title))
+        
+        setMessage(`✅ Product "${productData.title}" added! Total: ${parsedVerify.length}`)
       } else {
         console.error('❌ savedProduct is null or has no ID:', savedProduct)
         // Fallback: save locally
