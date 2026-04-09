@@ -285,6 +285,10 @@ export default function AddProducts({ darkMode = false }) {
       if (savedProduct && savedProduct.id) {
         const updatedProducts = [...products, savedProduct]
         setProducts(updatedProducts)
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts))
+        
         setMessage(`✅ Product "${productData.title}" saved to database!`)
         clearForm()
         
