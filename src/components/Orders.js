@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
+import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
 import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
+  const showToast = useToast();
   const [loading, setLoading] = useState(true);
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -90,7 +92,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
 
     // فقط الطلبات في حالة Processing ممكن تتCancel
     if (orderToCancel.status !== 'Processing') {
-      alert('❌ You can only cancel orders that are still being processed.');
+      showToast('❌ You can only cancel orders that are still being processed.', 'error');
       return;
     }
 
@@ -122,7 +124,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       // 3. Update local state
       setUserOrders(prev => prev.filter(o => o.id !== orderId));
 
-      alert('✅ Order cancelled successfully. Products returned to stock.');
+      showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');
     }
   };
 
