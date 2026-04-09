@@ -61,10 +61,14 @@ export default function Admin({ darkMode = true }) {
     let allOrders = [];
     try {
       const { data: supabaseOrders } = await getOrdersFromSupabase(100, 0);
+      console.log('=== ORDERS FROM SUPABASE ===');
       console.log('Orders loaded from Supabase:', supabaseOrders.length);
+      console.log('Orders data:', supabaseOrders);
       allOrders = supabaseOrders || [];
     } catch (error) {
+      console.log('=== ERROR LOADING ORDERS ===');
       console.log('Using localStorage orders:', error.message);
+      console.log('Error:', error);
       allOrders = database.getOrders();
     }
     
