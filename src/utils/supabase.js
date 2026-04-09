@@ -9,16 +9,12 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Products table operations
 export const addProductToSupabase = async (product) => {
   try {
+    // 🆕 Only basic columns that definitely exist
     const productData = {
-      id: product.id || crypto.randomUUID(),
       title: product.title,
       price: product.price,
       quantity: product.quantity,
-      image: product.image,
-      description: product.description,
-      category: product.category || 'General',
-      createdBy: product.createdBy,
-      created_at: new Date().toISOString()
+      image: product.image
     };
     
     const { data, error } = await supabase

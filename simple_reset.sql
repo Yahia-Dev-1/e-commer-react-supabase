@@ -1,24 +1,21 @@
--- 🚨 SQL شامل: مسح كل حاجة وعملها من جديد
+-- 🚨 SQL بسيط: Table بـ columns أساسية بس
 
--- 1️⃣ مسح كل الـ Tables
-DROP TABLE IF EXISTS orders CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
+-- مسح القديم
 DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
 
--- 2️⃣ عمل PRODUCTS TABLE
+-- PRODUCTS: columns أساسية بس
 CREATE TABLE products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     price FLOAT DEFAULT 0,
     quantity INTEGER DEFAULT 0,
     image TEXT,
-    description TEXT,
-    category TEXT DEFAULT 'General',
-    createdBy TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 3️⃣ عمل USERS TABLE
+-- USERS
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT UNIQUE NOT NULL,
@@ -28,7 +25,7 @@ CREATE TABLE users (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 4️⃣ عمل ORDERS TABLE
+-- ORDERS
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     orderNumber TEXT NOT NULL,
@@ -42,7 +39,7 @@ CREATE TABLE orders (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 5️⃣ RLS Policies
+-- RLS
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
@@ -51,14 +48,7 @@ CREATE POLICY "Allow all" ON products FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow all" ON orders FOR ALL USING (true) WITH CHECK (true);
 
--- 6️⃣ Refresh Cache
+-- Refresh
 NOTIFY pgrst, 'reload schema';
-SELECT pg_sleep(3);
+SELECT pg_sleep(2);
 NOTIFY pgrst, 'reload schema';
-
--- 7️⃣ Verify
-SELECT 'PRODUCTS:' as table_name, COUNT(*) as count FROM products
-UNION ALL
-SELECT 'USERS:', COUNT(*) FROM users
-UNION ALL
-SELECT 'ORDERS:', COUNT(*) FROM orders;
