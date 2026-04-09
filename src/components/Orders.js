@@ -167,6 +167,21 @@ export default function Orders({ user, orders = [], darkMode = false }) {
                 ))}
               </div>
 
+              {/* Shipping Details */}
+              {order.shipping && (
+                <div className="order-shipping">
+                  <h4>📦 Shipping Details</h4>
+                  <p><strong>Name:</strong> {order.shipping.fullName}</p>
+                  <p><strong>Phone:</strong> {order.shipping.phone}</p>
+                  <p><strong>Address:</strong> {order.shipping.street}, {order.shipping.building}</p>
+                  <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
+                  <p><strong>City:</strong> {order.shipping.city}, {order.shipping.governorate}</p>
+                  {order.shipping.additionalInfo && (
+                    <p><strong>Notes:</strong> {order.shipping.additionalInfo}</p>
+                  )}
+                </div>
+              )}
+
               <div className="order-footer">
                 <div className="order-total">
                   <span>Total:</span>
