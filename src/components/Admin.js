@@ -308,6 +308,22 @@ export default function Admin({ darkMode = true }) {
     alert(`Order #${orderToApprove.orderNumber} approved!`);
   };
 
+  const updateShippingStatus = (orderId, status) => {
+    const updatedOrders = orders.map(order =>
+      order.id === orderId ? { ...order, shippingStatus: status } : order
+    );
+    setOrders(updatedOrders);
+    localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
+  };
+
+  const updateDeliveryTime = (orderId, time) => {
+    const updatedOrders = orders.map(order =>
+      order.id === orderId ? { ...order, estimatedDeliveryTime: time } : order
+    );
+    setOrders(updatedOrders);
+    localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
+  };
+
   const deleteOrder = async (orderId) => {
     const orderToDelete = orders.find(order => order.id === orderId);
     if (!orderToDelete) return;
@@ -682,6 +698,29 @@ export default function Admin({ darkMode = true }) {
                       ))}
                     </div>
                     <div className="order-actions">
+                      {/* Shipping Status and Delivery Time */}
+                      <div className="shipping-status-section">
+                        <h4>🚚 Shipping Status</h4>
+                        <select 
+                          value={order.shippingStatus || 'pending'} 
+                          onChange={(e) => updateShippingStatus(order.id, e.target.value)}
+                          className="shipping-status-select"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="processing">Processing</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="in_transit">In Transit</option>
+                          <option value="delivered">Delivered</option>
+                        </select>
+                        <input 
+                          type="text" 
+                          placeholder="Estimated Delivery Time (e.g., 2-3 days)"
+                          value={order.estimatedDeliveryTime || ''}
+                          onChange={(e) => updateDeliveryTime(order.id, e.target.value)}
+                          className="delivery-time-input"
+                        />
+                      </div>
+                      
                       {/* Accept Button for Pending Orders */}
                       {order.status === 'pending' && (
                         <button 

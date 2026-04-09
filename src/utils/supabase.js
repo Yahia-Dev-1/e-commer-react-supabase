@@ -189,14 +189,16 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use essential columns + shipping
+    // Use essential columns + shipping + shipping status
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0,
-      shipping: JSON.stringify(order.shipping || {})
+      shipping: JSON.stringify(order.shipping || {}),
+      shippingStatus: 'pending',
+      estimatedDeliveryTime: ''
     };
     
-    console.log('=== MINIMAL SOLUTION + SHIPPING: Inserting order ===');
+    console.log('=== MINIMAL SOLUTION + SHIPPING + STATUS: Inserting order ===');
     console.log('Original order:', order);
     console.log('Order data to save:', orderData);
     

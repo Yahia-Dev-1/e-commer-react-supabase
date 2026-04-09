@@ -212,6 +212,17 @@ export default function Orders({ user, orders = [], darkMode = false }) {
                 </div>
               )}
 
+              {/* Shipping Status */}
+              {order.shippingStatus && (
+                <div className="order-shipping-status">
+                  <h4>🚚 Shipping Status</h4>
+                  <p><strong>Status:</strong> {order.shippingStatus}</p>
+                  {order.estimatedDeliveryTime && (
+                    <p><strong>Estimated Delivery:</strong> {order.estimatedDeliveryTime}</p>
+                  )}
+                </div>
+              )}
+
               <div className="order-footer">
                 <div className="order-total">
                   <span>Total:</span>
