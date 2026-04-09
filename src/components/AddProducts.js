@@ -276,50 +276,24 @@ export default function AddProducts({ darkMode = false }) {
     }
 
     try {
-      // Save to Supabase - will sync to all devices automatically!
-      console.log('📝 Calling addProductToSupabase with:', productData)
+      // Save to Supabase ONLY
+      console.log('📝 Saving product to Supabase:', productData)
       const savedProduct = await addProductToSupabase(productData)
-      console.log('📦 Returned from addProductToSupabase:', savedProduct)
+      console.log('✅ Saved to Supabase:', savedProduct)
       
-      // Add to local state with Supabase ID
+      // Add to local state
       if (savedProduct && savedProduct.id) {
-        console.log('✅ Product has ID, adding to state:', savedProduct.id)
         const updatedProducts = [...products, savedProduct]
         setProducts(updatedProducts)
-        
-        // 🆕 DEBUG: Save to localStorage and verify
-        const storageKey = 'ecommerce_products'
-        const dataToStore = JSON.stringify(updatedProducts.slice(-50))
-        console.log('� Saving to localStorage key:', storageKey)
-        console.log('📝 Data length:', dataToStore.length, 'characters')
-        localStorage.setItem(storageKey, dataToStore)
-        
-        // 🆕 DEBUG: Verify it was saved
-        const verifyData = localStorage.getItem(storageKey)
-        const parsedVerify = JSON.parse(verifyData)
-        console.log('✅ Verification - localStorage has:', parsedVerify.length, 'products')
-        console.log('✅ Product titles:', parsedVerify.map(p => p.title))
-        
-        setMessage(`✅ Product "${productData.title}" added! Total: ${parsedVerify.length}`)
+        setMessage(`✅ Product "${productData.title}" saved to database!`)
+        clearForm()
       } else {
-        console.error('❌ savedProduct is null or has no ID:', savedProduct)
-        // Fallback: save locally
-        const localProduct = { ...productData, id: String(Date.now()) }
-        const updatedProducts = [...products, localProduct]
-        setProducts(updatedProducts)
-        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
-        setMessage(`⚠️ Saved locally only.`)
+        throw new Error('Invalid response from Supabase')
       }
       
-      clearForm()
     } catch (error) {
-      console.error('❌ CATCH BLOCK - Supabase error:', error)
-      // Fallback: save locally only with text ID
-      const localProduct = { ...productData, id: String(Date.now()) }
-      const updatedProducts = [...products, localProduct]
-      setProducts(updatedProducts)
-      localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
-      setMessage(`⚠️ Saved locally only. Check Supabase setup.`)
+      console.error('❌ Error saving product:', error)
+      alert('❌ Failed to save product to database. Please check Supabase connection.')
     }
   }
 

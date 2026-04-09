@@ -131,47 +131,17 @@ function AppContent() {
         setIsLoadingProducts(true)
         const { getProductsFromSupabase } = await import('./utils/supabase')
         
-        // 🆕 Fetch from Supabase
+        // 🆕 Fetch ONLY from Supabase (no localStorage)
         const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0)
         
         if (!isMounted) return
         
         console.log('📥 Supabase fetch:', supabaseProducts.length, 'products')
+        setProducts(supabaseProducts)
         
-        // 🆕 Load from localStorage (may have products not in Supabase yet)
-        let localProducts = []
-        try {
-          const localData = localStorage.getItem('ecommerce_products')
-          console.log('🔍 RAW localStorage data:', localData ? localData.substring(0, 100) + '...' : 'null')
-          if (localData) {
-            localProducts = JSON.parse(localData)
-            console.log('💾 localStorage has:', localProducts.length, 'products')
-            console.log('📋 Product titles in localStorage:', localProducts.map(p => p.title))
-          } else {
-            console.log('⚠️ No localStorage data found')
-          }
-        } catch (e) {
-          console.warn('❌ Could not parse localStorage products:', e.message)
-        }
-        
-        // 🆕 Merge: Supabase + localStorage products (avoid duplicates by ID)
-        const supabaseIds = new Set(supabaseProducts.map(p => p.id))
-        const uniqueLocalProducts = localProducts.filter(p => !supabaseIds.has(p.id))
-        const mergedProducts = [...supabaseProducts, ...uniqueLocalProducts]
-        
-        console.log('🔄 Merged:', supabaseProducts.length, 'from Supabase +', uniqueLocalProducts.length, 'from localStorage =', mergedProducts.length, 'total')
-        setProducts(mergedProducts)
-        
-        // Save merged to localStorage
-        try {
-          localStorage.setItem('ecommerce_products', JSON.stringify(mergedProducts.slice(0, 20)))
-        } catch (e) {
-          console.warn('localStorage quota exceeded, skipping cache')
-        }
       } catch (error) {
-        console.error('Error fetching products:', error)
-        // 🆕 Fallback: load from localStorage only
-        loadProducts()
+        console.error('❌ Error fetching products from Supabase:', error)
+        alert('❌ Failed to load products from database. Please check Supabase connection.')
       } finally {
         if (isMounted) setIsLoadingProducts(false)
       }
@@ -592,21 +562,16 @@ function AppContent() {
       shipping: shippingData || {}
     }
     
-    // 🆕 Save to Supabase first
+    // 🆕 Save to Supabase ONLY (no localStorage fallback)
     try {
-      console.log('📝 Attempting to save order to Supabase:', newOrder.orderNumber)
+      console.log('📝 Saving order to Supabase:', newOrder.orderNumber)
       const supabaseOrder = await addOrderToSupabase(newOrder)
       console.log('✅ Order saved to Supabase:', supabaseOrder.orderNumber, supabaseOrder.id)
-      // Also save to localStorage for offline backup
-      database.saveOrder(supabaseOrder)
       setOrders(prevOrders => [supabaseOrder, ...prevOrders])
     } catch (error) {
-      console.error('❌ ERROR saving to Supabase:', error)
-      console.error('❌ Error details:', error.message, error.code || '')
-      alert('⚠️ Could not save order to database. Check console for details.')
-      // Fallback to localStorage only
-      const savedOrder = database.saveOrder(newOrder)
-      setOrders(prevOrders => [savedOrder, ...prevOrders])
+      console.error('❌ ERROR saving order to Supabase:', error)
+      alert('❌ Failed to save order. Please check Supabase connection and try again.')
+      return // Stop here - don't proceed if order not saved
     }
     
     // ✅ Deduct quantities from Supabase immediately after successful order

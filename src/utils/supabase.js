@@ -9,7 +9,6 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Products table operations
 export const addProductToSupabase = async (product) => {
   try {
-    // 🆕 Only send columns that exist in Supabase
     const productData = {
       id: product.id || crypto.randomUUID(),
       title: product.title,
@@ -27,23 +26,11 @@ export const addProductToSupabase = async (product) => {
       .insert([productData])
       .select();
     
-    if (error) {
-      // 🆕 If schema cache error, return product without throwing
-      if (error.code === 'PGRST204') {
-        console.warn('⚠️ Supabase schema cache error, using localStorage fallback');
-        return productData;
-      }
-      throw error;
-    }
+    if (error) throw error;
     return data[0];
   } catch (error) {
-    console.error('Error adding product:', error);
-    // 🆕 Return product anyway so app continues
-    return {
-      ...product,
-      id: product.id || crypto.randomUUID(),
-      created_at: new Date().toISOString()
-    };
+    console.error('❌ Error adding product to Supabase:', error);
+    throw error;
   }
 };
 
@@ -70,19 +57,11 @@ export const updateProductInSupabase = async (productId, updates) => {
       .eq('id', productId)
       .select();
     
-    if (error) {
-      // 🆕 If schema cache error, return updates without throwing
-      if (error.code === 'PGRST204') {
-        console.warn('⚠️ Supabase schema cache error, using localStorage fallback');
-        return { id: productId, ...updates };
-      }
-      throw error;
-    }
+    if (error) throw error;
     return data[0];
   } catch (error) {
-    console.error('Error updating product:', error);
-    // 🆕 Return updates anyway so app continues
-    return { id: productId, ...updates };
+    console.error('❌ Error updating product in Supabase:', error);
+    throw error;
   }
 };
 
@@ -130,7 +109,6 @@ export const subscribeToProducts = (callback, limit = 50) => {
 // User functions
 export const addUserToSupabase = async (user) => {
   try {
-    // 🆕 Only send columns that exist in Supabase
     const userData = {
       id: user.id || crypto.randomUUID(),
       email: user.email,
@@ -145,23 +123,11 @@ export const addUserToSupabase = async (user) => {
       .insert([userData])
       .select();
     
-    if (error) {
-      // 🆕 If schema cache error, return user without throwing
-      if (error.code === 'PGRST204') {
-        console.warn('⚠️ Supabase schema cache error, using localStorage fallback');
-        return userData;
-      }
-      throw error;
-    }
+    if (error) throw error;
     return data[0];
   } catch (error) {
-    console.error('Error adding user:', error);
-    // 🆕 Return user anyway so app continues
-    return {
-      ...user,
-      id: user.id || crypto.randomUUID(),
-      created_at: new Date().toISOString()
-    };
+    console.error('❌ Error adding user to Supabase:', error);
+    throw error;
   }
 };
 
@@ -218,7 +184,6 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // 🆕 Only send columns that exist in Supabase
     const orderData = {
       id: order.id || crypto.randomUUID(),
       orderNumber: order.orderNumber,
@@ -237,23 +202,11 @@ export const addOrderToSupabase = async (order) => {
       .insert([orderData])
       .select();
     
-    if (error) {
-      // 🆕 If schema cache error, return order without throwing
-      if (error.code === 'PGRST204') {
-        console.warn('⚠️ Supabase schema cache error, using localStorage fallback');
-        return orderData;
-      }
-      throw error;
-    }
+    if (error) throw error;
     return data[0];
   } catch (error) {
-    console.error('Error adding order:', error);
-    // 🆕 Return order anyway so app continues
-    return {
-      ...order,
-      id: order.id || crypto.randomUUID(),
-      created_at: new Date().toISOString()
-    };
+    console.error('❌ Error adding order to Supabase:', error);
+    throw error;
   }
 };
 
