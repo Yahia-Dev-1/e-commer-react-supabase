@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/CategoryManagement.css';
+import { useToast } from '../contexts/ToastContext';
 
 export default function CategoryManagement({ darkMode = true }) {
+  const showToast = useToast();
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [editingCategory, setEditingCategory] = useState(null);
@@ -39,12 +41,12 @@ export default function CategoryManagement({ darkMode = true }) {
 
   const addCategory = () => {
     if (!newCategory.trim()) {
-      alert('Please enter a category name');
+      showToast('Please enter a category name', 'error');
       return;
     }
 
     if (categories.includes(newCategory.trim())) {
-      alert('Category already exists');
+      showToast('Category already exists', 'warning');
       return;
     }
 
@@ -52,7 +54,7 @@ export default function CategoryManagement({ darkMode = true }) {
     setCategories(updatedCategories);
     localStorage.setItem('ecommerce_categories', JSON.stringify(updatedCategories));
     setNewCategory('');
-    alert('Category added successfully!');
+    showToast('Category added successfully!', 'success');
   };
 
   const deleteCategory = (categoryName) => {
@@ -60,7 +62,7 @@ export default function CategoryManagement({ darkMode = true }) {
       const updatedCategories = categories.filter(cat => cat !== categoryName);
       setCategories(updatedCategories);
       localStorage.setItem('ecommerce_categories', JSON.stringify(updatedCategories));
-      alert('Category deleted successfully!');
+      showToast('Category deleted successfully!', 'success');
     }
   };
 
@@ -71,12 +73,12 @@ export default function CategoryManagement({ darkMode = true }) {
 
   const saveEdit = () => {
     if (!editName.trim()) {
-      alert('Please enter a category name');
+      showToast('Please enter a category name', 'error');
       return;
     }
 
     if (categories.includes(editName.trim()) && editName.trim() !== editingCategory) {
-      alert('Category already exists');
+      showToast('Category already exists', 'warning');
       return;
     }
 
