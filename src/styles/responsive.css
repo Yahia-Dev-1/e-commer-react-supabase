@@ -505,7 +505,391 @@ img {
   }
 }
 
+/* ============================================
+   COMPREHENSIVE RESPONSIVE IMPROVEMENTS
+   ============================================ */
+
+/* Extra Small Devices (phones, 320px and up) */
+@media (max-width: 320px) {
+  .products-grid {
+    grid-template-columns: repeat(1, 1fr);
+    gap: 12px;
+    padding: 10px;
+  }
+  
+  .product-card {
+    min-width: auto;
+  }
+  
+  .floating-buttons-container {
+    bottom: 15px;
+    right: 15px;
+    gap: 10px;
+  }
+  
+  .floating-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .floating-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Small Devices (phones, 576px and down) */
+@media (max-width: 576px) {
+  .navbar {
+    padding: 10px 15px;
+  }
+  
+  .nav-links {
+    gap: 15px;
+  }
+  
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .product-card .item-image img {
+    height: 150px;
+  }
+  
+  .product-card h3 {
+    font-size: 13px;
+  }
+  
+  .product-card .price {
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  /* Cart Responsive */
+  .cart-item {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .cart-item-image {
+    width: 100%;
+    height: 180px;
+  }
+  
+  .cart-item-details {
+    width: 100%;
+  }
+  
+  /* Orders Responsive */
+  .order-card {
+    padding: 15px;
+  }
+  
+  .order-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .order-footer {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .order-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Admin Responsive */
+  .admin-container {
+    padding: 15px;
+  }
+  
+  .admin-tabs {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .admin-tab {
+    padding: 10px 15px;
+    font-size: 13px;
+  }
+  
+  .order-card-admin {
+    padding: 15px;
+  }
+  
+  .order-actions-admin {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .order-actions-admin button {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  /* Search Responsive */
+  .search-container {
+    padding: 0 10px;
+  }
+  
+  .search-input {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Toast Responsive */
+  .toast {
+    left: 10px;
+    right: 10px;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  /* Modal Responsive */
+  .modal-content {
+    width: 95%;
+    margin: 20px auto;
+    padding: 20px;
+  }
+}
+
+/* Medium Devices (tablets, 768px and down) */
+@media (max-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .hero-section {
+    padding: 40px 20px;
+  }
+  
+  .hero-title {
+    font-size: 28px;
+  }
+  
+  .hero-subtitle {
+    font-size: 16px;
+  }
+  
+  .section-title {
+    font-size: 24px;
+  }
+  
+  /* Navigation Mobile */
+  .nav-links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 80%;
+    max-width: 300px;
+    height: 100vh;
+    background: #1a1a2e;
+    flex-direction: column;
+    padding: 80px 20px 20px;
+    transition: right 0.3s ease;
+    z-index: 1000;
+    border-left: 1px solid #2d2d44;
+  }
+  
+  .nav-links.active {
+    right: 0;
+  }
+  
+  .mobile-menu-btn {
+    display: flex;
+    z-index: 1001;
+  }
+  
+  /* Cart Page */
+  .cart-container {
+    padding: 15px;
+  }
+  
+  .cart-summary {
+    position: static;
+    margin-top: 20px;
+  }
+  
+  /* Admin Users Table */
+  .users-table {
+    font-size: 13px;
+  }
+  
+  .users-table th,
+  .users-table td {
+    padding: 10px 8px;
+  }
+  
+  .user-email {
+    font-size: 12px;
+  }
+}
+
+/* Large Devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+  
+  .admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .cart-container {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+  }
+}
+
+/* Extra Large Devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 30px;
+  }
+  
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 30px;
+  }
+}
+
+/* ============================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .btn, 
+  .nav-links a,
+  .floating-btn,
+  .order-actions button,
+  .admin-tab {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects */
+  .product-card:hover,
+  .btn:hover,
+  .floating-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Active states for touch */
+  .btn:active,
+  .floating-btn:active,
+  .product-card:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+  
+  /* Scroll momentum */
+  .products-grid,
+  .orders-list,
+  .cart-items {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* ============================================
+   ORIENTATION OPTIMIZATIONS
+   ============================================ */
+
+/* Landscape mode on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-section {
+    min-height: auto;
+    padding: 30px 20px;
+  }
+  
+  .floating-buttons-container {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .modal-content {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
 /* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .card {
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+  
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+}
+
+/* Focus styles for accessibility */
+*:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover {
+    transform: none;
+  }
+  
+  .card:hover {
+    transform: none;
+  }
+}
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
   .card {
     box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
