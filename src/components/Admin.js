@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
@@ -251,13 +251,59 @@ export default function Admin({ darkMode = true }) {
     alert(`Order #${orderToReject.orderNumber} has been rejected. Products returned to stock.`);
   };
 
-  const approveOrder = (orderId) => {
-    const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status: 'approved' } : order
-    );
-    setOrders(updatedOrders);
-    localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
-    alert('Order has been approved.');
+  // 🆕 Fixed: Deduct stock when accepting order
+  const approveOrder = async (orderId) => {
+    const orderToApprove = orders.find(order => order.id === orderId);
+    if (!orderToApprove) return;
+    
+    // Check if already approved
+    if (orderToApprove.status === 'approved') {
+      alert('Order is already approved!');
+      return;
+    }
+    
+    try {
+      // Get current products from Supabase
+      const { data: currentProducts } = await getProductsFromSupabase(100, 0);
+      
+      // Check stock availability for all items
+      const stockIssues = [];
+      for (const item of orderToApprove.items) {
+        const product = currentProducts.find(p => p.id === item.id);
+        if (!product) {
+          stockIssues.push(`${item.name}: Product not found`);
+        } else if (product.quantity < item.quantity) {
+          stockIssues.push(`${item.name}: Only ${product.quantity} available, need ${item.quantity}`);
+        }
+      }
+      
+      if (stockIssues.length > 0) {
+        alert(`Cannot approve order:\n${stockIssues.join('\n')}`);
+        return;
+      }
+      
+      // Deduct quantities from stock
+      for (const item of orderToApprove.items) {
+        const product = currentProducts.find(p => p.id === item.id);
+        if (product) {
+          const newQuantity = product.quantity - item.quantity;
+          await updateProductInSupabase(item.id, { quantity: newQuantity });
+          console.log(`✅ Deducted ${item.quantity} from ${item.name}, new stock: ${newQuantity}`);
+        }
+      }
+      
+      // Update order status
+      const updatedOrders = orders.map(order =>
+        order.id === orderId ? { ...order, status: 'approved' } : order
+      );
+      setOrders(updatedOrders);
+      localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
+      
+      alert(`Order #${orderToApprove.orderNumber} approved! Stock deducted successfully.`);
+    } catch (error) {
+      console.error('Error approving order:', error);
+      alert('Failed to approve order: ' + error.message);
+    }
   };
 
   const deleteOrder = async (orderId) => {
