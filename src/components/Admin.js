@@ -617,7 +617,18 @@ export default function Admin({ darkMode = true }) {
                       ))}
                     </div>
                     <div className="order-actions">
-                      {order.status !== 'rejected' && order.status !== 'approved' && (
+                      {/* Accept Button for Processing Orders */}
+                      {order.status === 'Processing' && (
+                        <button 
+                          className="accept-btn"
+                          onClick={() => approveOrder(order.id)}
+                        >
+                          Accept Order
+                        </button>
+                      )}
+                      
+                      {/* Reject Button for Processing Orders */}
+                      {order.status === 'Processing' && (
                         <button 
                           className="reject-btn"
                           onClick={() => rejectOrder(order.id)}
@@ -625,8 +636,10 @@ export default function Admin({ darkMode = true }) {
                           Reject Order
                         </button>
                       )}
+                      
+                      {/* Re-activate Button for Rejected Orders */}
                       {order.status === 'rejected' && (
-                        <div className="order-actions">
+                        <div className="order-actions-row">
                           <span className="rejected-status">Rejected</span>
                           <button 
                             className="approve-btn"
@@ -636,9 +649,13 @@ export default function Admin({ darkMode = true }) {
                           </button>
                         </div>
                       )}
+                      
+                      {/* Approved Status */}
                       {order.status === 'approved' && (
                         <span className="approved-status">Approved</span>
                       )}
+                      
+                      {/* Delete Button - Always Available */}
                       <button 
                         className="delete-order-btn"
                         onClick={() => deleteOrder(order.id)}
