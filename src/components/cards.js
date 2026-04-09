@@ -34,15 +34,16 @@ function Card({ image, title, description, price, quantity, status, onAddToCart 
 
   const isOutOfStock = safeQuantity <= 0 || safeStatus === 'out_of_stock';
   const isDiscontinued = safeStatus === 'discontinued';
+  const isPending = safeStatus === 'pending';
   const isLowStock = safeQuantity > 0 && safeQuantity <= 5;
   const isInStock = safeQuantity > 5 && safeStatus === 'available';
   const isAdmin = isCurrentUserAdmin();
 
   return (
-    <div className={`card ${isOutOfStock ? 'out-of-stock' : ''}`} style={{ 
-      cursor: isOutOfStock ? 'not-allowed' : 'default',
-      opacity: isOutOfStock ? 0.6 : 1,
-      pointerEvents: isOutOfStock ? 'none' : 'auto'
+    <div className={`card ${isOutOfStock || isPending ? 'out-of-stock' : ''}`} style={{ 
+      cursor: isOutOfStock || isPending ? 'not-allowed' : 'default',
+      opacity: isOutOfStock || isPending ? 0.6 : 1,
+      pointerEvents: isOutOfStock || isPending ? 'none' : 'auto'
     }}>
       <div className="card-img">
         <img 
@@ -64,12 +65,18 @@ function Card({ image, title, description, price, quantity, status, onAddToCart 
             <span>Discontinued</span>
           </div>
         )}
+        {isPending && (
+          <div className="pending-overlay">
+            <span>Pending Review</span>
+          </div>
+        )}
       </div>
       <div className="card-title">{safeTitle}</div>
       <div className="card-subtitle">{safeDescription}</div>
       <div className="quantity-badge-container" style={{ textAlign: 'center', margin: '8px 0' }}>
-        <span className={`quantity-badge ${isOutOfStock ? 'out-of-stock' : safeQuantity <= 5 ? 'low-stock' : 'in-stock'}`}>
-          {isDiscontinued ? 'Discontinued' : 
+        <span className={`quantity-badge ${isPending ? 'pending' : isOutOfStock ? 'out-of-stock' : safeQuantity <= 5 ? 'low-stock' : 'in-stock'}`}>
+          {isPending ? 'Pending Review' : 
+           isDiscontinued ? 'Discontinued' : 
            isOutOfStock ? 'Out of Stock' : 
            isAdmin ? (safeQuantity <= 5 ? `Low (${safeQuantity})` : `${safeQuantity}`) : 
            'In Stock'}

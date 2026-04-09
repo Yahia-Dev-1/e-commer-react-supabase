@@ -46,7 +46,7 @@ export default function AddProducts({ darkMode = false }) {
     image: '',
     description: '',
     category: 'electronics',
-    status: 'available'
+    status: 'pending'
   })
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -367,7 +367,7 @@ export default function AddProducts({ darkMode = false }) {
       image: '',
       description: '',
       category: 'electronics',
-      status: 'available'
+      status: 'pending'
     })
     setMessage('Form cleared successfully!')
     setTimeout(() => setMessage(''), 3000)
@@ -634,6 +634,7 @@ export default function AddProducts({ darkMode = false }) {
                 onChange={editingProduct ? handleEditInputChange : handleInputChange}
                 required
               >
+                <option value="pending">Pending Review</option>
                 <option value="available">Available</option>
                 <option value="out_of_stock">Out of Stock</option>
                 <option value="discontinued">Discontinued</option>
