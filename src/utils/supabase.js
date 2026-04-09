@@ -60,33 +60,36 @@ export const updateProductInSupabase = async (productId, updates) => {
   }
 };
 
-export const getProductsFromSupabase = async () => {
+// 🆕 Optimized: Get products with pagination (default 50 products)
+export const getProductsFromSupabase = async (limit = 50, offset = 0) => {
   try {
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
     
     if (error) throw error;
-    return data || [];
+    return { data: data || [], count };
   } catch (error) {
     console.error('Error getting products:', error);
     throw error;
   }
 };
 
-// Real-time subscription
-export const subscribeToProducts = (callback) => {
+// 🆕 Optimized: Real-time subscription with limit
+export const subscribeToProducts = (callback, limit = 50) => {
   const subscription = supabase
     .channel('products_changes')
     .on('postgres_changes', 
       { event: '*', schema: 'public', table: 'products' },
       async (payload) => {
-        // Refresh all products on any change
+        // 🆕 Only refresh limited products instead of all
         const { data } = await supabase
           .from('products')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .limit(limit);
         callback(data || []);
       }
     )
@@ -192,15 +195,16 @@ export const addOrderToSupabase = async (order) => {
   }
 };
 
-export const getOrdersFromSupabase = async () => {
+export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
   try {
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
     
     if (error) throw error;
-    return data || [];
+    return { data: data || [], count };
   } catch (error) {
     console.error('Error getting orders:', error);
     throw error;

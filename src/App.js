@@ -64,6 +64,7 @@ function AppContent() {
   const [showModal, setShowModal] = useState(false)
   const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
   const [pendingProduct, setPendingProduct] = useState(null)
   const [showAddToCartModal, setShowAddToCartModal] = useState(false)
   const [orders, setOrders] = useState([])
@@ -118,17 +119,27 @@ function AppContent() {
   
   // Dark mode is always enabled
 
-  // Load products from Supabase (real-time sync!)
+  // 🆕 Optimized: Load products with pagination and loading state
+  const [productsPage, setProductsPage] = useState(0)
+  const PRODUCTS_PER_PAGE = 20
+  
   useEffect(() => {
-    // First, fetch existing products from Supabase
+    let isMounted = true
+    
     const fetchProducts = async () => {
       try {
+        setIsLoadingProducts(true)
         const { getProductsFromSupabase } = await import('./utils/supabase')
-        const supabaseProducts = await getProductsFromSupabase()
-        console.log('📥 Initial fetch:', supabaseProducts.length, 'products')
         
-        // ✅ استخدم قيمة Supabase مباشرة
+        // 🆕 Fetch with pagination (first 20 products only)
+        const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0)
+        
+        if (!isMounted) return
+        
+        console.log('📥 Initial fetch:', supabaseProducts.length, 'products')
         setProducts(supabaseProducts)
+        
+        // Save limited products to localStorage
         try {
           localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
         } catch (e) {
@@ -136,15 +147,18 @@ function AppContent() {
         }
       } catch (error) {
         console.error('Error fetching products:', error)
+      } finally {
+        if (isMounted) setIsLoadingProducts(false)
       }
     }
+    
     fetchProducts()
 
-    // Subscribe to real-time updates from Supabase
+    // Subscribe to real-time updates from Supabase (limited)
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
-      console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
+      if (!isMounted) return
       
-      // ✅ استخدم قيمة Supabase مباشرة - هيها اللي فيها الحجز فعلاً
+      console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
       setProducts(supabaseProducts)
       
       // Also save to localStorage for offline support (limit to 20 items)
@@ -153,10 +167,13 @@ function AppContent() {
       } catch (e) {
         console.warn('localStorage quota exceeded in realtime sync')
       }
-    })
+    }, PRODUCTS_PER_PAGE)
 
     // Cleanup subscription on unmount
-    return () => unsubscribe()
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
   }, [])
 
   // Fallback: load from localStorage initially (for faster UI)

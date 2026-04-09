@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/FloatingButtons.css';
 
-export default function FloatingButtons({ 
+// 🆕 Optimized: Memoized to prevent unnecessary re-renders
+const FloatingButtons = memo(function FloatingButtons({ 
   cartItemsCount = 0, 
   unreadNotifications = 0, 
   onNotificationClick 
