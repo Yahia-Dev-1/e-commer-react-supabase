@@ -21,7 +21,6 @@ const Modal = lazy(() => import('./components/Modal'))
 const AlertModal = lazy(() => import('./components/AlertModal'))
 const Admin = lazy(() => import('./components/Admin'))
 const FloatingButtons = lazy(() => import('./components/FloatingButtons'))
-const Footer = lazy(() => import('./components/Footer'))
 
 // Loading component
 const LoadingSpinner = () => (
@@ -827,17 +826,6 @@ function AppContent() {
         </Suspense>
       )}
       
-      {/* إظهار الفوتر في كل الصفحات ما عدا صفحة اللوجين و My Orders والأدمن والسلة */}
-      {location.pathname !== '/login' && 
-       location.pathname !== '/orders' && 
-       location.pathname !== '/admin' && 
-       location.pathname !== '/add-products' && 
-       location.pathname !== '/category-management' && 
-       location.pathname !== '/cart' && 
-        <Suspense fallback={<LoadingSpinner />}>
-          <Footer darkMode={true} />
-        </Suspense>
-      }
       <Suspense fallback={<LoadingSpinner />}>
         <Modal
           isOpen={showModal}
