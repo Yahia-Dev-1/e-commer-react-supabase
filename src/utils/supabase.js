@@ -177,33 +177,41 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Ensure all required fields with proper types
+    // Test with minimal data first
     const orderData = {
       orderNumber: order.orderNumber,
-      status: order.status || 'pending',
-      userEmail: order.userEmail || null,
-      items: order.items || [],
-      total: parseFloat(order.total) || 0,
-      userId: order.userId || null,
-      shipping: order.shipping || {}
+      status: 'pending',
+      total: parseFloat(order.total) || 0
     };
     
-    console.log('Inserting order:', orderData);
+    console.log('=== DEBUG: Inserting order ===');
+    console.log('Original order:', order);
+    console.log('Cleaned orderData:', orderData);
+    console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
     
     const { data, error } = await supabase
       .from('orders')
       .insert([orderData])
       .select();
     
+    console.log('Supabase response:', { data, error });
+    
     if (error) {
-      console.error('Supabase insert error:', error);
+      console.error('=== ERROR DETAILS ===');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Error details:', error.details);
+      console.error('Error hint:', error.hint);
       throw error;
     }
     
-    console.log('Order inserted:', data);
+    console.log('Order inserted successfully:', data);
     return data[0];
   } catch (error) {
-    console.error('Error adding order to Supabase:', error);
+    console.error('=== CATCH ERROR ===');
+    console.error('Full error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     throw error;
   }
 };
