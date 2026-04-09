@@ -245,7 +245,8 @@ export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
 };
 
 export const subscribeToOrders = (callback) => {
-  const channelName = 'orders_changes';
+  // Use unique channel name to avoid conflicts
+  const channelName = `orders_changes_${Date.now()}`;
   const channel = supabase.channel(channelName);
   
   channel.on('postgres_changes', 
@@ -261,7 +262,7 @@ export const subscribeToOrders = (callback) => {
   const subscription = channel.subscribe();
 
   return () => {
-    channel.unsubscribe();
+    supabase.removeChannel(channel);
   };
 };
 
