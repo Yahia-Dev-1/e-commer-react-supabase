@@ -84,6 +84,24 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
 
   const handleShippingSubmit = (e) => {
     e.preventDefault()
+    
+    // Validate form data
+    if (!shippingData.fullName || !shippingData.phone || !shippingData.governorate || 
+        !shippingData.city || !shippingData.street || !shippingData.building) {
+      alert('⚠️ Please fill in all required fields marked with *')
+      return
+    }
+    
+    // Validate phone number
+    const phoneRegex = /^[\d\s\-\+\(\)]+$/
+    if (!phoneRegex.test(shippingData.phone)) {
+      alert('⚠️ Please enter a valid phone number')
+      return
+    }
+    
+    console.log('✅ Form validation passed')
+    console.log('Shipping data:', shippingData)
+    
     setShowAnimation(true)
     setTimeout(() => {
       createOrder(shippingData) // Pass shipping data to createOrder
