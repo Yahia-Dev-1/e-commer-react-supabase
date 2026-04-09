@@ -62,6 +62,8 @@ function AppContent() {
   const [cartItems, setCartItems] = useState([])
   const [user, setUser] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
   const [pendingProduct, setPendingProduct] = useState(null)
   const [showAddToCartModal, setShowAddToCartModal] = useState(false)
   const [orders, setOrders] = useState([])
