@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useToast } from '../contexts/ToastContext';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import SEO from './SEO'
 import '../styles/cards.css'
@@ -102,6 +103,7 @@ function FilterButton({ category, isActive, onClick }) {
 
 // Main Cards Container Component
 export default function Cards({ addToCart, darkMode = false, products = [], productsVersion = 0 }) {
+  const showToast = useToast();
   const [activeFilter, setActiveFilter] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -164,10 +166,10 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
         // Trigger App.js to reload products
         window.dispatchEvent(new CustomEvent('productsUpdated'))
         console.log('🗑️ All products cleared from localStorage')
-        alert('All products have been cleared successfully!')
+        showToast('All products have been cleared successfully!', 'success')
       } catch (error) {
         console.error('Error clearing products:', error)
-        alert('Error clearing products')
+        showToast('Error clearing products', 'error')
       }
     }
   }
