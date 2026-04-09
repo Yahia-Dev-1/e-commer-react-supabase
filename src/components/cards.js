@@ -17,23 +17,25 @@ const isCurrentUserAdmin = () => {
 };
 
 // Optimized Card Component with lazy loading images
-function Card({ image, title, description, price, quantity, onAddToCart }) {
+function Card({ image, title, description, price, quantity, status, onAddToCart }) {
   // Ensure all required properties exist
   const safeTitle = title || 'Untitled Product';
   const safeDescription = description || 'No description available';
   const safePrice = price || '0.00';
   const safeQuantity = typeof quantity === 'number' ? quantity : 0;
   const safeImage = image || 'https://via.placeholder.com/400x400?text=No+Image';
+  const safeStatus = status || 'available';
 
   const handleClick = () => {
-    if (safeQuantity > 0) {
+    if (safeQuantity > 0 && safeStatus === 'available') {
       onAddToCart();
     }
   }
 
-  const isOutOfStock = safeQuantity <= 0;
+  const isOutOfStock = safeQuantity <= 0 || safeStatus === 'out_of_stock';
+  const isDiscontinued = safeStatus === 'discontinued';
   const isLowStock = safeQuantity > 0 && safeQuantity <= 5;
-  const isInStock = safeQuantity > 5;
+  const isInStock = safeQuantity > 5 && safeStatus === 'available';
   const isAdmin = isCurrentUserAdmin();
 
   return (
@@ -57,12 +59,18 @@ function Card({ image, title, description, price, quantity, onAddToCart }) {
             <span>Out of Stock</span>
           </div>
         )}
+        {isDiscontinued && (
+          <div className="discontinued-overlay">
+            <span>Discontinued</span>
+          </div>
+        )}
       </div>
       <div className="card-title">{safeTitle}</div>
       <div className="card-subtitle">{safeDescription}</div>
       <div className="quantity-badge-container" style={{ textAlign: 'center', margin: '8px 0' }}>
         <span className={`quantity-badge ${isOutOfStock ? 'out-of-stock' : safeQuantity <= 5 ? 'low-stock' : 'in-stock'}`}>
-          {isOutOfStock ? 'Out of Stock' : 
+          {isDiscontinued ? 'Discontinued' : 
+           isOutOfStock ? 'Out of Stock' : 
            isAdmin ? (safeQuantity <= 5 ? `Low (${safeQuantity})` : `${safeQuantity}`) : 
            'In Stock'}
         </span>
@@ -282,6 +290,7 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
             key={product.id}
             image={product.image}
             title={product.title}
+            status={product.status}
             description={product.description}
             price={product.price}
             quantity={product.quantity}

@@ -45,7 +45,8 @@ export default function AddProducts({ darkMode = false }) {
     quantity: 1,
     image: '',
     description: '',
-    category: 'electronics'
+    category: 'electronics',
+    status: 'available'
   })
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -272,6 +273,7 @@ export default function AddProducts({ darkMode = false }) {
       image: newProduct.image,
       description: newProduct.description || '',
       category: newProduct.category || 'other',
+      status: newProduct.status || 'available',
       createdBy: `${localStorage.getItem('currentUserEmail') || 'Admin'}`,
       isProtected: isProtectedAdmin()
     }
@@ -327,6 +329,7 @@ export default function AddProducts({ darkMode = false }) {
       image: editingProduct.image,
       description: editingProduct.description,
       category: editingProduct.category,
+      status: editingProduct.status || 'available',
       updated_at: new Date().toISOString(),
       updated_by: `${localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail') || 'Admin'} (Admin)`
     }
@@ -363,7 +366,8 @@ export default function AddProducts({ darkMode = false }) {
       quantity: 1,
       image: '',
       description: '',
-      category: 'electronics'
+      category: 'electronics',
+      status: 'available'
     })
     setMessage('Form cleared successfully!')
     setTimeout(() => setMessage(''), 3000)
@@ -619,6 +623,21 @@ export default function AddProducts({ darkMode = false }) {
                   </div>
                 )}
               </div>
+          </div>
+
+          <div className="form-group">
+              <label htmlFor="status">Product Status *</label>
+              <select
+                id="status"
+                name="status"
+                value={editingProduct ? editingProduct.status : newProduct.status}
+                onChange={editingProduct ? handleEditInputChange : handleInputChange}
+                required
+              >
+                <option value="available">Available</option>
+                <option value="out_of_stock">Out of Stock</option>
+                <option value="discontinued">Discontinued</option>
+              </select>
           </div>
 
           <div className="form-group">
