@@ -201,8 +201,7 @@ export const addOrderToSupabase = async (order) => {
       status: 'pending',
       total: parseFloat(order.total) || 0,
       shipping: JSON.stringify(order.shipping || {}),
-      shippingStatus: 'pending',
-      estimatedDeliveryTime: ''
+      shippingStatus: 'pending'
     };
     
     console.log('=== MINIMAL SOLUTION + SHIPPING + STATUS: Inserting order ===');
