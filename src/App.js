@@ -7,7 +7,7 @@ import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
 import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase, addUserToSupabase } from './utils/supabase'
 import React from 'react';
-import { ToastProvider } from './contexts/ToastContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
 // import { ProductsProvider } from './context/ProductsContext';
 
 // Lazy load components for better performance
@@ -57,6 +57,7 @@ const LoadingSpinner = () => (
 )
 
 function AppContent() {
+  const showToast = useToast();
   const navigate = useNavigate()
   const location = useLocation();
   const [cartItems, setCartItems] = useState([])
@@ -141,7 +142,7 @@ function AppContent() {
         
       } catch (error) {
         console.error('❌ Error fetching products from Supabase:', error)
-        alert('❌ Failed to load products from database. Please check Supabase connection.')
+        showToast('❌ Failed to load products from database. Please check Supabase connection.', 'error')
       } finally {
         if (isMounted) setIsLoadingProducts(false)
       }
@@ -336,7 +337,7 @@ function AppContent() {
     // 🆕 Check stock availability first
     const availableQuantity = checkAvailableQuantity(product.id)
     if (availableQuantity <= 0) {
-      showAlert('Out of Stock', 'Sorry, this product is out of stock!', 'error')
+      showToast('Sorry, this product is out of stock!', 'error')
       return
     }
     
@@ -347,7 +348,7 @@ function AppContent() {
       const newQuantity = existingItem.quantity + 1
       // Check if we can add more
       if (newQuantity > availableQuantity) {
-        showAlert('Limited Stock', `Sorry, only ${availableQuantity} items available.`, 'warning')
+        showToast(`Sorry, only ${availableQuantity} items available.`, 'warning')
         return
       }
       
@@ -364,7 +365,7 @@ function AppContent() {
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
             cleanupLocalStorage()
-            showAlert('Storage Full', 'Storage was full. Please try again.', 'warning')
+            showToast('Storage was full. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -379,7 +380,7 @@ function AppContent() {
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
             cleanupLocalStorage()
-            showAlert('Storage Full', 'Storage was full. Please try again.', 'warning')
+            showToast('Storage was full. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -428,7 +429,7 @@ function AppContent() {
           if (error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded, clearing old data...')
             cleanupLocalStorage()
-            showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+            showToast('Storage was full, some data was cleared. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -437,7 +438,7 @@ function AppContent() {
       // 🆕 Check stock availability
       const availableQuantity = checkAvailableQuantity(id)
       if (newQuantity > availableQuantity) {
-        showAlert('Limited Stock', `Sorry, only ${availableQuantity} items available.`, 'warning')
+        showToast(`Sorry, only ${availableQuantity} items available.`, 'warning')
         return
       }
       
@@ -455,7 +456,7 @@ function AppContent() {
           if (error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded, clearing old data...')
             cleanupLocalStorage()
-            showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+            showToast('Storage was full, some data was cleared. Please try again.', 'warning')
           }
           return updatedItems
         }
@@ -549,7 +550,7 @@ function AppContent() {
     
     // If any items are out of stock, show error and don't create order
     if (outOfStockItems.length > 0) {
-      showAlert('Cannot Complete Order', `The following items are no longer available:\n\n${outOfStockItems.join('\n')}\n\nPlease update your cart.`, 'error')
+      showToast(`The following items are no longer available:\n\n${outOfStockItems.join('\n')}\n\nPlease update your cart.`, 'error')
       return
     }
     
@@ -578,7 +579,7 @@ function AppContent() {
       setOrders(prevOrders => [supabaseOrder, ...prevOrders])
     } catch (error) {
       console.error('❌ ERROR saving order to Supabase:', error)
-      alert('❌ Failed to save order. Please check Supabase connection and try again.')
+      showToast('❌ Failed to save order. Please check Supabase connection and try again.', 'error');
       return // Stop here - don't proceed if order not saved
     }
     
@@ -651,7 +652,7 @@ function AppContent() {
               if (error.name === 'QuotaExceededError') {
                 console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
                 cleanupLocalStorage()
-                showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+                showToast('Storage was full, some data was cleared. Please try again.', 'warning')
               }
             }
             
@@ -668,7 +669,7 @@ function AppContent() {
               if (error.name === 'QuotaExceededError') {
                 console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
                 cleanupLocalStorage()
-                showAlert('Storage Full', 'Storage was full, some data was cleared. Please try again.', 'warning')
+                showToast('Storage was full, some data was cleared. Please try again.', 'warning')
               }
             }
             
