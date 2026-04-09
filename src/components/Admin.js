@@ -244,6 +244,10 @@ export default function Admin({ darkMode = true }) {
       return;
     }
 
+    console.log('=== REJECTING ORDER ===');
+    console.log('Order to reject:', orderToReject);
+    console.log('Order items:', orderToReject.items);
+
     const updatedOrders = orders.map(order =>
       order.id === orderId ? { ...order, status: 'rejected' } : order
     );
@@ -251,6 +255,7 @@ export default function Admin({ darkMode = true }) {
     localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
     
     // Restore product quantities to Supabase (sync across all devices)
+    console.log('🔄 Restoring product quantities...');
     await restoreProductQuantities(orderToReject);
     
     addRejectionNotification(orderToReject);
