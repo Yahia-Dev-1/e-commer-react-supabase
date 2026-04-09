@@ -100,11 +100,11 @@ header, nav, main, section, article, aside, footer, div, span, p, h1, h2, h3, h4
 }
 
 .App {
-    padding-top: 0px; /* لا نحتاج padding-top هنا لأننا أضفناه للـ body */
+    padding-top: 0px; /* We don't need padding-top here since we added it to body */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    /* إزالة أي حدود أو خطوط بيضاء */
+    /* Remove any borders or white lines */
     border: none !important;
     outline: none !important;
     box-shadow: none !important;

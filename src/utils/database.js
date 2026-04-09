@@ -594,7 +594,7 @@ class Database {
   }
 }
 
-// إنشاء نسخة واحدة من قاعدة البيانات
+// Create single instance of database
 const database = new Database();
 
 export default database; 

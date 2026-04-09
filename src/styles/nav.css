@@ -19,7 +19,7 @@
   justify-content: space-between;
   z-index: 2000;
   box-shadow: none !important;
-  /* إزالة أي خطوط بيضاء */
+  /* Remove any white lines */
   box-shadow: 0 0 0 0 rgba(255, 255, 255, 0) !important;
   border-radius: 0 !important;
 }
@@ -31,7 +31,7 @@
   box-shadow: none !important;
 }
 
-/* إزالة أي خطوط بيضاء من جميع العناصر */
+/* Remove any white lines from all elements */
 html, body, #root, .App, .nav-container, .nav-links, .hamburger-menu {
   border: none !important;
   border-bottom: none !important;
@@ -77,12 +77,12 @@ body, html, #root, .App {
   overflow-x: hidden;
 }
 
-/* إضافة مساحة للنافبار الثابت */
+/* Add space for fixed navbar */
 body {
-  padding-top: 80px; /* مساحة للنافبار الثابت */
+  padding-top: 80px; /* Space for fixed navbar */
 }
 
-/* تعديل المساحة للشاشات الصغيرة */
+/* Adjust space for small screens */
 @media (max-width: 768px) {
   body {
     padding-top: 60px;
@@ -615,7 +615,7 @@ body {
     border-color: rgba(244, 67, 54, 0.3);
   }
   
-  /* لا نحتاج padding-top هنا لأننا أضفناه للـ body */
+  /* We don't need padding-top here since we added it to body */
   body, .App, #root {
     padding-top: 0px;
   }
@@ -691,7 +691,7 @@ body {
     font-size: 0.75rem;
   }
   
-  /* لا نحتاج padding-top هنا لأننا أضفناه للـ body */
+  /* We don't need padding-top here since we added it to body */
   body, .App, #root {
     padding-top: 0px;
   }

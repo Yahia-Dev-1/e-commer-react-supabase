@@ -35,7 +35,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
 
 
 
-  // دالة للتحقق من الكمية المتاحة (بدون حجز)
+  // Function to check available quantity (without reservation)
   const checkAvailableQuantity = (itemId, requestedQuantity) => {
     try {
       // First check Supabase products (real-time)
@@ -58,7 +58,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
     }
   }
 
-  // دالة محدثة لتحديث الكمية مع التحقق من المتاح
+  // Updated function to update quantity with availability check
   const handleQuantityUpdate = (itemId, newQuantity) => {
     if (newQuantity <= 0) {
       updateQuantity(itemId, 0)

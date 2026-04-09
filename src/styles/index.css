@@ -7,7 +7,7 @@
 html, body {
   margin: 0;
   padding: 0;
-  /* إزالة أي خطوط بيضاء */
+  /* Remove any white lines */
   border: none !important;
   outline: none !important;
   box-shadow: none !important;

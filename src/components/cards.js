@@ -18,7 +18,7 @@ const isCurrentUserAdmin = () => {
 
 // Optimized Card Component with lazy loading images
 function Card({ image, title, description, price, quantity, onAddToCart }) {
-  // تأكد من وجود جميع الخصائص المطلوبة
+  // Ensure all required properties exist
   const safeTitle = title || 'Untitled Product';
   const safeDescription = description || 'No description available';
   const safePrice = price || '0.00';
@@ -157,7 +157,7 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
     window.dispatchEvent(new CustomEvent('productsUpdated'))
   }
 
-  // دالة لمسح جميع المنتجات من اللوكل استورج
+  // Function to clear all products from localStorage
   const clearAllProducts = () => {
     if (window.confirm('Are you sure you want to clear all products? This action cannot be undone.')) {
       try {

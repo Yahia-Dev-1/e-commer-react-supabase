@@ -83,7 +83,7 @@ function AppContent() {
     showConfirm: false
   })
   
-  // 🆕 دالة مساعدة لعرض الـ Alert
+  // 🆕 Helper function to display Alert
   const showAlert = (title, message, type = 'info') => {
     setAlertModal({
       isOpen: true,
@@ -95,7 +95,7 @@ function AppContent() {
     })
   }
   
-  // 🆕 دالة مساعدة لعرض Confirm
+  // 🆕 Helper function to display Confirm
   const showConfirm = (title, message, onConfirm, type = 'warning') => {
     setAlertModal({
       isOpen: true,
@@ -391,16 +391,16 @@ function AppContent() {
   }
 
 
-  // دالة للتحقق من الكمية المتاحة (بدون حجز)
+  // Function to check available quantity (without reservation)
   const checkAvailableQuantity = (productId) => {
     try {
-      // الأول نشوف في products state (من Supabase)
+      // First check in products state (from Supabase)
       const productFromState = products.find(p => p.id === productId)
       if (productFromState) {
         return Math.max(0, productFromState.quantity || 0)
       }
       
-      // لو مش لقينا، نشوف في localStorage
+      // If not found, check in localStorage
       const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]')
       const product = existingProducts.find(p => p.id === productId)
       
@@ -503,10 +503,10 @@ function AppContent() {
     return () => clearTimeout(timeoutId)
   }, [cartItems])
 
-  // دالة لتنظيف اللوكل ستورج
+  // Function to clean up localStorage
   const cleanupLocalStorage = () => {
     try {
-      // حذف البيانات غير الضرورية
+      // Delete unnecessary data
       const keysToRemove = [
         'react-devtools',
         'react-devtools::Dock',
@@ -531,7 +531,7 @@ function AppContent() {
   }
 
   const clearCart = () => {
-    // 🆕 بس نمسح السلة (مفيش حجز فمش لازم نرجع حاجة)
+    // 🆕 Just clear the cart (no reservation so no need to return anything)
     setCartItems([])
     localStorage.removeItem('cartItems')
   }
@@ -591,7 +591,7 @@ function AppContent() {
     localStorage.removeItem('cartItems')
   }
 
-  // 🆕 دالة طرح الكمية من Supabase بعد الشراء الناجح
+  // 🆕 Function to deduct quantity from Supabase after successful purchase
   const subtractProductQuantities = async (purchasedItems) => {
     try {
       for (const item of purchasedItems) {
