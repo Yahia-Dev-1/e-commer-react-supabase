@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useToast } from '../contexts/ToastContext';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
 import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
+  const showToast = useToast();
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('orders');
@@ -197,7 +199,7 @@ export default function Admin({ darkMode = true }) {
     const userToDelete = users.find(user => user.id === userId);
     
     if (!userToDelete) {
-      alert('User not found!');
+      showToast('User not found!', 'error');
       return;
     }
 
@@ -205,14 +207,14 @@ export default function Admin({ darkMode = true }) {
     const currentUserEmail = localStorage.getItem('currentUserEmail');
     
     if (protectedAdmins.includes(userToDelete.email)) {
-      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
+      showToast('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.', 'error');
       return;
     }
 
     const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
     
     if (adminEmails.includes(userToDelete.email) && !protectedAdmins.includes(currentUserEmail)) {
-      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
+      showToast('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.', 'error');
       return;
     }
 
@@ -228,10 +230,10 @@ export default function Admin({ darkMode = true }) {
       // Delete from localStorage
       const success = database.deleteUser(userId);
       if (success) {
-        alert(`✅ User ${userToDelete.email} has been deleted successfully!`);
+        showToast(`✅ User ${userToDelete.email} has been deleted successfully!`, 'success');
         loadData();
       } else {
-        alert('❌ Failed to delete user. Please try again.');
+        showToast('❌ Failed to delete user. Please try again.', 'error');
       }
     }
   };
@@ -242,7 +244,7 @@ export default function Admin({ darkMode = true }) {
     const currentUserEmail = localStorage.getItem('currentUserEmail');
     
     if (protectedAdmins.includes(user.email) && !protectedAdmins.includes(currentUserEmail)) {
-      alert('❌ Only protected admins can edit admin accounts!\n\nContact yahiapro400@gmail.com for changes.');
+      showToast('❌ Only protected admins can edit admin accounts!\n\nContact yahiapro400@gmail.com for changes.', 'error');
       return;
     }
 
@@ -255,7 +257,7 @@ export default function Admin({ darkMode = true }) {
     if (userId) {
       await deleteUser(userId);
     } else {
-      alert('Could not find user ID');
+      showToast('Could not find user ID', 'error');
     }
   };
 
@@ -265,7 +267,7 @@ export default function Admin({ darkMode = true }) {
     
     // Check if already rejected (prevent double stock restoration)
     if (orderToReject.status === 'rejected') {
-      alert('Order is already rejected!');
+      showToast('Order is already rejected!', 'warning');
       return;
     }
 
@@ -284,7 +286,7 @@ export default function Admin({ darkMode = true }) {
     await restoreProductQuantities(orderToReject);
     
     addRejectionNotification(orderToReject);
-    alert(`Order #${orderToReject.orderNumber} has been rejected. Products returned to stock.`);
+    showToast(`Order #${orderToReject.orderNumber} has been rejected. Products returned to stock.`, 'success');
   };
 
   // Approve order - stock already deducted when order was created
@@ -294,7 +296,7 @@ export default function Admin({ darkMode = true }) {
     
     // Check if already approved
     if (orderToApprove.status === 'approved') {
-      alert('Order is already approved!');
+      showToast('Order is already approved!', 'warning');
       return;
     }
     
@@ -305,7 +307,7 @@ export default function Admin({ darkMode = true }) {
     setOrders(updatedOrders);
     localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
     
-    alert(`Order #${orderToApprove.orderNumber} approved!`);
+    showToast(`Order #${orderToApprove.orderNumber} approved!`, 'success');
   };
 
   const updateShippingStatus = (orderId, status) => {
@@ -344,7 +346,7 @@ export default function Admin({ darkMode = true }) {
       
       addDeletionNotification(orderToDelete);
       await restoreProductQuantities(orderToDelete);
-      alert(`Order #${orderToDelete.orderNumber} deleted successfully. Products returned to stock.`);
+      showToast(`Order #${orderToDelete.orderNumber} deleted successfully. Products returned to stock.`, 'success');
     }
   };
 
@@ -428,7 +430,7 @@ export default function Admin({ darkMode = true }) {
       database.clearDatabase();
       setUsers([]);
       setOrders([]);
-      alert('All data has been cleared.');
+      showToast('All data has been cleared.', 'success');
     }
   };
 
@@ -476,12 +478,12 @@ export default function Admin({ darkMode = true }) {
       localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
 
       if (addedCount > 0) {
-        alert(`✅ Added ${addedCount} protected admin(s) successfully!`);
+        showToast(`✅ Successfully added ${addedCount} protected admin(s)!`, 'success');
       } else {
-        alert('ℹ️ Protected admins already exist.');
+        showToast('ℹ️ Protected admins already exist.', 'info');
       }
     } catch (error) {
-      alert('Error adding protected admins: ' + error.message);
+      showToast('Error adding protected admins: ' + error.message, 'error');
     }
   };
 
@@ -490,13 +492,13 @@ export default function Admin({ darkMode = true }) {
       try {
         const success = database.resetProtectedAdmins();
         if (success) {
-          alert('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / ylyr5767ykm34562');
+          showToast('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / ylyr5767ykm34562', 'success');
           loadData();
         } else {
-          alert('❌ Failed to fix login issues. Please try again.');
+          showToast('❌ Failed to fix login issues. Please try again.', 'error');
         }
       } catch (error) {
-        alert('❌ Error fixing login issues: ' + error.message);
+        showToast('❌ Error fixing login issues: ' + error.message, 'error');
       }
     }
   };
@@ -574,9 +576,9 @@ export default function Admin({ darkMode = true }) {
                     setTimeout(() => {
                       checkAuthorization();
                     }, 500);
-                    alert(`تم إضافة ${currentUserEmail} كمدير بنجاح!`);
+                    showToast(`تم إضافة ${currentUserEmail} كمدير بنجاح!`, 'success');
                   } else {
-                    alert('يرجى تسجيل الدخول أولاً');
+                    showToast('يرجى تسجيل الدخول أولاً', 'warning');
                   }
                 }}
               >

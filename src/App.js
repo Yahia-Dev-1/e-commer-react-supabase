@@ -7,6 +7,7 @@ import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
 import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase, addUserToSupabase } from './utils/supabase'
 import React from 'react';
+import { ToastProvider } from './contexts/ToastContext';
 // import { ProductsProvider } from './context/ProductsContext';
 
 // Lazy load components for better performance
@@ -861,11 +862,13 @@ function AppContent() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </HelmetProvider>
+    <ToastProvider>
+      <HelmetProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </HelmetProvider>
+    </ToastProvider>
   );
 }
 
