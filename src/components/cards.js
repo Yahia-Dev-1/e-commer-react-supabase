@@ -9,7 +9,7 @@ const isCurrentUserAdmin = () => {
   if (!currentUserEmail) return false;
   
   const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-  const defaultAdminEmails = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+  const defaultAdminEmails = ['yahiapro400@gmail.com'];
   const allAdminEmails = adminEmails.length > 0 ? adminEmails : defaultAdminEmails;
   
   return allAdminEmails.includes(currentUserEmail);

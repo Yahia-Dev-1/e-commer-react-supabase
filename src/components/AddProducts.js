@@ -50,7 +50,6 @@ export default function AddProducts({ darkMode = false }) {
   // Protected admin emails
   const protectedAdmins = [
     'yahiapro400@gmail.com',
-    'yahiacool2009@gmail.com'
   ]
 
   const isProtectedAdmin = () => {
@@ -106,7 +105,7 @@ export default function AddProducts({ darkMode = false }) {
     
     if (!currentUser) {
       // If user not found in users array, check if it's an admin email
-      const adminEmails = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com']
+      const adminEmails = ['yahiapro400@gmail.com']
       if (adminEmails.includes(currentUserEmail)) {
         setUser({ email: currentUserEmail })
         loadProducts()
@@ -314,7 +313,7 @@ export default function AddProducts({ darkMode = false }) {
     }
 
     if (editingProduct.isProtected && !canModifyProtectedAdmin()) {
-      alert('❌ Cannot edit protected products!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can edit protected products.')
+      alert('❌ Cannot edit protected products!\n\nOnly yahiapro400@gmail.com can edit protected products.')
       return
     }
 
@@ -802,7 +801,7 @@ export default function AddProducts({ darkMode = false }) {
                     )}
                     {product.isProtected && (
                       <p className="protected-info">
-                        🔒 Protected Product - Only yahiapro400@gmail.com and yahiacool2009@gmail.com can modify
+                        🔒 Protected Product - Only yahiapro400@gmail.com can modify
                       </p>
                     )}
                 </div>
@@ -828,7 +827,7 @@ export default function AddProducts({ darkMode = false }) {
 
                         // Check if trying to delete a protected product
                         if (productToDelete && productToDelete.isProtected && !canModifyProtectedAdmin()) {
-                          alert('❌ Cannot delete protected products!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can delete protected products.')
+                          alert('❌ Cannot delete protected products!\n\nOnly yahiapro400@gmail.com can delete protected products.')
                           return
                         }
 

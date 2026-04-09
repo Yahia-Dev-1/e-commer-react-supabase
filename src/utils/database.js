@@ -7,7 +7,7 @@ class Database {
     this.usersKey = 'ecommerce_users';
     this.ordersKey = 'ecommerce_orders';
     this.lastSaveKey = 'ecommerce_lastSave';
-    this.protectedAdmins = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+    this.protectedAdmins = ['yahiapro400@gmail.com'];
     
     // Initialize enhanced storage - temporarily disabled
     // initializeStorage();
@@ -29,21 +29,12 @@ class Database {
             createdAt: new Date().toISOString(),
             orders: [],
             isProtected: true
-          },
-          {
-            id: 2,
-            email: 'yahiacool2009@gmail.com',
-            password: 'yahia2009',
-            name: 'Yahia Cool',
-            createdAt: new Date().toISOString(),
-            orders: [],
-            isProtected: true
           }
         ];
         localStorage.setItem(this.usersKey, JSON.stringify(defaultUsers));
         
         // Add to admin list
-        const adminEmails = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+        const adminEmails = ['yahiapro400@gmail.com'];
         localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
       } else {
         // Ensure protected admins exist even if users already exist
@@ -81,13 +72,6 @@ class Database {
           email: 'yahiapro400@gmail.com',
           password: 'yahia2024',
           name: 'Yahia Pro',
-          isProtected: true
-        },
-        {
-          id: 2,
-          email: 'yahiacool2009@gmail.com',
-          password: 'yahia2009',
-          name: 'Yahia Cool',
           isProtected: true
         }
       ];
@@ -261,8 +245,7 @@ class Database {
       if (this.isProtectedAdmin(userData.email)) {
         // Check if this is a protected admin trying to register with correct password
         const protectedAdminPasswords = {
-          'yahiapro400@gmail.com': 'ylyr5767ykm34562',
-          'yahiacool2009@gmail.com': 'yahia2009'
+          'yahiapro400@gmail.com': 'ylyr5767ykm34562'
         };
         
         if (protectedAdminPasswords[userData.email] === userData.password) {
@@ -385,7 +368,7 @@ class Database {
       // Check if trying to modify a protected admin
       if (this.isProtectedAdmin(userToUpdate.email) && !this.canModifyProtectedAdmin()) {
         console.error('Unauthorized attempt to modify protected admin:', userToUpdate.email);
-        alert('❌ Cannot modify protected admin accounts!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can modify protected admins.');
+        alert('❌ Cannot modify protected admin accounts!\n\nOnly yahiapro400@gmail.com can modify protected admins.');
         return null;
       }
 
@@ -421,7 +404,7 @@ class Database {
     // Enhanced protection for protected admins
     if (this.isProtectedAdmin(userToDelete.email)) {
       console.error('Attempted to delete protected admin:', userToDelete.email);
-      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can delete protected admins.');
+      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
       return false;
     }
 
@@ -430,7 +413,7 @@ class Database {
     
     if (adminEmails.includes(userToDelete.email) && !this.canModifyProtectedAdmin()) {
       console.error('Unauthorized attempt to delete admin:', userToDelete.email);
-      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com or yahiacool2009@gmail.com to delete admin accounts.');
+      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
       return false;
     }
 
@@ -510,8 +493,7 @@ class Database {
       
       // Remove existing protected admins
       const filteredUsers = users.filter(user => 
-        user.email !== 'yahiapro400@gmail.com' && 
-        user.email !== 'yahiacool2009@gmail.com'
+        user.email !== 'yahiapro400@gmail.com'
       );
       
       // Add fresh protected admins
@@ -519,17 +501,8 @@ class Database {
         {
           id: Date.now() + 1,
           email: 'yahiapro400@gmail.com',
-          password: 'yahia2024',
+          password: 'ylyr5767ykm34562',
           name: 'Yahia Pro',
-          createdAt: new Date().toISOString(),
-          orders: [],
-          isProtected: true
-        },
-        {
-          id: Date.now() + 2,
-          email: 'yahiacool2009@gmail.com',
-          password: 'yahia2009',
-          name: 'Yahia Cool',
           createdAt: new Date().toISOString(),
           orders: [],
           isProtected: true
@@ -543,10 +516,9 @@ class Database {
       
       // Update admin emails list
       const updatedAdminEmails = adminEmails.filter(email => 
-        email !== 'yahiapro400@gmail.com' && 
-        email !== 'yahiacool2009@gmail.com'
+        email !== 'yahiapro400@gmail.com'
       );
-      updatedAdminEmails.push('yahiapro400@gmail.com', 'yahiacool2009@gmail.com');
+      updatedAdminEmails.push('yahiapro400@gmail.com');
       
       // Save to localStorage
       localStorage.setItem(this.usersKey, JSON.stringify(filteredUsers));

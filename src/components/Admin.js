@@ -201,18 +201,18 @@ export default function Admin({ darkMode = true }) {
       return;
     }
 
-    const protectedAdmins = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+    const protectedAdmins = ['yahiapro400@gmail.com'];
     const currentUserEmail = localStorage.getItem('currentUserEmail');
     
     if (protectedAdmins.includes(userToDelete.email)) {
-      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com and yahiacool2009@gmail.com can delete protected admins.');
+      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
       return;
     }
 
     const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
     
     if (adminEmails.includes(userToDelete.email) && !protectedAdmins.includes(currentUserEmail)) {
-      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com or yahiacool2009@gmail.com to delete admin accounts.');
+      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
       return;
     }
 
@@ -238,11 +238,11 @@ export default function Admin({ darkMode = true }) {
 
   const handleEditUser = (user) => {
     // التحقق من صلاحيات التعديل
-    const protectedAdmins = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+    const protectedAdmins = ['yahiapro400@gmail.com'];
     const currentUserEmail = localStorage.getItem('currentUserEmail');
     
     if (protectedAdmins.includes(user.email) && !protectedAdmins.includes(currentUserEmail)) {
-      alert('❌ Only protected admins can edit admin accounts!\n\nContact yahiapro400@gmail.com or yahiacool2009@gmail.com for changes.');
+      alert('❌ Only protected admins can edit admin accounts!\n\nContact yahiapro400@gmail.com for changes.');
       return;
     }
 
@@ -423,11 +423,6 @@ export default function Admin({ darkMode = true }) {
           email: 'yahiapro400@gmail.com',
           password: 'ylyr5767ykm34562',
           name: 'Yahia Pro'
-        },
-        {
-          email: 'yahiacool2009@gmail.com',
-          password: 'yahia2009',
-          name: 'Yahia Cool'
         }
       ];
 
@@ -479,7 +474,7 @@ export default function Admin({ darkMode = true }) {
       try {
         const success = database.resetProtectedAdmins();
         if (success) {
-          alert('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / ylyr5767ykm34562\n• yahiacool2009@gmail.com / yahia2009');
+          alert('✅ Login issues fixed successfully!\n\nYou can now login with:\n• yahiapro400@gmail.com / ylyr5767ykm34562');
           loadData();
         } else {
           alert('❌ Failed to fix login issues. Please try again.');
@@ -521,7 +516,6 @@ export default function Admin({ darkMode = true }) {
               <h3>Authorized Admin Accounts:</h3>
               <ul>
                 <li>yahiapro400@gmail.com</li>
-                <li>yahiacool2009@gmail.com</li>
               </ul>
             </div>
             <div className="unauthorized-actions">
@@ -976,7 +970,7 @@ export default function Admin({ darkMode = true }) {
               <div className="admins-list">
                 {(() => {
                   const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-                  const defaultAdmins = ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'];
+                  const defaultAdmins = ['yahiapro400@gmail.com'];
                   const allAdmins = adminEmails.length > 0 ? adminEmails : defaultAdmins;
                   
                   return allAdmins.map((email, index) => (
