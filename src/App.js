@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-ro
 import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react'
 import database from './utils/database'
-import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase } from './utils/supabase'
+import { subscribeToProducts, subscribeToOrders, getOrdersFromSupabase, addOrderToSupabase, updateProductInSupabase, addUserToSupabase } from './utils/supabase'
 import React from 'react';
 // import { ProductsProvider } from './context/ProductsContext';
 
@@ -567,15 +567,18 @@ function AppContent() {
       shipping: shippingData || {}
     }
     
-    // حفظ الطلب في Supabase أولاً
+    // 🆕 Save to Supabase first
     try {
+      console.log('📝 Attempting to save order to Supabase:', newOrder.orderNumber)
       const supabaseOrder = await addOrderToSupabase(newOrder)
-      console.log('✅ Order saved to Supabase:', supabaseOrder.orderNumber)
+      console.log('✅ Order saved to Supabase:', supabaseOrder.orderNumber, supabaseOrder.id)
       // Also save to localStorage for offline backup
-      database.saveOrder(newOrder)
+      database.saveOrder(supabaseOrder)
       setOrders(prevOrders => [supabaseOrder, ...prevOrders])
     } catch (error) {
-      console.warn('⚠️ Could not save to Supabase, using localStorage only:', error.message)
+      console.error('❌ ERROR saving to Supabase:', error)
+      console.error('❌ Error details:', error.message, error.code || '')
+      alert('⚠️ Could not save order to database. Check console for details.')
       // Fallback to localStorage only
       const savedOrder = database.saveOrder(newOrder)
       setOrders(prevOrders => [savedOrder, ...prevOrders])
@@ -618,9 +621,10 @@ function AppContent() {
     // Save user to Supabase
     try {
       await addUserToSupabase(userData)
-      console.log(' User saved to Supabase:', userData.email)
+      console.log('✅ User saved to Supabase:', userData.email)
     } catch (error) {
-      console.warn(' Could not save user to Supabase:', error.message)
+      console.error('❌ ERROR saving user to Supabase:', error)
+      console.error('❌ Error details:', error.message, error.code || '')
     }
     
     // Merge cart items from this user with existing cart
