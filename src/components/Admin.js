@@ -608,7 +608,7 @@ export default function Admin({ darkMode = true }) {
               </div>
             ) : (
               <div className="orders-list">
-                {orders.map((order) => (
+                {orders && orders.map((order) => (
                   <div key={order.id} className="order-card">
                     <div className="order-info">
                       <h3>Order #{order.orderNumber}</h3>
