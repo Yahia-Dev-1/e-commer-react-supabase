@@ -57,7 +57,16 @@ export default function Admin({ darkMode = true }) {
       allUsers = database.getUsers();
     }
     
-    const allOrders = database.getOrders();
+    // Get orders from Supabase (with localStorage fallback)
+    let allOrders = [];
+    try {
+      const { data: supabaseOrders } = await getOrdersFromSupabase(100, 0);
+      console.log('Orders loaded from Supabase:', supabaseOrders.length);
+      allOrders = supabaseOrders || [];
+    } catch (error) {
+      console.log('Using localStorage orders:', error.message);
+      allOrders = database.getOrders();
+    }
     
     const protectedAdmins = [
       {

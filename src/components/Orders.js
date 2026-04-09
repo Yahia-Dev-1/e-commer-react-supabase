@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import database from '../utils/database';
-import { updateProductInSupabase } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -12,12 +12,32 @@ export default function Orders({ user, orders = [], darkMode = false }) {
   const [userOrders, setUserOrders] = useState([]);
 
   useEffect(() => {
-    if (user) {
-      // Get user orders from database
-      const orders = database.getUserOrders(user.id);
-      setUserOrders(orders);
-    }
-    setLoading(false);
+    const loadOrders = async () => {
+      if (user) {
+        try {
+          // Get orders from Supabase
+          const { data: allOrders } = await getOrdersFromSupabase(100, 0);
+          console.log('📥 Orders loaded from Supabase:', allOrders.length);
+          
+          // Filter orders for current user (by userEmail)
+          const currentUserEmail = localStorage.getItem('currentUserEmail') || user.email;
+          const filteredOrders = allOrders.filter(order => 
+            order.userEmail === currentUserEmail
+          );
+          
+          console.log('📦 User orders:', filteredOrders.length);
+          setUserOrders(filteredOrders);
+        } catch (error) {
+          console.log('Using localStorage orders:', error.message);
+          // Fallback to localStorage
+          const orders = database.getUserOrders(user.id);
+          setUserOrders(orders);
+        }
+      }
+      setLoading(false);
+    };
+    
+    loadOrders();
   }, [user]);
 
   const getStatusColor = (status) => {
