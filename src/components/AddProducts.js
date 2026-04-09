@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddProducts.css';
 import { addProductToSupabase, deleteProductFromSupabase, updateProductInSupabase } from '../utils/supabase';
+import { useToast } from '../contexts/ToastContext';
 
 export default function AddProducts({ darkMode = false }) {
+  const showToast = useToast();
   const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -300,7 +302,7 @@ export default function AddProducts({ darkMode = false }) {
       
     } catch (error) {
       console.error('❌ Error saving product:', error)
-      alert('❌ Failed to save product to database. Please check Supabase connection.')
+      showToast('❌ Failed to save product to database. Please check Supabase connection.', 'error')
     }
   }
 
@@ -313,7 +315,7 @@ export default function AddProducts({ darkMode = false }) {
     }
 
     if (editingProduct.isProtected && !canModifyProtectedAdmin()) {
-      alert('❌ Cannot edit protected products!\n\nOnly yahiapro400@gmail.com can edit protected products.')
+      showToast('❌ Cannot edit protected products!\n\nOnly yahiapro400@gmail.com can edit protected products.', 'error')
       return
     }
 
@@ -827,7 +829,7 @@ export default function AddProducts({ darkMode = false }) {
 
                         // Check if trying to delete a protected product
                         if (productToDelete && productToDelete.isProtected && !canModifyProtectedAdmin()) {
-                          alert('❌ Cannot delete protected products!\n\nOnly yahiapro400@gmail.com can delete protected products.')
+                          showToast('❌ Cannot delete protected products!\n\nOnly yahiapro400@gmail.com can delete protected products.', 'error')
                           return
                         }
 
