@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const [users, setUsers] = useState([]);
@@ -313,13 +313,22 @@ export default function Admin({ darkMode = true }) {
     if (!orderToDelete) return;
 
     if (window.confirm(`Are you sure you want to delete order #${orderToDelete.orderNumber}?`)) {
+      // Delete from Supabase
+      try {
+        await deleteOrderFromSupabase(orderId);
+        console.log('✅ Order deleted from Supabase:', orderId);
+      } catch (error) {
+        console.error('❌ Error deleting order from Supabase:', error);
+      }
+      
+      // Update local state
       const updatedOrders = orders.filter(order => order.id !== orderId);
       setOrders(updatedOrders);
       localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
       
       addDeletionNotification(orderToDelete);
       await restoreProductQuantities(orderToDelete);
-      alert(`Order #${orderToDelete.orderNumber} has been deleted. Products returned to stock.`);
+      alert(`Order #${orderToDelete.orderNumber} deleted successfully. Products returned to stock.`);
     }
   };
 
