@@ -105,13 +105,12 @@ export const subscribeToProducts = (callback, limit = 50) => {
 // User functions
 export const addUserToSupabase = async (user) => {
   try {
+    // 🆕 Only basic columns that definitely exist
     const userData = {
-      id: user.id || crypto.randomUUID(),
       email: user.email,
       password: user.password,
       name: user.name,
-      isAdmin: user.isAdmin || false,
-      created_at: new Date().toISOString()
+      isAdmin: user.isAdmin || false
     };
     
     const { data, error } = await supabase
@@ -131,8 +130,7 @@ export const getUsersFromSupabase = async () => {
   try {
     const { data, error } = await supabase
       .from('users')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
     
     if (error) throw error;
     return data || [];
@@ -165,8 +163,7 @@ export const subscribeToUsers = (callback) => {
       async (payload) => {
         const { data } = await supabase
           .from('users')
-          .select('*')
-          .order('created_at', { ascending: false });
+          .select('*');
         callback(data || []);
       }
     )
@@ -207,7 +204,6 @@ export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
     const { data, error, count } = await supabase
       .from('orders')
       .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
     
     if (error) throw error;
@@ -226,8 +222,7 @@ export const subscribeToOrders = (callback) => {
       async (payload) => {
         const { data } = await supabase
           .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false });
+          .select('*');
         callback(data || []);
       }
     )
