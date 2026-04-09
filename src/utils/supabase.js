@@ -180,17 +180,13 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
+    // 🆕 Only basic columns that definitely exist
     const orderData = {
-      id: order.id || crypto.randomUUID(),
       orderNumber: order.orderNumber,
-      date: order.date,
       status: order.status || 'pending',
-      userId: order.userId,
       userEmail: order.userEmail,
       items: order.items,
-      total: order.total,
-      shipping: order.shipping,
-      created_at: new Date().toISOString()
+      total: order.total
     };
     
     const { data, error } = await supabase
