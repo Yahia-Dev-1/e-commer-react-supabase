@@ -231,7 +231,7 @@ class Database {
     return user || null;
   }
 
-  // Register user with protection
+  // Register new user
   registerUser(userData) {
     try {
       const users = this.getUsers();
