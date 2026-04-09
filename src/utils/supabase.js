@@ -184,16 +184,15 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use essential columns including userEmail
+    // Use ONLY essential columns that definitely exist
     const orderData = {
       status: 'pending',
-      total: parseFloat(order.total) || 0,
-      userEmail: order.userEmail
+      total: parseFloat(order.total) || 0
     };
     
-    console.log('=== INSERTING ORDER WITH userEmail ===');
+    console.log('=== MINIMAL SOLUTION: Inserting order ===');
     console.log('Original order:', order);
-    console.log('Order data:', orderData);
+    console.log('Minimal orderData:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -216,6 +215,7 @@ export const addOrderToSupabase = async (order) => {
     // Add all order data for UI only (not stored in database)
     if (data && data[0]) {
       data[0].orderNumber = order.orderNumber;
+      data[0].userEmail = order.userEmail;
       data[0].items = order.items;
     }
     

@@ -1,12 +1,11 @@
--- FIX: Create orders table with userEmail field
+-- MINIMAL SOLUTION: Create orders table with ONLY essential columns
 DROP TABLE IF EXISTS orders CASCADE;
 
--- Create table with userEmail field
+-- Create table with minimal columns only
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status TEXT DEFAULT 'pending',
     total FLOAT DEFAULT 0,
-    userEmail TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
