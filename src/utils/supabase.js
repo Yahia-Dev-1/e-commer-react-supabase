@@ -189,15 +189,19 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use ONLY essential columns that definitely exist
+    // Save ALL order data to database as TEXT
     const orderData = {
       status: 'pending',
-      total: parseFloat(order.total) || 0
+      total: parseFloat(order.total) || 0,
+      orderNumber: order.orderNumber,
+      userEmail: order.userEmail,
+      items: JSON.stringify(order.items || []),
+      shipping: JSON.stringify(order.shipping || {})
     };
     
-    console.log('=== MINIMAL SOLUTION: Inserting order ===');
+    console.log('=== FULL SOLUTION: Inserting order with ALL data ===');
     console.log('Original order:', order);
-    console.log('Minimal orderData:', orderData);
+    console.log('Order data to save:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -217,12 +221,15 @@ export const addOrderToSupabase = async (order) => {
     
     console.log('✅ Order inserted successfully:', data);
     
-    // Add all order data for UI only (not stored in database)
+    // Parse JSON strings back to objects for UI
     if (data && data[0]) {
-      data[0].orderNumber = order.orderNumber;
-      data[0].userEmail = order.userEmail;
-      data[0].items = order.items;
-      data[0].shipping = order.shipping;
+      try {
+        data[0].items = JSON.parse(data[0].items || '[]');
+        data[0].shipping = JSON.parse(data[0].shipping || '{}');
+      } catch (e) {
+        data[0].items = [];
+        data[0].shipping = {};
+      }
     }
     
     return data[0];
@@ -258,7 +265,25 @@ export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
       .range(offset, offset + limit - 1);
     
     if (error) throw error;
-    return { data: data || [], count };
+    
+    // Parse TEXT fields back to JSON for UI
+    const parsedData = (data || []).map(order => {
+      try {
+        return {
+          ...order,
+          items: JSON.parse(order.items || '[]'),
+          shipping: JSON.parse(order.shipping || '{}')
+        };
+      } catch (e) {
+        return {
+          ...order,
+          items: [],
+          shipping: {}
+        };
+      }
+    });
+    
+    return { data: parsedData, count };
   } catch (error) {
     console.error('Error getting orders:', error);
     throw error;
