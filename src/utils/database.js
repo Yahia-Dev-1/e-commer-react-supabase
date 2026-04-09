@@ -325,7 +325,27 @@ class Database {
     };
 
     orders.push(newOrder);
-    localStorage.setItem(this.ordersKey, JSON.stringify(orders));
+    
+    // 🆕 Handle quota exceeded error
+    try {
+      localStorage.setItem(this.ordersKey, JSON.stringify(orders.slice(-10)))
+    } catch (error) {
+      if (error.name === 'QuotaExceededError') {
+        console.warn('⚠️ LocalStorage quota exceeded, saving minimal data only')
+        // Save only the last 5 orders with minimal data
+        const minimalOrders = orders.slice(-5).map(order => ({
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          total: order.total,
+          date: order.date,
+          userEmail: order.userEmail
+        }))
+        localStorage.setItem(this.ordersKey, JSON.stringify(minimalOrders))
+      } else {
+        throw error
+      }
+    }
 
     // Add order to user's order list
     if (orderData.userId) {
