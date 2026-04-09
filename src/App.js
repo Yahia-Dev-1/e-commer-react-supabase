@@ -164,10 +164,18 @@ function AppContent() {
       }
     }, PRODUCTS_PER_PAGE)
 
+    // 🆕 Listen for productsUpdated event from AddProducts page
+    const handleProductsUpdated = () => {
+      console.log('🔄 productsUpdated event received - refreshing products')
+      fetchProducts()
+    }
+    window.addEventListener('productsUpdated', handleProductsUpdated)
+
     // Cleanup subscription on unmount
     return () => {
       isMounted = false
       unsubscribe()
+      window.removeEventListener('productsUpdated', handleProductsUpdated)
     }
   }, [])
 

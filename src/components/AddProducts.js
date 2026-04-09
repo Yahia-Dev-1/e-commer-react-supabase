@@ -287,6 +287,10 @@ export default function AddProducts({ darkMode = false }) {
         setProducts(updatedProducts)
         setMessage(`✅ Product "${productData.title}" saved to database!`)
         clearForm()
+        
+        // 🆕 Trigger update event for Home page
+        window.dispatchEvent(new Event('productsUpdated'))
+        console.log('🔄 Triggered productsUpdated event for Home page')
       } else {
         throw new Error('Invalid response from Supabase')
       }
