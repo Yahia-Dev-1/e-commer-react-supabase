@@ -177,21 +177,28 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // 🆕 Only basic columns that definitely exist
+    // 🆕 Only basic columns - items as JSONB string
     const orderData = {
       orderNumber: order.orderNumber,
       status: order.status || 'pending',
       userEmail: order.userEmail,
-      items: order.items,
-      total: order.total
+      items: JSON.stringify(order.items || []),
+      total: parseFloat(order.total) || 0
     };
+    
+    console.log('📝 Inserting order:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
       .insert([orderData])
       .select();
     
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase insert error:', error);
+      throw error;
+    }
+    
+    console.log('✅ Order inserted:', data);
     return data[0];
   } catch (error) {
     console.error('❌ Error adding order to Supabase:', error);
