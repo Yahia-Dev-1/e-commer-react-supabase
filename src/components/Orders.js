@@ -21,8 +21,17 @@ export default function Orders({ user, orders = [], darkMode = false }) {
           console.log('📥 Orders loaded from Supabase:', allOrders.length);
           console.log('All orders data:', allOrders);
           
-          // Show all orders (no filtering since userEmail not in database)
-          setUserOrders(allOrders || []);
+          // Filter orders for current user (by userEmail)
+          const currentUserEmail = localStorage.getItem('currentUserEmail') || user.email;
+          console.log('Current user email:', currentUserEmail);
+          
+          const filteredOrders = allOrders.filter(order => 
+            order.userEmail === currentUserEmail
+          );
+          
+          console.log('📦 User orders:', filteredOrders.length);
+          console.log('Filtered orders:', filteredOrders);
+          setUserOrders(filteredOrders);
         } catch (error) {
           console.log('=== ERROR LOADING ORDERS (USER PAGE) ===');
           console.log('Using localStorage orders:', error.message);
@@ -43,8 +52,14 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       
       console.log('🔄 Orders updated from Supabase:', supabaseOrders.length);
       
-      // Show all orders (no filtering since userEmail not in database)
-      setUserOrders(supabaseOrders || []);
+      // Filter orders for current user (by userEmail)
+      const currentUserEmail = localStorage.getItem('currentUserEmail') || user.email;
+      const filteredOrders = supabaseOrders.filter(order => 
+        order.userEmail === currentUserEmail
+      );
+      
+      console.log('📦 User orders updated:', filteredOrders.length);
+      setUserOrders(filteredOrders || []);
     });
 
     return () => unsubscribe();

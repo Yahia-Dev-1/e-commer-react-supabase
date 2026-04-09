@@ -189,15 +189,19 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use ONLY essential columns that definitely exist
+    // Save ALL order data to database
     const orderData = {
       status: 'pending',
-      total: parseFloat(order.total) || 0
+      total: parseFloat(order.total) || 0,
+      orderNumber: order.orderNumber,
+      userEmail: order.userEmail,
+      items: order.items || [],
+      shipping: order.shipping || {}
     };
     
-    console.log('=== MINIMAL SOLUTION: Inserting order ===');
+    console.log('=== FULL SOLUTION: Inserting order with ALL data ===');
     console.log('Original order:', order);
-    console.log('Minimal orderData:', orderData);
+    console.log('Order data to save:', orderData);
     
     const { data, error } = await supabase
       .from('orders')
@@ -216,15 +220,6 @@ export const addOrderToSupabase = async (order) => {
     }
     
     console.log('✅ Order inserted successfully:', data);
-    
-    // Add all order data for UI only (not stored in database)
-    if (data && data[0]) {
-      data[0].orderNumber = order.orderNumber;
-      data[0].userEmail = order.userEmail;
-      data[0].items = order.items;
-      data[0].shipping = order.shipping;
-    }
-    
     return data[0];
   } catch (error) {
     console.error('=== CATCH ERROR ===');
