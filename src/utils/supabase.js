@@ -9,16 +9,22 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Products table operations
 export const addProductToSupabase = async (product) => {
   try {
-    // Generate ID if not provided
-    const productWithId = {
-      ...product,
+    // 🆕 Only send columns that exist in Supabase
+    const productData = {
       id: product.id || crypto.randomUUID(),
+      title: product.title,
+      price: product.price,
+      quantity: product.quantity,
+      image: product.image,
+      description: product.description,
+      category: product.category || 'General',
+      createdBy: product.createdBy,
       created_at: new Date().toISOString()
     };
     
     const { data, error } = await supabase
       .from('products')
-      .insert([productWithId])
+      .insert([productData])
       .select();
     
     if (error) throw error;
@@ -104,15 +110,19 @@ export const subscribeToProducts = (callback, limit = 50) => {
 // User functions
 export const addUserToSupabase = async (user) => {
   try {
-    const userWithId = {
-      ...user,
+    // 🆕 Only send columns that exist in Supabase
+    const userData = {
       id: user.id || crypto.randomUUID(),
+      email: user.email,
+      password: user.password,
+      name: user.name,
+      isAdmin: user.isAdmin || false,
       created_at: new Date().toISOString()
     };
     
     const { data, error } = await supabase
       .from('users')
-      .insert([userWithId])
+      .insert([userData])
       .select();
     
     if (error) throw error;
@@ -176,15 +186,23 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    const orderWithId = {
-      ...order,
+    // 🆕 Only send columns that exist in Supabase
+    const orderData = {
       id: order.id || crypto.randomUUID(),
+      orderNumber: order.orderNumber,
+      date: order.date,
+      status: order.status || 'pending',
+      userId: order.userId,
+      userEmail: order.userEmail,
+      items: order.items,
+      total: order.total,
+      shipping: order.shipping,
       created_at: new Date().toISOString()
     };
     
     const { data, error } = await supabase
       .from('orders')
-      .insert([orderWithId])
+      .insert([orderData])
       .select();
     
     if (error) throw error;
