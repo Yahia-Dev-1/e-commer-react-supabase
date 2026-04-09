@@ -37,14 +37,14 @@
 
 .footer-contact-section {
   text-align: center;
-  padding: 50px 0 30px 0;
+  padding: 25px 0 15px 0;
 }
 
 .footer-section-title {
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 600;
-  margin: 0 0 20px 0;
+  margin: 0 0 12px 0;
   position: relative;
 }
 
@@ -63,7 +63,7 @@
 .footer-contact-info {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   align-items: center;
   justify-content: center;
 }
@@ -71,17 +71,17 @@
 .footer-contact-info .contact-link {
   color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
   transition: all 0.3s ease;
-  padding: 12px 20px;
-  border-radius: 25px;
+  padding: 8px 16px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
 }
 
@@ -95,16 +95,16 @@
 }
 
 .footer-contact-info .contact-link i {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: #667eea;
 }
 
 .footer-contact-info .contact-text {
   color: rgba(255, 255, 255, 0.8);
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 12px 20px;
-  border-radius: 25px;
+  padding: 8px 16px;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   display: inline-flex;
@@ -113,13 +113,13 @@
 }
 
 .footer-contact-info .contact-text i {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: #667eea;
 }
 
 .footer-bottom-row {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px 0 20px 0;
+  padding: 12px 0 12px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -128,7 +128,7 @@
 
 .footer-copyright {
   color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 400;
 }
 
@@ -139,21 +139,21 @@
   }
   
   .footer-contact-section {
-    padding: 40px 0 25px 0;
+    padding: 20px 0 12px 0;
   }
   
   .footer-section-title {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
   }
   
   .footer-contact-info .contact-link,
   .footer-contact-info .contact-text {
-    font-size: 0.9rem;
-    padding: 10px 16px;
+    font-size: 0.75rem;
+    padding: 6px 12px;
   }
   
   .footer-copyright {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
   }
 }
 
@@ -163,21 +163,21 @@
   }
   
   .footer-contact-section {
-    padding: 30px 0 20px 0;
+    padding: 15px 0 10px 0;
   }
   
   .footer-section-title {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
   }
   
   .footer-contact-info .contact-link,
   .footer-contact-info .contact-text {
-    font-size: 0.85rem;
-    padding: 8px 14px;
+    font-size: 0.7rem;
+    padding: 5px 10px;
   }
   
   .footer-copyright {
-    font-size: 0.8rem;
+    font-size: 0.65rem;
   }
 }
 
