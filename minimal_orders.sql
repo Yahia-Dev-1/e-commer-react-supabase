@@ -1,15 +1,11 @@
--- FULL SOLUTION: Create orders table with ALL order data
+-- MINIMAL SOLUTION: Create orders table with ONLY essential columns
 DROP TABLE IF EXISTS orders CASCADE;
 
--- Create table with all order data fields
+-- Create table with minimal columns only
 CREATE TABLE orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     status TEXT DEFAULT 'pending',
     total FLOAT DEFAULT 0,
-    orderNumber TEXT,
-    userEmail TEXT,
-    items TEXT,
-    shipping TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
