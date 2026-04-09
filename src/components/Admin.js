@@ -237,6 +237,12 @@ export default function Admin({ darkMode = true }) {
   const rejectOrder = async (orderId) => {
     const orderToReject = orders.find(order => order.id === orderId);
     if (!orderToReject) return;
+    
+    // Check if already rejected (prevent double stock restoration)
+    if (orderToReject.status === 'rejected') {
+      alert('Order is already rejected!');
+      return;
+    }
 
     const updatedOrders = orders.map(order =>
       order.id === orderId ? { ...order, status: 'rejected' } : order
@@ -317,22 +323,34 @@ export default function Admin({ darkMode = true }) {
 
   const restoreProductQuantities = async (order) => {
     try {
-      // Update localStorage
-      const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
+      // 🆕 Get current products from Supabase first (correct source of truth)
+      const { data: currentProducts, error: fetchError } = await getProductsFromSupabase(100, 0);
+      
+      if (fetchError || !currentProducts) {
+        console.error('Could not fetch products from Supabase:', fetchError);
+        return;
+      }
+      
+      // Calculate new quantities
+      const updatedProducts = [...currentProducts];
       
       order.items.forEach(item => {
-        const productIndex = existingProducts.findIndex(p => p.id === item.id);
+        const productIndex = updatedProducts.findIndex(p => p.id === item.id);
         if (productIndex !== -1) {
-          existingProducts[productIndex].quantity += item.quantity;
+          // 🆕 Add back the quantity
+          const newQuantity = updatedProducts[productIndex].quantity + item.quantity;
+          updatedProducts[productIndex].quantity = newQuantity;
+          console.log(`🔄 Restored ${item.quantity} to ${item.name}, new stock: ${newQuantity}`);
         }
       });
       
-      localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts));
+      // Update localStorage
+      localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts));
       
       // Update Supabase for real-time sync across all devices
       for (const item of order.items) {
         try {
-          const product = existingProducts.find(p => p.id === item.id);
+          const product = updatedProducts.find(p => p.id === item.id);
           if (product) {
             await updateProductInSupabase(item.id, { quantity: product.quantity });
           }
@@ -344,7 +362,7 @@ export default function Admin({ darkMode = true }) {
       // Trigger update event
       window.dispatchEvent(new Event('productsUpdated'));
       
-      console.log('Product quantities restored after order rejection/deletion');
+      console.log('✅ Product quantities restored after order rejection/deletion');
     } catch (error) {
       console.error('Error restoring product quantities:', error);
     }
