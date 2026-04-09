@@ -1,9 +1,11 @@
-import React, { useState,useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
+import { useToast } from '../contexts/ToastContext';
 import '../styles/cart.css'
 
 export default function Cart({ cartItems, updateQuantity, clearCart, createOrder, darkMode = false, products = [] }) {
+  const showToast = useToast();
   const navigate = useNavigate()
   const [showAnimation, setShowAnimation] = useState(false)
   const [showShippingForm, setShowShippingForm] = useState(false)
@@ -65,7 +67,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
     
     const availableQuantity = checkAvailableQuantity(itemId, newQuantity)
     if (availableQuantity < newQuantity) {
-      alert(`Sorry, only ${availableQuantity} items available for this product.`)
+      showToast(`Sorry, only ${availableQuantity} items available for this product.`, 'warning')
       updateQuantity(itemId, availableQuantity)
     } else {
       updateQuantity(itemId, newQuantity)
@@ -88,14 +90,14 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
     // Validate form data
     if (!shippingData.fullName || !shippingData.phone || !shippingData.governorate || 
         !shippingData.city || !shippingData.street || !shippingData.building) {
-      alert('⚠️ Please fill in all required fields marked with *')
+      showToast('⚠️ Please fill in all required fields marked with *', 'warning')
       return
     }
     
     // Validate phone number
     const phoneRegex = /^[\d\s\-\+\(\)]+$/
     if (!phoneRegex.test(shippingData.phone)) {
-      alert('⚠️ Please enter a valid phone number')
+      showToast('⚠️ Please enter a valid phone number', 'warning')
       return
     }
     
