@@ -616,8 +616,8 @@ export default function Admin({ darkMode = true }) {
                       <p className="order-date font-weight-bold">Order Date: {formatDate(order.date)}</p>
                       <p className="order-status font-weight-bold">Status: {order.status}</p>
                       <p className="order-total font-weight-bold">Total: ${order.total.toFixed(2)}</p>
-                      <p className="order-items font-weight-bold">Number of Items: {order.items.length}</p>
-                      {order.shipping && Object.keys(order.shipping).length > 0 && (
+                      <p className="order-items font-weight-bold">Number of Items: {order.items && order.items.length || 0}</p>
+                      {order.shipping && order.shipping && Object.keys(order.shipping).length > 0 && (
                         <div className="shipping-info">
                           <h4>Shipping Details:</h4>
                           <p><strong>Name:</strong> {order.shipping.fullName}</p>
