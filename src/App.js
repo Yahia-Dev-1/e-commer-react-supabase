@@ -131,22 +131,43 @@ function AppContent() {
         setIsLoadingProducts(true)
         const { getProductsFromSupabase } = await import('./utils/supabase')
         
-        // 🆕 Fetch with pagination (first 20 products only)
+        // 🆕 Fetch from Supabase
         const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0)
         
         if (!isMounted) return
         
-        console.log('📥 Initial fetch:', supabaseProducts.length, 'products')
-        setProducts(supabaseProducts)
+        console.log('📥 Supabase fetch:', supabaseProducts.length, 'products')
         
-        // Save limited products to localStorage
+        // 🆕 Load from localStorage (may have products not in Supabase yet)
+        let localProducts = []
         try {
-          localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
+          const localData = localStorage.getItem('ecommerce_products')
+          if (localData) {
+            localProducts = JSON.parse(localData)
+            console.log('💾 localStorage has:', localProducts.length, 'products')
+          }
+        } catch (e) {
+          console.warn('Could not parse localStorage products')
+        }
+        
+        // 🆕 Merge: Supabase + localStorage products (avoid duplicates by ID)
+        const supabaseIds = new Set(supabaseProducts.map(p => p.id))
+        const uniqueLocalProducts = localProducts.filter(p => !supabaseIds.has(p.id))
+        const mergedProducts = [...supabaseProducts, ...uniqueLocalProducts]
+        
+        console.log('🔄 Merged:', supabaseProducts.length, 'from Supabase +', uniqueLocalProducts.length, 'from localStorage =', mergedProducts.length, 'total')
+        setProducts(mergedProducts)
+        
+        // Save merged to localStorage
+        try {
+          localStorage.setItem('ecommerce_products', JSON.stringify(mergedProducts.slice(0, 20)))
         } catch (e) {
           console.warn('localStorage quota exceeded, skipping cache')
         }
       } catch (error) {
         console.error('Error fetching products:', error)
+        // 🆕 Fallback: load from localStorage only
+        loadProducts()
       } finally {
         if (isMounted) setIsLoadingProducts(false)
       }
