@@ -632,7 +632,7 @@ export default function Admin({ darkMode = true }) {
                       )}
                     </div>
                     <div className="order-items">
-                      {order.items.map((item, index) => (
+                      {order.items && order.items.map((item, index) => (
                         <div key={index} className="order-item">
                           <div className="item-image">
                             <img src={item.image} alt={item.name} />
