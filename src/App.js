@@ -581,8 +581,8 @@ function AppContent() {
       setOrders(prevOrders => [savedOrder, ...prevOrders])
     }
     
-    // 🆕 Subtract quantities from Supabase after successful order
-    await subtractProductQuantities(cartItems)
+    // ❌ REMOVED: Don't subtract stock here - Admin will do it when approving
+    // Stock will be deducted when admin accepts the order
     
     setCartItems([])
     localStorage.removeItem('cartItems')
