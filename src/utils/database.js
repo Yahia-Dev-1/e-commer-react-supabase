@@ -368,7 +368,7 @@ class Database {
       // Check if trying to modify a protected admin
       if (this.isProtectedAdmin(userToUpdate.email) && !this.canModifyProtectedAdmin()) {
         console.error('Unauthorized attempt to modify protected admin:', userToUpdate.email);
-        alert('❌ Cannot modify protected admin accounts!\n\nOnly yahiapro400@gmail.com can modify protected admins.');
+        console.error('❌ Cannot modify protected admin accounts!\n\nOnly yahiapro400@gmail.com can modify protected admins.');
         return null;
       }
 
@@ -404,7 +404,7 @@ class Database {
     // Enhanced protection for protected admins
     if (this.isProtectedAdmin(userToDelete.email)) {
       console.error('Attempted to delete protected admin:', userToDelete.email);
-      alert('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
+      console.error('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
       return false;
     }
 
@@ -413,7 +413,7 @@ class Database {
     
     if (adminEmails.includes(userToDelete.email) && !this.canModifyProtectedAdmin()) {
       console.error('Unauthorized attempt to delete admin:', userToDelete.email);
-      alert('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
+      console.error('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
       return false;
     }
 
