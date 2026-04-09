@@ -9,19 +9,15 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Products table operations
 export const addProductToSupabase = async (product) => {
   try {
-    // Include all fields that AddProducts.js sends
+    // Use ONLY basic columns that definitely exist
     const productData = {
       title: product.title,
       price: product.price,
       quantity: product.quantity,
-      image: product.image,
-      description: product.description || '',
-      category: product.category || 'other',
-      createdBy: product.createdBy || 'Admin',
-      isProtected: product.isProtected || false
+      image: product.image
     };
     
-    console.log('📝 Adding product to Supabase:', productData);
+    console.log('📝 Adding product to Supabase (minimal):', productData);
     
     const { data, error } = await supabase
       .from('products')
@@ -30,6 +26,15 @@ export const addProductToSupabase = async (product) => {
     
     if (error) throw error;
     console.log('✅ Product added to Supabase:', data[0]);
+    
+    // Add extra fields for UI only
+    if (data && data[0]) {
+      data[0].description = product.description || '';
+      data[0].category = product.category || 'other';
+      data[0].createdBy = product.createdBy || 'Admin';
+      data[0].isProtected = product.isProtected || false;
+    }
+    
     return data[0];
   } catch (error) {
     console.error('❌ Error adding product to Supabase:', error);
