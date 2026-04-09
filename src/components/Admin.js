@@ -617,6 +617,22 @@ export default function Admin({ darkMode = true }) {
                       <p className="order-status font-weight-bold">Status: {order.status}</p>
                       <p className="order-total font-weight-bold">Total: ${order.total.toFixed(2)}</p>
                       <p className="order-items font-weight-bold">Number of Items: {order.items && order.items.length || 0}</p>
+                      
+                      {/* Shipping Details - Always Show */}
+                      {order.shipping && (
+                        <div className="shipping-info">
+                          <h4>📦 Shipping Details:</h4>
+                          <p><strong>Name:</strong> {order.shipping.fullName}</p>
+                          <p><strong>Phone:</strong> {order.shipping.phone}</p>
+                          <p><strong>Address:</strong> {order.shipping.street}, {order.shipping.building}</p>
+                          <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
+                          <p><strong>City:</strong> {order.shipping.city}, {order.shipping.governorate}</p>
+                          {order.shipping.additionalInfo && (
+                            <p><strong>Notes:</strong> {order.shipping.additionalInfo}</p>
+                          )}
+                        </div>
+                      )}
+                      
                       {order.shipping && order.shipping && Object.keys(order.shipping).length > 0 && (
                         <div className="shipping-info">
                           <h4>Shipping Details:</h4>
@@ -647,6 +663,26 @@ export default function Admin({ darkMode = true }) {
                       ))}
                     </div>
                     <div className="order-actions">
+                      {/* Accept Button for Pending Orders */}
+                      {order.status === 'pending' && (
+                        <button 
+                          className="accept-btn"
+                          onClick={() => approveOrder(order.id)}
+                        >
+                          Accept Order
+                        </button>
+                      )}
+                      
+                      {/* Reject Button for Pending Orders */}
+                      {order.status === 'pending' && (
+                        <button 
+                          className="reject-btn"
+                          onClick={() => rejectOrder(order.id)}
+                        >
+                          Reject Order
+                        </button>
+                      )}
+                      
                       {/* Accept Button for Processing Orders */}
                       {order.status === 'Processing' && (
                         <button 

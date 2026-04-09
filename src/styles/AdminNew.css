@@ -24,6 +24,55 @@
   transform: translateY(0);
 }
 
+/* Accept Button Styling */
+.accept-btn {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.accept-btn:hover {
+  background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.accept-btn:active {
+  transform: translateY(0);
+}
+
+/* Shipping Info Styling */
+.shipping-info {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shipping-info h4 {
+  color: #667eea;
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.shipping-info p {
+  margin: 5px 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.shipping-info strong {
+  color: #fff;
+}
+
 /* Add Admin Button Styling */
 .add-admin-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
