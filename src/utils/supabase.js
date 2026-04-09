@@ -245,21 +245,23 @@ export const getOrdersFromSupabase = async (limit = 50, offset = 0) => {
 };
 
 export const subscribeToOrders = (callback) => {
-  const channel = supabase
-    .channel('orders_changes')
-    .on('postgres_changes', 
-      { event: '*', schema: 'public', table: 'orders' },
-      async (payload) => {
-        const { data } = await supabase
-          .from('orders')
-          .select('*');
-        callback(data || []);
-      }
-    )
-    .subscribe();
+  const channelName = 'orders_changes';
+  const channel = supabase.channel(channelName);
+  
+  channel.on('postgres_changes', 
+    { event: '*', schema: 'public', table: 'orders' },
+    async (payload) => {
+      const { data } = await supabase
+        .from('orders')
+        .select('*');
+      callback(data || []);
+    }
+  );
+  
+  const subscription = channel.subscribe();
 
   return () => {
-    supabase.removeChannel(channel);
+    channel.unsubscribe();
   };
 };
 
