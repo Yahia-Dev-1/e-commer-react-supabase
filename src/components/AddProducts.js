@@ -21,7 +21,7 @@ export default function AddProducts({ darkMode = false }) {
   
   // Sync productList with products from Supabase
   useEffect(()=>{
-    // تحميل المنتجات من localStorage
+    // Load products from localStorage
     try {
       const storedProducts = localStorage.getItem('ecommerce_products')
       if (storedProducts) {
@@ -142,13 +142,13 @@ export default function AddProducts({ darkMode = false }) {
       if (products.length > 50) {
         const limitedProducts = products.slice(-50)
         localStorage.setItem('ecommerce_products', JSON.stringify(limitedProducts))
-        console.log('🧹 Auto-cleanup: Reduced products from', products.length, 'to', limitedProducts.length)
+        console.log('Clean up: Reduced products from', products.length, 'to', limitedProducts.length)
       }
     } catch (error) {
       console.error('Error during auto-cleanup:', error)
     }
 
-    // تنظيف التخزين لمنع مشاكل الذاكرة
+    // Clean up storage to prevent memory issues
     cleanupStorage()
     
     setIsLoading(false)
@@ -207,10 +207,10 @@ export default function AddProducts({ darkMode = false }) {
     }
   }
 
-  // دالة لتنظيف التخزين
+  // Function to clean up storage
   const cleanupStorage = () => {
     try {
-      // تنظيف البيانات القديمة
+      // Clean up old data
       const keysToClean = [
         'ecommerce_products_old',
         'ecommerce_categories_old',
@@ -226,7 +226,7 @@ export default function AddProducts({ darkMode = false }) {
         }
       })
       
-      // تنظيف sessionStorage
+      // Clean up sessionStorage
       try {
         sessionStorage.clear()
       } catch (e) {
@@ -319,7 +319,7 @@ export default function AddProducts({ darkMode = false }) {
       return
     }
 
-    // تحديث المنتج في Supabase ومحلياً
+    // Update product in Supabase and locally
     const updatedProductData = {
       price: parseFloat(editingProduct.price),
       quantity: parseInt(editingProduct.quantity),
@@ -370,21 +370,21 @@ export default function AddProducts({ darkMode = false }) {
   }
 
   // Function to add new category
-  // دالة لحذف كاتجري
+  // Function to delete category
   const handleDeleteCategory = (categoryToDelete) => {
     if (window.confirm(`Are you sure you want to delete the category "${categoryToDelete}"? This will also remove it from all products.`)) {
       try {
-        // حذف الكاتجري من قائمة الكاتجري
+        // Delete category from category list
         const updatedCategories = categories.filter(cat => cat !== categoryToDelete)
         setCategories(updatedCategories)
         localStorage.setItem('ecommerce_categories', JSON.stringify(updatedCategories))
 
-        // تحديث المنتجات التي تستخدم هذه الكاتجري
+        // Update products that use this category
         const updatedProducts = products.map(product => {
           if (product.category === categoryToDelete) {
             return {
               ...product,
-              category: 'Other' // تعيين كاتجري افتراضية
+              category: 'Other' // Set default category
             }
           }
           return product
@@ -393,15 +393,15 @@ export default function AddProducts({ darkMode = false }) {
         setProducts(updatedProducts)
         localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts))
 
-        // إرسال حدث مخصص لتحديث المنتجات في الصفحة الرئيسية
+        // Send custom event to update products on home page
         window.dispatchEvent(new Event('productsUpdated'))
 
-        setMessage(`✅ Category "${categoryToDelete}" deleted successfully! Products moved to "Other" category.`)
+        setMessage(`Category "${categoryToDelete}" deleted successfully! Products moved to "Other" category.`)
         setTimeout(() => setMessage(''), 4000)
-        console.log(`✅ Category "${categoryToDelete}" deleted and products updated`)
+        console.log(`Category "${categoryToDelete}" deleted and products updated`)
       } catch (error) {
         console.error('Error deleting category:', error)
-        setMessage('⚠️ Error deleting category')
+        setMessage('Error deleting category')
         setTimeout(() => setMessage(''), 3000)
       }
     }
@@ -497,7 +497,7 @@ export default function AddProducts({ darkMode = false }) {
             <h2>All Products ({productList.length})</h2>
           </div>
           <div className='products-grid'>
-                {/* تم حذف استخدام ProductItem لعدم تعريفه */}
+                {/* ProductItem usage removed due to undefined */}
           </div>
         </div>
       )}

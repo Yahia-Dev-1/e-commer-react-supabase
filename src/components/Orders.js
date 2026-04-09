@@ -85,19 +85,19 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     setSelectedOrder(null);
   };
 
-  // 🆕 دالة إلغاء الطلب للمستخدم
+  // 🆕 Function to cancel order for user
   const cancelOrder = async (orderId) => {
     const orderToCancel = userOrders.find(order => order.id === orderId);
     if (!orderToCancel) return;
 
-    // فقط الطلبات في حالة Processing ممكن تتCancel
+    // Only orders in Processing status can be cancelled
     if (orderToCancel.status !== 'Processing') {
       showToast('❌ You can only cancel orders that are still being processed.', 'error');
       return;
     }
 
     if (window.confirm('Are you sure you want to cancel this order?')) {
-      // 1. إرجاع الكميات للمخزون
+      // 1. Return quantities to stock
       for (const item of orderToCancel.items || []) {
         try {
           const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
@@ -116,7 +116,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
         }
       }
 
-      // 2. حذف الطلب من localStorage
+      // 2. Delete order from localStorage
       const allOrders = JSON.parse(localStorage.getItem('ecommerce_orders') || '[]');
       const updatedOrders = allOrders.filter(o => o.id !== orderId);
       localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
