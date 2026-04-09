@@ -277,20 +277,31 @@ export default function AddProducts({ darkMode = false }) {
 
     try {
       // Save to Supabase - will sync to all devices automatically!
+      console.log('📝 Calling addProductToSupabase with:', productData)
       const savedProduct = await addProductToSupabase(productData)
-      console.log('✅ Saved to Supabase:', savedProduct)
+      console.log('📦 Returned from addProductToSupabase:', savedProduct)
       
       // Add to local state with Supabase ID
       if (savedProduct && savedProduct.id) {
+        console.log('✅ Product has ID, adding to state:', savedProduct.id)
         const updatedProducts = [...products, savedProduct]
         setProducts(updatedProducts)
         localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
+        console.log('💾 Saved to localStorage, total products:', updatedProducts.length)
+        setMessage(`✅ Product "${productData.title}" added!`)
+      } else {
+        console.error('❌ savedProduct is null or has no ID:', savedProduct)
+        // Fallback: save locally
+        const localProduct = { ...productData, id: String(Date.now()) }
+        const updatedProducts = [...products, localProduct]
+        setProducts(updatedProducts)
+        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts.slice(-50)))
+        setMessage(`⚠️ Saved locally only.`)
       }
       
-      setMessage(`✅ Product "${productData.title}" added! All devices will see it.`)
       clearForm()
     } catch (error) {
-      console.error('Supabase error:', error)
+      console.error('❌ CATCH BLOCK - Supabase error:', error)
       // Fallback: save locally only with text ID
       const localProduct = { ...productData, id: String(Date.now()) }
       const updatedProducts = [...products, localProduct]
