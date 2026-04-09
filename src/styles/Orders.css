@@ -7,6 +7,38 @@
   transition: all 0.3s ease;
 }
 
+/* Shipping Status Display Styling */
+.order-shipping-status {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  border: 2px solid rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.order-shipping-status h4 {
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-shipping-status p {
+  margin: 8px 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.order-shipping-status strong {
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
 .orders-container::before {
   content: '';
   position: absolute;
