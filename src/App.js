@@ -372,8 +372,6 @@ function AppContent() {
         }
       })
     }
-    
-    setShowAddToCartModal(true)
   }
 
 
@@ -706,8 +704,6 @@ function AppContent() {
         }
       })
     }
-    // Then show the modal
-    setShowAddToCartModal(true)
   }
 
   const handleLogout = () => {
