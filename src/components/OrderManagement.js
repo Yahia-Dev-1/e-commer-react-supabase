@@ -160,7 +160,7 @@ export default function OrderManagement({ darkMode = false }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return 'Not Available';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
@@ -170,7 +170,7 @@ export default function OrderManagement({ darkMode = false }) {
   };
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return 'Not Available';
     const date = new Date(dateString);
     return date.toLocaleString('en-US', {
       year: 'numeric',
@@ -267,7 +267,7 @@ export default function OrderManagement({ darkMode = false }) {
                         </div>
                         <div className="item-details">
                           <h5>{item.name || item.title || 'Unknown Product'}</h5>
-                          <p>Code: #{item.id || 'N/A'}</p>
+                          <p>Code: #{item.id || 'Not Available'}</p>
                           <p>Price: ${item.price || '0.00'}</p>
                           <p>Quantity: {item.quantity || 0}</p>
                           <p>Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
@@ -295,10 +295,10 @@ export default function OrderManagement({ darkMode = false }) {
                     <pre>{order.shipping}</pre>
                   ) : (
                     <>
-                      <p><strong>Name:</strong> {order.shipping.fullName || 'N/A'}</p>
-                      <p><strong>Phone:</strong> {order.shipping.phone || 'N/A'}</p>
-                      <p><strong>Address:</strong> {order.shipping.street || 'N/A'}, {order.shipping.building || 'N/A'}</p>
-                      <p><strong>City:</strong> {order.shipping.city || 'N/A'}, {order.shipping.governorate || 'N/A'}</p>
+                      <p><strong>Name:</strong> {order.shipping.fullName || 'Not Available'}</p>
+                      <p><strong>Phone:</strong> {order.shipping.phone || 'Not Available'}</p>
+                      <p><strong>Address:</strong> {order.shipping.street || 'Not Available'}, {order.shipping.building || 'Not Available'}</p>
+                      <p><strong>City:</strong> {order.shipping.city || 'Not Available'}, {order.shipping.governorate || 'Not Available'}</p>
                       {order.shipping.addressInCountry && (
                         <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
                       )}
