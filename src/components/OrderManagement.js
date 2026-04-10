@@ -9,6 +9,8 @@ export default function OrderManagement({ darkMode = false }) {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
   const [editForm, setEditForm] = useState({
     status: 'pending'
   });
@@ -53,16 +55,45 @@ export default function OrderManagement({ darkMode = false }) {
     }
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    if (window.confirm('Are you sure you want to delete this order?')) {
-      try {
-        await deleteOrderFromSupabase(orderId);
-        showToast('✅ Order deleted successfully', 'success');
-        loadOrders();
-      } catch (error) {
-        console.error('Error deleting order:', error);
-        showToast('❌ Failed to delete order', 'error');
-      }
+  const handleDeleteOrder = (orderId) => {
+    const orderToDelete = orders.find(order => order.id === orderId);
+    if (!orderToDelete) return;
+    
+    setSelectedOrder(orderToDelete);
+    setShowDeleteModal(true);
+    setDeleteReason('');
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!deleteReason) {
+      showToast('Please select a reason for deletion', 'error');
+      return;
+    }
+
+    try {
+      await deleteOrderFromSupabase(selectedOrder.id);
+      
+      // Add deletion notification to localStorage
+      const notifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
+      const notification = {
+        id: Date.now(),
+        type: 'deletion',
+        message: `Your order #${selectedOrder.orderNumber} has been deleted. Reason: ${deleteReason}`,
+        date: new Date().toISOString(),
+        userEmail: selectedOrder.userEmail || selectedOrder.user?.email,
+        read: false
+      };
+      notifications.push(notification);
+      localStorage.setItem('order_notifications', JSON.stringify(notifications));
+      
+      showToast('✅ Order deleted successfully', 'success');
+      setShowDeleteModal(false);
+      setSelectedOrder(null);
+      setDeleteReason('');
+      loadOrders();
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      showToast('❌ Failed to delete order', 'error');
     }
   };
 
@@ -136,6 +167,49 @@ export default function OrderManagement({ darkMode = false }) {
                 </div>
               </div>
 
+              {/* Order Items */}
+              {order.items && order.items.length > 0 && (
+                <div className="order-items">
+                  <h4>📦 Order Items</h4>
+                  {order.items.map((item, index) => (
+                    <div key={index} className="order-item">
+                      <div className="item-image">
+                        <img src={item.image} alt={item.name} />
+                      </div>
+                      <div className="item-details">
+                        <h5>{item.name}</h5>
+                        <p>Price: ${item.price}</p>
+                        <p>Quantity: {item.quantity}</p>
+                        <p>Total: ${(item.price * item.quantity).toFixed(2)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Shipping Details */}
+              {order.shipping && (
+                <div className="order-shipping">
+                  <h4>🚚 Shipping Details</h4>
+                  {typeof order.shipping === 'string' ? (
+                    <pre>{order.shipping}</pre>
+                  ) : (
+                    <>
+                      <p><strong>Name:</strong> {order.shipping.fullName || 'N/A'}</p>
+                      <p><strong>Phone:</strong> {order.shipping.phone || 'N/A'}</p>
+                      <p><strong>Address:</strong> {order.shipping.street || 'N/A'}, {order.shipping.building || 'N/A'}</p>
+                      <p><strong>City:</strong> {order.shipping.city || 'N/A'}, {order.shipping.governorate || 'N/A'}</p>
+                      {order.shipping.addressInCountry && (
+                        <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
+                      )}
+                      {order.shipping.additionalInfo && (
+                        <p><strong>Notes:</strong> {order.shipping.additionalInfo}</p>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
               <div className="order-details">
                 <div className="order-total">
                   <span>Total:</span>
@@ -198,6 +272,85 @@ export default function OrderManagement({ darkMode = false }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Reason Modal */}
+      {showDeleteModal && selectedOrder && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Delete Order #{selectedOrder.orderNumber}</h2>
+              <button className="close-btn" onClick={() => setShowDeleteModal(false)}>×</button>
+            </div>
+
+            <div className="delete-reason-form">
+              <p>Please select a reason for deleting this order:</p>
+              <div className="reason-options">
+                <label className="reason-option">
+                  <input
+                    type="radio"
+                    value="Incomplete data"
+                    checked={deleteReason === 'Incomplete data'}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                  />
+                  <span>📝 Incomplete data - Order data is incomplete</span>
+                </label>
+                <label className="reason-option">
+                  <input
+                    type="radio"
+                    value="Invalid data"
+                    checked={deleteReason === 'Invalid data'}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                  />
+                  <span>❌ Invalid data - Order data is incorrect</span>
+                </label>
+                <label className="reason-option">
+                  <input
+                    type="radio"
+                    value="Product out of stock"
+                    checked={deleteReason === 'Product out of stock'}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                  />
+                  <span>📦 Product out of stock - Product is no longer available</span>
+                </label>
+                <label className="reason-option">
+                  <input
+                    type="radio"
+                    value="Customer request"
+                    checked={deleteReason === 'Customer request'}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                  />
+                  <span>👤 Customer request - Customer requested cancellation</span>
+                </label>
+                <label className="reason-option">
+                  <input
+                    type="radio"
+                    value="Other"
+                    checked={deleteReason === 'Other'}
+                    onChange={(e) => setDeleteReason(e.target.value)}
+                  />
+                  <span>🔍 Other - Other reason</span>
+                </label>
+              </div>
+
+              <div className="form-actions">
+                <button 
+                  className="delete-btn" 
+                  onClick={confirmDeleteOrder}
+                  disabled={!deleteReason}
+                >
+                  Delete Order
+                </button>
+                <button 
+                  className="cancel-btn" 
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
