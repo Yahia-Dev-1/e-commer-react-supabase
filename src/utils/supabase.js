@@ -195,15 +195,14 @@ export const subscribeToUsers = (callback) => {
 // Order functions
 export const addOrderToSupabase = async (order) => {
   try {
-    // Use essential columns + shipping + shipping status + user_email
+    // Use only columns that exist in orders table: id, status, total, shipping, created_at
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0,
-      shipping: JSON.stringify(order.shipping || {}),
-      user_email: order.userEmail || order.user?.email || localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser')
+      shipping: JSON.stringify(order.shipping || {})
     };
     
-    console.log('=== MINIMAL SOLUTION + SHIPPING + STATUS + USER_EMAIL: Inserting order ===');
+    console.log('=== INSERTING ORDER TO SUPABASE ===');
     console.log('Original order:', order);
     console.log('Order data to save:', orderData);
     
@@ -315,12 +314,11 @@ export const subscribeToOrders = (callback) => {
   };
 };
 
-// 🆕 Update order status and tracking information
+// 🆕 Update order status (only status column exists)
 export const updateOrderStatus = async (orderId, status, trackingInfo = {}) => {
   try {
     const updateData = {
-      status: status,
-      ...trackingInfo
+      status: status
     };
     
     const { data, error } = await supabase

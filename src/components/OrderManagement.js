@@ -10,13 +10,7 @@ export default function OrderManagement({ darkMode = false }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
-    status: 'pending',
-    preparation_start_date: '',
-    preparation_end_date: '',
-    shipping_start_date: '',
-    shipping_end_date: '',
-    shipping_location: '',
-    estimated_delivery_date: ''
+    status: 'pending'
   });
 
   useEffect(() => {
@@ -36,13 +30,7 @@ export default function OrderManagement({ darkMode = false }) {
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
     setEditForm({
-      status: order.status || 'pending',
-      preparation_start_date: order.preparation_start_date || '',
-      preparation_end_date: order.preparation_end_date || '',
-      shipping_start_date: order.shipping_start_date || '',
-      shipping_end_date: order.shipping_end_date || '',
-      shipping_location: order.shipping_location || '',
-      estimated_delivery_date: order.estimated_delivery_date || ''
+      status: order.status || 'pending'
     });
     setShowEditModal(true);
   };
@@ -50,16 +38,7 @@ export default function OrderManagement({ darkMode = false }) {
   const handleSaveOrder = async (e) => {
     e.preventDefault();
     try {
-      const trackingInfo = {
-        preparation_start_date: editForm.preparation_start_date,
-        preparation_end_date: editForm.preparation_end_date,
-        shipping_start_date: editForm.shipping_start_date,
-        shipping_end_date: editForm.shipping_end_date,
-        shipping_location: editForm.shipping_location,
-        estimated_delivery_date: editForm.estimated_delivery_date
-      };
-      
-      await updateOrderStatus(selectedOrder.id, editForm.status, trackingInfo);
+      await updateOrderStatus(selectedOrder.id, editForm.status);
       showToast('✅ Order updated successfully', 'success');
       setShowEditModal(false);
       loadOrders();
@@ -141,7 +120,6 @@ export default function OrderManagement({ darkMode = false }) {
                 <div className="order-info">
                   <h3>Order #{order.orderNumber}</h3>
                   <p className="order-date">{formatDate(order.created_at)}</p>
-                  <p className="order-user">User: {order.user_email || 'Unknown'}</p>
                 </div>
                 <div className="order-status">
                   <span 
@@ -173,25 +151,6 @@ export default function OrderManagement({ darkMode = false }) {
                   </button>
                 </div>
               </div>
-
-              {/* Timeline Details */}
-              {(order.preparation_start_date || order.shipping_start_date) && (
-                <div className="order-timeline">
-                  <h4>📅 Timeline Details</h4>
-                  {order.preparation_start_date && (
-                    <p>Preparation: {formatDate(order.preparation_start_date)} - {formatDate(order.preparation_end_date)}</p>
-                  )}
-                  {order.shipping_start_date && (
-                    <p>Shipping: {formatDate(order.shipping_start_date)} - {formatDate(order.shipping_end_date)}</p>
-                  )}
-                  {order.shipping_location && (
-                    <p>Shipping from: {order.shipping_location}</p>
-                  )}
-                  {order.estimated_delivery_date && (
-                    <p>Estimated delivery: {formatDate(order.estimated_delivery_date)}</p>
-                  )}
-                </div>
-              )}
             </div>
           ))}
         </div>
@@ -221,63 +180,6 @@ export default function OrderManagement({ darkMode = false }) {
                   <option value="Shipped">Shipped</option>
                   <option value="Delivered">Delivered</option>
                 </select>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Preparation Start Date</label>
-                  <input
-                    type="date"
-                    value={editForm.preparation_start_date}
-                    onChange={(e) => setEditForm({ ...editForm, preparation_start_date: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Preparation End Date</label>
-                  <input
-                    type="date"
-                    value={editForm.preparation_end_date}
-                    onChange={(e) => setEditForm({ ...editForm, preparation_end_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Shipping Start Date</label>
-                  <input
-                    type="date"
-                    value={editForm.shipping_start_date}
-                    onChange={(e) => setEditForm({ ...editForm, shipping_start_date: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Shipping End Date</label>
-                  <input
-                    type="date"
-                    value={editForm.shipping_end_date}
-                    onChange={(e) => setEditForm({ ...editForm, shipping_end_date: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Shipping Location</label>
-                <input
-                  type="text"
-                  value={editForm.shipping_location}
-                  onChange={(e) => setEditForm({ ...editForm, shipping_location: e.target.value })}
-                  placeholder="e.g., Cairo, Egypt"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Estimated Delivery Date</label>
-                <input
-                  type="date"
-                  value={editForm.estimated_delivery_date}
-                  onChange={(e) => setEditForm({ ...editForm, estimated_delivery_date: e.target.value })}
-                />
               </div>
 
               <div className="form-actions">

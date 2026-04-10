@@ -137,18 +137,9 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       { id: 1, title: 'Order Placed', description: 'Your order has been received', completed: true },
       { id: 2, title: 'Pending Approval', description: 'Waiting for admin approval', completed: status === 'approved' || status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
       { id: 3, title: 'Processing', description: 'We are preparing your order', completed: status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 4, title: 'Preparing', description: order?.preparation_start_date && order?.preparation_end_date 
-        ? `Preparing from ${formatDate(order.preparation_start_date)} to ${formatDate(order.preparation_end_date)}`
-        : 'Your items are being prepared', 
-        completed: status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 5, title: 'Shipped', description: order?.shipping_start_date && order?.shipping_end_date 
-        ? `Shipping from ${formatDate(order.shipping_start_date)} to ${formatDate(order.shipping_end_date)}`
-        : 'Your order is on its way', 
-        completed: status === 'Shipped' || status === 'Delivered' },
-      { id: 6, title: 'Delivered', description: order?.estimated_delivery_date 
-        ? `Expected delivery by ${formatDate(order.estimated_delivery_date)}`
-        : 'Your order has been delivered', 
-        completed: status === 'Delivered' }
+      { id: 4, title: 'Preparing', description: 'Your items are being prepared', completed: status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 5, title: 'Shipped', description: 'Your order is on its way', completed: status === 'Shipped' || status === 'Delivered' },
+      { id: 6, title: 'Delivered', description: 'Your order has been delivered', completed: status === 'Delivered' }
     ];
     return steps;
   };
@@ -291,10 +282,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
             </div>
 
             <div className="tracking-footer">
-              <p>Estimated delivery: {selectedOrder?.estimated_delivery_date ? formatDate(selectedOrder.estimated_delivery_date) : formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))}</p>
-              {selectedOrder?.shipping_location && (
-                <p>Shipping from: {selectedOrder.shipping_location}</p>
-              )}
+              <p>Estimated delivery: {formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))}</p>
             </div>
           </div>
         </div>
