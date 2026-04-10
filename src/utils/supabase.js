@@ -321,10 +321,23 @@ export const updateOrderStatus = async (orderId, status, trackingInfo = {}, esti
       status: status
     };
 
+    // Try to update with estimatedDelivery first
     if (estimatedDelivery) {
-      updateData.estimatedDelivery = estimatedDelivery;
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .update({ ...updateData, estimatedDelivery: estimatedDelivery })
+          .eq('id', orderId)
+          .select();
+
+        if (error) throw error;
+        return data[0];
+      } catch (error) {
+        console.warn('Estimated delivery field may not exist in orders table, trying without it:', error.message);
+      }
     }
 
+    // Fallback: update only status
     const { data, error } = await supabase
       .from('orders')
       .update(updateData)
