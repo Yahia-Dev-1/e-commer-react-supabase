@@ -442,9 +442,9 @@ export const restoreProductQuantities = async (order) => {
 export const addReviewToSupabase = async (review) => {
   try {
     const reviewData = {
-      productId: review.productId,
-      userId: review.userId,
-      userName: review.userName || 'Anonymous',
+      productid: review.productId,
+      userid: review.userId,
+      username: review.userName || 'Anonymous',
       rating: review.rating,
       comment: review.comment || ''
     };
@@ -477,10 +477,10 @@ export const getReviewsFromSupabase = async (productId = null, limit = 50, offse
     let query = supabase.from('reviews').select('*');
 
     if (productId) {
-      query = query.eq('productId', productId);
+      query = query.eq('productid', productId);
     }
 
-    query = query.order('createdAt', { ascending: false }).range(offset, offset + limit - 1);
+    query = query.order('created_at', { ascending: false }).range(offset, offset + limit - 1);
 
     const { data, error } = await query;
 
@@ -500,7 +500,7 @@ export const getProductRating = async (productId) => {
     const { data, error } = await supabase
       .from('reviews')
       .select('rating')
-      .eq('productId', productId);
+      .eq('productid', productId);
 
     if (error) throw error;
 
