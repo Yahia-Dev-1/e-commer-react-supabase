@@ -199,9 +199,22 @@ export const addOrderToSupabase = async (order) => {
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0,
-      shipping: JSON.stringify(order.shipping || {})
+      shipping: JSON.stringify(order.shipping || {}),
+      items: order.items || []
     };
-    
+
+    if (order.orderNumber) {
+      orderData.orderNumber = order.orderNumber;
+    }
+
+    if (order.userId) {
+      orderData.userId = order.userId;
+    }
+
+    if (order.userEmail) {
+      orderData.userEmail = order.userEmail;
+    }
+
     console.log('=== INSERTING ORDER TO SUPABASE ===');
     console.log('Original order:', order);
     console.log('Order data to save:', orderData);
