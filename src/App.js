@@ -609,6 +609,29 @@ function AppContent() {
     // ✅ Clear cart after order is created
     setCartItems([])
     localStorage.removeItem('cartItems')
+
+    // 🆕 Send notification to admin
+    sendAdminNotification('new_order', newOrder)
+  }
+
+  // 🆕 Function to send notification to admin
+  const sendAdminNotification = (type, data) => {
+    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]')
+    const notification = {
+      id: Date.now(),
+      type: type,
+      message: type === 'new_order' 
+        ? `New order #${data.orderNumber} placed by ${data.userEmail || 'Unknown'}. Total: $${data.total.toFixed(2)}`
+        : type === 'cancelled_order'
+        ? `Order #${data.orderNumber} cancelled by ${data.userEmail || 'Unknown'}`
+        : 'Unknown notification',
+      data: data,
+      date: new Date().toISOString(),
+      read: false
+    }
+    adminNotifications.unshift(notification)
+    localStorage.setItem('admin_notifications', JSON.stringify(adminNotifications))
+    console.log('📢 Admin notification sent:', notification)
   }
 
   // 🆕 Function to deduct quantity from Supabase after successful purchase

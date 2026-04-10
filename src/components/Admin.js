@@ -12,6 +12,7 @@ export default function Admin({ darkMode = true }) {
   const [loading, setLoading] = useState(true);
   const [showAllUsers] = useState(true); // Changed to true to show all users by default
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [newAdmin, setNewAdmin] = useState({
     email: '',
     password: '',
@@ -205,6 +206,42 @@ export default function Admin({ darkMode = true }) {
     
     return () => unsubscribe();
   }, [isAuthorized]);
+
+  // 🆕 Load admin notifications
+  useEffect(() => {
+    const loadNotifications = () => {
+      const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
+      setNotifications(adminNotifications);
+    };
+
+    loadNotifications();
+
+    // Subscribe to storage events to update notifications
+    const handleStorageChange = () => {
+      loadNotifications();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // 🆕 Function to mark notification as read
+  const markNotificationAsRead = (notificationId) => {
+    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
+    const updatedNotifications = adminNotifications.map(notif => 
+      notif.id === notificationId ? { ...notif, read: true } : notif
+    );
+    localStorage.setItem('admin_notifications', JSON.stringify(updatedNotifications));
+    setNotifications(updatedNotifications);
+  };
+
+  // 🆕 Function to delete notification
+  const deleteNotification = (notificationId) => {
+    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
+    const updatedNotifications = adminNotifications.filter(notif => notif.id !== notificationId);
+    localStorage.setItem('admin_notifications', JSON.stringify(updatedNotifications));
+    setNotifications(updatedNotifications);
+  };
 
   const deleteUser = async (userId) => {
     const userToDelete = users.find(user => user.id === userId);
@@ -596,6 +633,49 @@ export default function Admin({ darkMode = true }) {
       </div>
 
       <div className="admin-content">
+        {/* 🆕 Notifications Section */}
+        {notifications.length > 0 && (
+          <div className="notifications-section">
+            <div className="section-header">
+              <h2>🔔 Notifications ({notifications.filter(n => !n.read).length})</h2>
+              <button className="clear-all-btn" onClick={() => {
+                localStorage.setItem('admin_notifications', '[]');
+                setNotifications([]);
+              }}>
+                Clear All
+              </button>
+            </div>
+            <div className="notifications-list">
+              {notifications.map(notification => (
+                <div 
+                  key={notification.id} 
+                  className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                  onClick={() => markNotificationAsRead(notification.id)}
+                >
+                  <div className="notification-content">
+                    <span className="notification-icon">
+                      {notification.type === 'new_order' ? '📦' : '❌'}
+                    </span>
+                    <span className="notification-message">{notification.message}</span>
+                    <span className="notification-time">
+                      {new Date(notification.date).toLocaleString()}
+                    </span>
+                  </div>
+                  <button 
+                    className="delete-notification-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteNotification(notification.id);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'stats' && (
           <div className="stats-section">
             <div className="section-header">
