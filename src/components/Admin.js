@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase, getUsersFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const showToast = useToast();
@@ -49,13 +49,14 @@ export default function Admin({ darkMode = true }) {
   const loadData = useCallback(async () => {
     setLoading(true);
     
-    // Get users from Supabase (with localStorage fallback)
+    // Get users from Supabase directly
     let allUsers = [];
     try {
-      allUsers = await database.getUsersAsync();
+      allUsers = await getUsersFromSupabase();
       console.log('Users loaded from Supabase:', allUsers.length);
     } catch (error) {
-      console.log('Using localStorage users:', error.message);
+      console.log('Error loading users from Supabase:', error.message);
+      // Fallback to localStorage
       allUsers = database.getUsers();
     }
     
