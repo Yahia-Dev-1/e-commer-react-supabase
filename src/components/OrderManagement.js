@@ -223,6 +223,7 @@ export default function OrderManagement({ darkMode = false }) {
               {order.items && order.items.length > 0 && (
                 <div className="order-items">
                   <h4>📦 Order Items</h4>
+                  {console.log('Order items:', order.items)}
                   {order.items.map((item, index) => (
                     <div key={index} className="order-item">
                       <div className="item-image">
