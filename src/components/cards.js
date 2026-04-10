@@ -176,12 +176,20 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     try {
       const savedCategories = JSON.parse(localStorage.getItem('ecommerce_categories') || '[]');
       if (savedCategories.length === 0) {
-        return ['All', ...new Set(products.map(product => product.category))];
+        const categories = ['All', ...new Set(products.map(product => product.category))];
+        console.log('=== CATEGORIES FROM PRODUCTS ===');
+        console.log('Categories:', categories);
+        return categories;
       }
+      console.log('=== CATEGORIES FROM LOCALSTORAGE ===');
+      console.log('Saved categories:', savedCategories);
       return savedCategories;
     } catch (error) {
       console.error('Error loading categories:', error);
-      return ['All', ...new Set(products.map(product => product.category))];
+      const categories = ['All', ...new Set(products.map(product => product.category))];
+      console.log('=== CATEGORIES FROM PRODUCTS (ERROR) ===');
+      console.log('Categories:', categories);
+      return categories;
     }
   }, [products])
 
@@ -195,6 +203,8 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
 
   // Handle filter change
   const handleFilterChange = (category) => {
+    console.log('=== FILTER CHANGE ===');
+    console.log('Selected category:', category);
     setActiveFilter(category)
   }
 
