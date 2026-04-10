@@ -119,19 +119,7 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
         
         {/* Dark Mode Toggle - Removed */}
       </div>
-      
-      {/* Brand/Logo - Right Side */}
-      <Link to='/' className={`nav-brand ${user && ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(user.email) ? 'admin-brand' : ''}`} onClick={closeMenu}>
-        <img 
-          src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea'/%3E%3Cstop offset='100%25' style='stop-color:%23764ba2'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='15' fill='url(%23grad1)'/%3E%3Ctext x='50' y='55' font-size='45' font-weight='bold' text-anchor='middle' fill='white'%3EEC%3C/text%3E%3C/svg%3E"
-          alt="Logo" 
-          className="nav-logo"
-        />
-        <span className={`nav-brand-text ${user && ['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(user.email) ? 'admin-text' : ''}`}>
-          Store
-        </span>
-      </Link>
-       
+
       {/* Notifications Panel */}
         {showNotifications && user && (
           <>
