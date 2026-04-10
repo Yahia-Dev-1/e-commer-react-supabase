@@ -12,34 +12,6 @@ export default function Orders({ user, orders = [], darkMode = false }) {
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [userOrders, setUserOrders] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-
-  useEffect(() => {
-    // Load notifications
-    const loadNotifications = () => {
-      const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-      // Filter notifications for current user
-      const userNotifications = allNotifications.filter(
-        notif => notif.userEmail === user?.email
-      );
-      setNotifications(userNotifications);
-    };
-
-    loadNotifications();
-
-    // Subscribe to notifications changes
-    const handleStorageChange = () => {
-      loadNotifications();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('productsUpdated', handleStorageChange);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('productsUpdated', handleStorageChange);
-    };
-  }, [user?.email]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -146,28 +118,6 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     }
   };
 
-  const markNotificationAsRead = (notificationId) => {
-    const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const updatedNotifications = allNotifications.map(notif => 
-      notif.id === notificationId ? { ...notif, read: true } : notif
-    );
-    localStorage.setItem('order_notifications', JSON.stringify(updatedNotifications));
-    
-    // Update local state
-    setNotifications(prev => 
-      prev.map(notif => notif.id === notificationId ? { ...notif, read: true } : notif)
-    );
-  };
-
-  const deleteNotification = (notificationId) => {
-    const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const updatedNotifications = allNotifications.filter(notif => notif.id !== notificationId);
-    localStorage.setItem('order_notifications', JSON.stringify(updatedNotifications));
-    
-    // Update local state
-    setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
-  };
-
   const getTrackingSteps = (status, order) => {
     const steps = [
       { id: 1, title: 'Order Placed', description: 'Your order has been received', completed: true },
@@ -197,42 +147,6 @@ export default function Orders({ user, orders = [], darkMode = false }) {
         <h1>My Orders</h1>
         <p>Welcome back, {user?.name || 'User'}!</p>
       </div>
-
-      {/* Notifications Section */}
-      {notifications.length > 0 && (
-        <div className="notifications-section">
-          <h3>📢 Notifications</h3>
-          {notifications.map((notification) => (
-            <div 
-              key={notification.id} 
-              className={`notification-item ${notification.read ? 'read' : 'unread'}`}
-            >
-              <div className="notification-content">
-                <p className="notification-message">{notification.message}</p>
-                <p className="notification-date">
-                  {new Date(notification.date).toLocaleString()}
-                </p>
-              </div>
-              <div className="notification-actions">
-                {!notification.read && (
-                  <button 
-                    className="mark-read-btn"
-                    onClick={() => markNotificationAsRead(notification.id)}
-                  >
-                    Mark as Read
-                  </button>
-                )}
-                <button 
-                  className="delete-notification-btn"
-                  onClick={() => deleteNotification(notification.id)}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
 
       {userOrders.length === 0 ? (
         <div className="no-orders">
