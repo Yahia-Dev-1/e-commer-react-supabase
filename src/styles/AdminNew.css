@@ -148,12 +148,29 @@
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  font-weight: 600;
+}
+
+/* Delete User Button Styling */
+.delete-user-btn {
+  background: linear-gradient(135deg, #ff5252 0%, #ff3d3d 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);
+}
+
+.delete-user-btn:hover {
+  background: linear-gradient(135deg, #ff3d3d 0%, #ff2d2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
+}
+
+.delete-user-btn:active {
+  transform: translateY(0);
 }
 
 .add-admin-btn:hover {
