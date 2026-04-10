@@ -119,16 +119,19 @@ export default function OrderManagement({ darkMode = false }) {
   const getStatusColor = (status) => {
     let color;
     switch (status) {
-      case 'وصل':
+      case 'Delivered':
         color = '#4CAF50';
         break;
-      case 'خرج للتوصيل':
+      case 'Shipped':
         color = '#2196F3';
         break;
-      case 'بيجهز':
+      case 'Processing':
         color = '#FF9800';
         break;
-      case 'بيتراجع':
+      case 'Preparing':
+        color = '#FF9800';
+        break;
+      case 'pending':
         color = '#FF5722';
         break;
       default:
@@ -140,17 +143,17 @@ export default function OrderManagement({ darkMode = false }) {
   const getStatusLabel = (status) => {
     switch (status) {
       case 'Delivered':
-        return '4 وصل';
+        return 'Delivered';
       case 'Shipped':
-        return '3 خرج للتوصيل';
+        return 'Shipped';
       case 'Processing':
-        return '2 بيجهز';
+        return 'Processing';
       case 'Preparing':
-        return '2 بيجهز';
+        return 'Preparing';
       case 'pending':
-        return '1 بيتراجع';
+        return 'Pending';
       case 'approved':
-        return '1 بيتراجع';
+        return 'Approved';
       default:
         return status;
     }
@@ -355,10 +358,10 @@ export default function OrderManagement({ darkMode = false }) {
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                   required
                 >
-                  <option value="pending">1 بيتراجع</option>
-                  <option value="Processing">2 بيجهز</option>
-                  <option value="Shipped">3 خرج للتوصيل</option>
-                  <option value="Delivered">4 وصل</option>
+                  <option value="pending">Processing</option>
+                  <option value="Processing"> Preparing</option>
+                  <option value="Shipped"> Shipped</option>
+                  <option value="Delivered"> Delivered</option>
                 </select>
               </div>
 
