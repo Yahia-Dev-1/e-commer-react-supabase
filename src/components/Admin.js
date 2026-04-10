@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase, getUsersFromSupabase } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase, getUsersFromSupabase, restoreProductQuantities } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
   const showToast = useToast();
@@ -387,53 +387,6 @@ export default function Admin({ darkMode = true }) {
     };
     notifications.push(notification);
     localStorage.setItem('order_notifications', JSON.stringify(notifications));
-  };
-
-  const restoreProductQuantities = async (order) => {
-    try {
-      // 🆕 Get current products from Supabase first (correct source of truth)
-      const { data: currentProducts, error: fetchError } = await getProductsFromSupabase(100, 0);
-      
-      if (fetchError || !currentProducts) {
-        console.error('Could not fetch products from Supabase:', fetchError);
-        return;
-      }
-      
-      // Calculate new quantities
-      const updatedProducts = [...currentProducts];
-      
-      order.items.forEach(item => {
-        const productIndex = updatedProducts.findIndex(p => p.id === item.id);
-        if (productIndex !== -1) {
-          // 🆕 Add back the quantity
-          const newQuantity = updatedProducts[productIndex].quantity + item.quantity;
-          updatedProducts[productIndex].quantity = newQuantity;
-          console.log(`🔄 Restored ${item.quantity} to ${item.name}, new stock: ${newQuantity}`);
-        }
-      });
-      
-      // Update localStorage
-      localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts));
-      
-      // Update Supabase for real-time sync across all devices
-      for (const item of order.items) {
-        try {
-          const product = updatedProducts.find(p => p.id === item.id);
-          if (product) {
-            await updateProductInSupabase(item.id, { quantity: product.quantity });
-          }
-        } catch (error) {
-          console.warn('Could not update quantity in Supabase:', error.message);
-        }
-      }
-      
-      // Trigger update event
-      window.dispatchEvent(new Event('productsUpdated'));
-      
-      console.log('✅ Product quantities restored after order rejection/deletion');
-    } catch (error) {
-      console.error('Error restoring product quantities:', error);
-    }
   };
 
   const clearDatabase = () => {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -101,31 +101,10 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     }
 
     if (window.confirm('Are you sure you want to cancel this order?')) {
-      // 1. Return quantities to stock
-      for (const item of orderToCancel.items || []) {
-        try {
-          const existingProducts = JSON.parse(localStorage.getItem('ecommerce_products') || '[]');
-          const productIndex = existingProducts.findIndex(p => p.id === item.id);
-          
-          if (productIndex !== -1) {
-            const currentQty = existingProducts[productIndex].quantity || 0;
-            existingProducts[productIndex].quantity = currentQty + (item.quantity || 1);
-            localStorage.setItem('ecommerce_products', JSON.stringify(existingProducts));
-            
-            // Update Supabase
-            await updateProductInSupabase(item.id, { quantity: existingProducts[productIndex].quantity });
-          }
-        } catch (error) {
-          console.warn('Could not restore quantity for item:', item.id, error.message);
-        }
-      }
+      // Restore product quantities
+      await restoreProductQuantities(orderToCancel);
 
-      // 2. Delete order from localStorage
-      const allOrders = JSON.parse(localStorage.getItem('ecommerce_orders') || '[]');
-      const updatedOrders = allOrders.filter(o => o.id !== orderId);
-      localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
-
-      // 3. Update local state
+      // Update local state
       setUserOrders(prev => prev.filter(o => o.id !== orderId));
 
       showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');

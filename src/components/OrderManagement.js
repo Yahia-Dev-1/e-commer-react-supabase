@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/OrderManagement.css';
 import { useToast } from '../contexts/ToastContext';
-import { getOrdersFromSupabase, updateOrderStatus, deleteOrderFromSupabase } from '../utils/supabase';
+import { getOrdersFromSupabase, updateOrderStatus, deleteOrderFromSupabase, restoreProductQuantities } from '../utils/supabase';
 
 export default function OrderManagement({ darkMode = false }) {
   const showToast = useToast();
@@ -73,6 +73,9 @@ export default function OrderManagement({ darkMode = false }) {
     try {
       await deleteOrderFromSupabase(selectedOrder.id);
       
+      // Restore product quantities
+      await restoreProductQuantities(selectedOrder);
+      
       // Add deletion notification to localStorage
       const notifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
       const notification = {
@@ -86,7 +89,7 @@ export default function OrderManagement({ darkMode = false }) {
       notifications.push(notification);
       localStorage.setItem('order_notifications', JSON.stringify(notifications));
       
-      showToast('✅ Order deleted successfully', 'success');
+      showToast('✅ Order deleted successfully. Products returned to stock.', 'success');
       setShowDeleteModal(false);
       setSelectedOrder(null);
       setDeleteReason('');
