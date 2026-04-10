@@ -8,7 +8,7 @@ export default function Admin({ darkMode = true }) {
   const showToast = useToast();
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState(true);
   const [showAllUsers] = useState(true); // Changed to true to show all users by default
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -581,22 +581,16 @@ export default function Admin({ darkMode = true }) {
       
       <div className="admin-tabs">
         <button 
-          className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
-          onClick={() => setActiveTab('orders')}
-        >
-          Orders Management
-        </button>
-        <button 
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          👥 Users
+          Users Management
         </button>
         <button 
-          className={`tab-btn ${activeTab === 'manage-admins' ? 'active' : ''}`}
-          onClick={() => setActiveTab('manage-admins')}
+          className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
+          onClick={() => setActiveTab('products')}
         >
-          Manage Admins
+          Products Management
         </button>
         <button 
           className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
@@ -608,135 +602,6 @@ export default function Admin({ darkMode = true }) {
       </div>
 
       <div className="admin-content">
-        {activeTab === 'orders' && (
-          <div className="orders-section">
-            <div className="section-header">
-              <h2>Orders Management</h2>
-              <button className="refresh-btn" onClick={loadData}>
-                Refresh Data
-              </button>
-            </div>
-            
-            {orders.length === 0 ? (
-              <div className="no-data">
-                <p>No orders found</p>
-              </div>
-            ) : (
-              <div className="orders-list">
-                {orders && orders.map((order) => (
-                  <div key={order.id} className="order-card">
-                    <div className="order-info">
-                      <h3>Order #{order.orderNumber}</h3>
-                      <p className="order-email font-weight-bold">{order.userEmail}</p>
-                      <p className="order-date font-weight-bold">Order Date: {formatDate(order.date)}</p>
-                      <p className="order-status font-weight-bold">Status: {order.status}</p>
-                      <p className="order-total font-weight-bold">Total: ${order.total.toFixed(2)}</p>
-                      <p className="order-items font-weight-bold">Number of Items: {order.items && order.items.length || 0}</p>
-                      
-                      {/* Shipping Details - Always Show */}
-                      {order.shipping && (
-                        <div className="shipping-info">
-                          <h4>📦 Shipping Details:</h4>
-                          <p><strong>Name:</strong> {order.shipping.fullName}</p>
-                          <p><strong>Phone:</strong> {order.shipping.phone}</p>
-                          <p><strong>Address:</strong> {order.shipping.street}, {order.shipping.building}</p>
-                          <p><strong>Address Inside Country:</strong> {order.shipping.addressInCountry}</p>
-                          <p><strong>City:</strong> {order.shipping.city}, {order.shipping.governorate}</p>
-                          {order.shipping.additionalInfo && (
-                            <p><strong>Notes:</strong> {order.shipping.additionalInfo}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="order-items">
-                      {order.items && order.items.map((item, index) => (
-                        <div key={index} className="order-item">
-                          <div className="item-image">
-                            <img src={item.image} alt={item.name} />
-                          </div>
-                          <div className="item-details">
-                            <h4>{item.name}</h4>
-                            <p className="item-price">${item.price}</p>
-                            <p className="item-quantity">Quantity Sold: {item.quantity}</p>
-                            <p className="item-total">Total: ${(item.price * item.quantity).toFixed(2)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="order-actions">
-                      {/* Accept Button for Pending Orders */}
-                      {order.status === 'pending' && (
-                        <button 
-                          className="accept-btn"
-                          onClick={() => approveOrder(order.id)}
-                        >
-                          Accept Order
-                        </button>
-                      )}
-                      
-                      {/* Reject Button for Pending Orders */}
-                      {order.status === 'pending' && (
-                        <button 
-                          className="reject-btn"
-                          onClick={() => rejectOrder(order.id)}
-                        >
-                          Reject Order
-                        </button>
-                      )}
-                      
-                      {/* Accept Button for Processing Orders */}
-                      {order.status === 'Processing' && (
-                        <button 
-                          className="accept-btn"
-                          onClick={() => approveOrder(order.id)}
-                        >
-                          Accept Order
-                        </button>
-                      )}
-                      
-                      {/* Reject Button for Processing Orders */}
-                      {order.status === 'Processing' && (
-                        <button 
-                          className="reject-btn"
-                          onClick={() => rejectOrder(order.id)}
-                        >
-                          Reject Order
-                        </button>
-                      )}
-                      
-                      {/* Re-activate Button for Rejected Orders */}
-                      {order.status === 'rejected' && (
-                        <div className="order-actions-row">
-                          <span className="rejected-status">Rejected</span>
-                          <button 
-                            className="approve-btn"
-                            onClick={() => approveOrder(order.id)}
-                          >
-                            Re-activate
-                          </button>
-                        </div>
-                      )}
-                      
-                      {/* Approved Status */}
-                      {order.status === 'approved' && (
-                        <span className="approved-status">Approved</span>
-                      )}
-                      
-                      {/* Delete Button - Always Available */}
-                      <button 
-                        className="delete-order-btn"
-                        onClick={() => deleteOrder(order.id)}
-                      >
-                        Delete Order
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
         {activeTab === 'stats' && (
           <div className="stats-section">
             <div className="section-header">
@@ -1021,9 +886,6 @@ export default function Admin({ darkMode = true }) {
                 <div className="quick-actions">
                   <button className="quick-action-btn" onClick={() => setActiveTab('users')}>
                     👥 Manage Users
-                  </button>
-                  <button className="quick-action-btn" onClick={() => setActiveTab('orders')}>
-                    📦 View Orders
                   </button>
                   <button className="quick-action-btn" onClick={clearDatabase}>
                     🗑️ Clear Database
