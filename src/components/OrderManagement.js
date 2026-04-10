@@ -220,11 +220,13 @@ export default function OrderManagement({ darkMode = false }) {
               </div>
 
               {/* Order Items */}
-              {order.items && order.items.length > 0 && (
-                <div className="order-items">
-                  <h4>📦 Order Items</h4>
-                  {order.items.map((item, index) => (
-                    <div key={index} className="order-item">
+              {(() => {
+                const items = order.items || (order.shipping && JSON.parse(order.shipping)?.items) || [];
+                return items.length > 0 ? (
+                  <div className="order-items">
+                    <h4>📦 Order Items</h4>
+                    {items.map((item, index) => (
+                      <div key={index} className="order-item">
                       <div className="item-image">
                         <img 
                           src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'} 
@@ -253,7 +255,8 @@ export default function OrderManagement({ darkMode = false }) {
                     </div>
                   ))}
                 </div>
-              )}
+                ) : null;
+              })()}
 
               {/* Shipping Details */}
               {order.shipping && (
