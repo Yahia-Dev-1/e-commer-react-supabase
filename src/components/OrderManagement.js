@@ -14,7 +14,8 @@ export default function OrderManagement({ darkMode = false }) {
   const [deleteReason, setDeleteReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editForm, setEditForm] = useState({
-    status: 'pending'
+    status: 'pending',
+    estimatedDelivery: ''
   });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -48,7 +49,8 @@ export default function OrderManagement({ darkMode = false }) {
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
     setEditForm({
-      status: order.status || 'pending'
+      status: order.status || 'pending',
+      estimatedDelivery: order.estimatedDelivery || ''
     });
     setShowEditModal(true);
   };
@@ -60,8 +62,9 @@ export default function OrderManagement({ darkMode = false }) {
       console.log('Selected order:', selectedOrder);
       console.log('Order ID:', selectedOrder.id);
       console.log('New status:', editForm.status);
-      
-      await updateOrderStatus(selectedOrder.id, editForm.status);
+      console.log('Estimated delivery:', editForm.estimatedDelivery);
+
+      await updateOrderStatus(selectedOrder.id, editForm.status, {}, editForm.estimatedDelivery);
       showToast('✅ Order updated successfully', 'success');
       setShowEditModal(false);
       loadOrders();
@@ -279,14 +282,20 @@ export default function OrderManagement({ darkMode = false }) {
                   <span>Total:</span>
                   <strong>${(order.total || 0).toFixed(2)}</strong>
                 </div>
+                {order.estimatedDelivery && (
+                  <div className="estimated-delivery">
+                    <span>📦 Estimated Delivery:</span>
+                    <strong>{order.estimatedDelivery}</strong>
+                  </div>
+                )}
                 <div className="order-actions">
-                  <button 
+                  <button
                     className="edit-order-btn"
                     onClick={() => handleEditOrder(order)}
                   >
                     Edit Order
                   </button>
-                  <button 
+                  <button
                     className="delete-order-btn"
                     onClick={() => handleDeleteOrder(order.id)}
                   >
@@ -325,11 +334,21 @@ export default function OrderManagement({ darkMode = false }) {
                 </select>
               </div>
 
+              <div className="form-group">
+                <label>Estimated Delivery Time</label>
+                <input
+                  type="text"
+                  value={editForm.estimatedDelivery || ''}
+                  onChange={(e) => setEditForm({ ...editForm, estimatedDelivery: e.target.value })}
+                  placeholder="e.g., 2-3 days, 1 week"
+                />
+              </div>
+
               <div className="form-actions">
                 <button type="submit" className="save-btn">Save Changes</button>
-                <button 
-                  type="button" 
-                  className="cancel-btn" 
+                <button
+                  type="button"
+                  className="cancel-btn"
                   onClick={() => setShowEditModal(false)}
                 >
                   Cancel

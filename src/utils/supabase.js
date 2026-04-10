@@ -315,18 +315,22 @@ export const subscribeToOrders = (callback) => {
 };
 
 // 🆕 Update order status (only status column exists)
-export const updateOrderStatus = async (orderId, status, trackingInfo = {}) => {
+export const updateOrderStatus = async (orderId, status, trackingInfo = {}, estimatedDelivery = null) => {
   try {
     const updateData = {
       status: status
     };
-    
+
+    if (estimatedDelivery) {
+      updateData.estimatedDelivery = estimatedDelivery;
+    }
+
     const { data, error } = await supabase
       .from('orders')
       .update(updateData)
       .eq('id', orderId)
       .select();
-    
+
     if (error) throw error;
     return data[0];
   } catch (error) {

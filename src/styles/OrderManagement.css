@@ -147,6 +147,28 @@
   color: #fff;
 }
 
+.estimated-delivery {
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.estimated-delivery span {
+  color: #666;
+}
+
+.order-management-container.dark-mode .estimated-delivery span {
+  color: #ccc;
+}
+
+.estimated-delivery strong {
+  color: #667eea;
+  margin-left: 10px;
+}
+
+.order-management-container.dark-mode .estimated-delivery strong {
+  color: #667eea;
+}
+
 .order-actions {
   display: flex;
   gap: 10px;
