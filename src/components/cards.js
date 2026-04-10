@@ -198,6 +198,12 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = activeFilter === 'All' || product.category === activeFilter
+    console.log('=== FILTER PRODUCT ===');
+    console.log('Product:', product.title);
+    console.log('Product category:', product.category);
+    console.log('Active filter:', activeFilter);
+    console.log('Matches filter:', matchesFilter);
+    console.log('Matches search:', matchesSearch);
     return matchesSearch && matchesFilter
   })
 
