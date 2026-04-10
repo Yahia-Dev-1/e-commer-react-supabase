@@ -505,10 +505,8 @@
 }
 
 .quantity-badge-container {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  z-index: 10;
+  text-align: center;
+  margin: 8px 0;
 }
 
 .card-price:hover {
