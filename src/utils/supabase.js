@@ -446,8 +446,7 @@ export const addReviewToSupabase = async (review) => {
       userId: review.userId,
       userName: review.userName || 'Anonymous',
       rating: review.rating,
-      comment: review.comment || '',
-      createdAt: new Date().toISOString()
+      comment: review.comment || ''
     };
 
     console.log('=== ADDING REVIEW TO SUPABASE ===');
