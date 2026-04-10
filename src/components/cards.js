@@ -3,6 +3,7 @@ import { useToast } from '../contexts/ToastContext';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import SEO from './SEO'
 import '../styles/cards.css'
+import { getReviewsFromSupabase } from '../utils/supabase'
 
 // Function to check if current user is admin
 const isCurrentUserAdmin = () => {
@@ -144,10 +145,26 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
   const showToast = useToast();
   const [activeFilter, setActiveFilter] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
+  const [reviews, setReviews] = useState([])
 
   // Products are now passed from App.js, no need to load from localStorage
   console.log(`📦 Cards: Received ${products.length} products from App.js (version: ${productsVersion})`)
-  
+
+  // Load reviews from Supabase
+  useEffect(() => {
+    const loadReviews = async () => {
+      try {
+        const reviewsData = await getReviewsFromSupabase(null, 50, 0);
+        setReviews(reviewsData);
+        console.log('=== REVIEWS LOADED ===');
+        console.log('Reviews count:', reviewsData.length);
+      } catch (error) {
+        console.error('Error loading reviews:', error);
+      }
+    };
+    loadReviews();
+  }, []);
+
   // Log when products change
   useEffect(() => {
     console.log(`🔄 Cards: Products updated - ${products.length} products (version: ${productsVersion})`)
@@ -365,10 +382,47 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
           <p>No products found in this category</p>
         </div>
       )}
-      
-      
+
+      {/* Reviews Section */}
+      {reviews.length > 0 && (
+        <div className="reviews-section">
+          <h2 className="reviews-title">Customer Reviews</h2>
+          <div className="reviews-container">
+            {reviews.map((review) => (
+              <div key={review.id} className="review-card">
+                <div className="review-header">
+                  <div className="review-user">
+                    <span className="review-username">{review.username || 'Anonymous'}</span>
+                    <div className="review-rating">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={i < review.rating ? 'star filled' : 'star'}>
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <span className="review-date">
+                    {new Date(review.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                {review.comment && (
+                  <div className="review-comment">
+                    <p>{review.comment}</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+
     </div>
-    
+
     </>
   )
 }
