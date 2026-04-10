@@ -604,7 +604,8 @@
 }
 
 .modal-content {
-  background: #fff;
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 30px;
   max-width: 600px;
@@ -613,30 +614,18 @@
   overflow-y: auto;
 }
 
-.order-management-container.dark-mode .modal-content {
-  background: #2d2d2d;
-}
-
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #eee;
-}
-
-.order-management-container.dark-mode .modal-header {
-  border-bottom-color: #444;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .modal-header h2 {
   margin: 0;
-  color: #333;
-}
-
-.order-management-container.dark-mode .modal-header h2 {
-  color: #fff;
+  color: #ffffff;
 }
 
 .close-btn {
@@ -644,10 +633,10 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #666;
+  color: #ffffff;
 }
 
-.order-management-container.dark-mode .close-btn {
+.close-btn:hover {
   color: #ccc;
 }
 
