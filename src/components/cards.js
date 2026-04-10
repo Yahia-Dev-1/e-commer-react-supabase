@@ -176,20 +176,12 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     try {
       const savedCategories = JSON.parse(localStorage.getItem('ecommerce_categories') || '[]');
       if (savedCategories.length === 0) {
-        const categories = ['All', ...new Set(products.map(product => product.category))];
-        console.log('=== CATEGORIES FROM PRODUCTS ===');
-        console.log('Categories:', categories);
-        return categories;
+        return ['All', ...new Set(products.map(product => product.category))];
       }
-      console.log('=== CATEGORIES FROM LOCALSTORAGE ===');
-      console.log('Saved categories:', savedCategories);
       return savedCategories;
     } catch (error) {
       console.error('Error loading categories:', error);
-      const categories = ['All', ...new Set(products.map(product => product.category))];
-      console.log('=== CATEGORIES FROM PRODUCTS (ERROR) ===');
-      console.log('Categories:', categories);
-      return categories;
+      return ['All', ...new Set(products.map(product => product.category))];
     }
   }, [products])
 
@@ -198,19 +190,11 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = activeFilter === 'All' || product.category === activeFilter
-    console.log('=== FILTER PRODUCT ===');
-    console.log('Product:', product.title);
-    console.log('Product category:', product.category);
-    console.log('Active filter:', activeFilter);
-    console.log('Matches filter:', matchesFilter);
-    console.log('Matches search:', matchesSearch);
     return matchesSearch && matchesFilter
   })
 
   // Handle filter change
   const handleFilterChange = (category) => {
-    console.log('=== FILTER CHANGE ===');
-    console.log('Selected category:', category);
     setActiveFilter(category)
   }
 
