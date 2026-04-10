@@ -446,7 +446,9 @@ export const addReviewToSupabase = async (review) => {
       userId: review.userId,
       userName: review.userName || 'Anonymous',
       rating: review.rating,
-      comment: review.comment || ''
+      comment: review.comment || '',
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
     };
 
     console.log('=== ADDING REVIEW TO SUPABASE ===');
@@ -467,8 +469,19 @@ export const addReviewToSupabase = async (review) => {
     console.log('✅ Review added successfully:', data);
     return data[0];
   } catch (error) {
-    console.error('Error adding review to Supabase:', error);
-    throw error;
+    console.error('Error adding review to Supabase, using localStorage fallback:', error);
+
+    // Fallback to localStorage
+    const existingReviews = JSON.parse(localStorage.getItem('ecommerce_reviews') || '[]');
+    const reviewWithId = {
+      ...review,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString()
+    };
+    existingReviews.push(reviewWithId);
+    localStorage.setItem('ecommerce_reviews', JSON.stringify(existingReviews));
+    console.log('✅ Review saved to localStorage:', reviewWithId);
+    return reviewWithId;
   }
 };
 
@@ -490,8 +503,23 @@ export const getReviewsFromSupabase = async (productId = null, limit = 50, offse
     console.log(`Reviews count: ${data?.length || 0}`);
     return data || [];
   } catch (error) {
-    console.error('Error fetching reviews from Supabase:', error);
-    return [];
+    console.error('Error fetching reviews from Supabase, using localStorage fallback:', error);
+
+    // Fallback to localStorage
+    const allReviews = JSON.parse(localStorage.getItem('ecommerce_reviews') || '[]');
+    let filteredReviews = allReviews;
+
+    if (productId) {
+      filteredReviews = allReviews.filter(r => r.productId === productId);
+    }
+
+    filteredReviews = filteredReviews
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(offset, offset + limit);
+
+    console.log(`=== REVIEWS FROM LOCALSTORAGE ===`);
+    console.log(`Reviews count: ${filteredReviews?.length || 0}`);
+    return filteredReviews;
   }
 };
 
@@ -513,8 +541,20 @@ export const getProductRating = async (productId) => {
 
     return { averageRating, reviewCount: data.length };
   } catch (error) {
-    console.error('Error getting product rating:', error);
-    return { averageRating: 0, reviewCount: 0 };
+    console.error('Error getting product rating from Supabase, using localStorage fallback:', error);
+
+    // Fallback to localStorage
+    const allReviews = JSON.parse(localStorage.getItem('ecommerce_reviews') || '[]');
+    const productReviews = allReviews.filter(r => r.productId === productId);
+
+    if (productReviews.length === 0) {
+      return { averageRating: 0, reviewCount: 0 };
+    }
+
+    const totalRating = productReviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = totalRating / productReviews.length;
+
+    return { averageRating, reviewCount: productReviews.length };
   }
 };
 
