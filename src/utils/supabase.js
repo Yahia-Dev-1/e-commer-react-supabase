@@ -128,8 +128,7 @@ export const addUserToSupabase = async (user) => {
     const userData = {
       email: user.email,
       password: user.password,
-      name: user.name,
-      isAdmin: user.isAdmin || false
+      name: user.name
     };
     
     const { data, error } = await supabase
