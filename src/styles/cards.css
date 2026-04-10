@@ -1300,12 +1300,6 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.add-to-cart-btn:hover {
-  animation: shimmer 2s infinite;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
-  background-size: 200% 100%;
-}
-
 .quantity-btn:hover {
   animation: pulse 0.3s ease-in-out;
 }
