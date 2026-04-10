@@ -14,7 +14,8 @@ export default function OrderManagement({ darkMode = false }) {
   const [deleteReason, setDeleteReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editForm, setEditForm] = useState({
-    status: 'pending'
+    status: 'pending',
+    productCode: ''
   });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -48,7 +49,8 @@ export default function OrderManagement({ darkMode = false }) {
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
     setEditForm({
-      status: order.status || 'pending'
+      status: order.status || 'pending',
+      productCode: order.productCode || ''
     });
     setShowEditModal(true);
   };
@@ -352,17 +354,27 @@ export default function OrderManagement({ darkMode = false }) {
 
             <form onSubmit={handleSaveOrder} className="edit-order-form">
               <div className="form-group">
-                <label>الحالة</label>
+                <label>Status</label>
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                   required
                 >
-                  <option value="pending">Processing</option>
-                  <option value="Processing"> Preparing</option>
-                  <option value="Shipped"> Shipped</option>
-                  <option value="Delivered"> Delivered</option>
+                  <option value="pending">Pending</option>
+                  <option value="Processing">Processing</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
                 </select>
+              </div>
+
+              <div className="form-group">
+                <label>Product Code</label>
+                <input
+                  type="text"
+                  value={editForm.productCode || ''}
+                  onChange={(e) => setEditForm({ ...editForm, productCode: e.target.value })}
+                  placeholder="Enter product code"
+                />
               </div>
 
               <div className="form-actions">
