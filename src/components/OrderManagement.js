@@ -223,13 +223,19 @@ export default function OrderManagement({ darkMode = false }) {
                   {order.items.map((item, index) => (
                     <div key={index} className="order-item">
                       <div className="item-image">
-                        <img src={item.image} alt={item.name} />
+                        <img 
+                          src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'} 
+                          alt={item.name || 'Product'} 
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                          }}
+                        />
                       </div>
                       <div className="item-details">
-                        <h5>{item.name}</h5>
-                        <p>Price: ${item.price}</p>
-                        <p>Quantity: {item.quantity}</p>
-                        <p>Total: ${(item.price * item.quantity).toFixed(2)}</p>
+                        <h5>{item.name || item.title || 'Unknown Product'}</h5>
+                        <p>Price: ${item.price || '0.00'}</p>
+                        <p>Quantity: {item.quantity || 0}</p>
+                        <p>Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
                         <button 
                           className="view-details-btn"
                           onClick={() => {
