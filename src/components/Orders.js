@@ -121,11 +121,10 @@ export default function Orders({ user, orders = [] }) {
         rating: reviewData.rating,
         comment: reviewData.comment
       });
-      showToast('✅ Review submitted successfully', 'success');
+      console.log('✅ Review submitted successfully');
       handleCloseReviewModal();
     } catch (error) {
       console.error('Error submitting review:', error);
-      showToast('❌ Failed to submit review', 'error');
     }
   };
 
