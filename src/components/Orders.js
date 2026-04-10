@@ -58,19 +58,19 @@ export default function Orders({ user, orders = [] }) {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Delivered':
-        return '#4CAF50';
+        return '#1a5f1a';
       case 'Shipped':
-        return '#2196F3';
+        return '#1a3a5f';
       case 'Processing':
-        return '#FF9800';
+        return '#5f4a1a';
       case 'Preparing':
-        return '#9C27B0';
+        return '#3f1a5f';
       case 'pending':
-        return '#FF5722';
+        return '#5f2a1a';
       case 'approved':
-        return '#00BCD4';
+        return '#1a5f5f';
       default:
-        return '#666';
+        return '#333';
     }
   };
 
