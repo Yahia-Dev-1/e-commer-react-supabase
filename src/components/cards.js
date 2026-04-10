@@ -129,21 +129,9 @@ function Card({ image, title, description, price, quantity, status, onAddToCart,
   )
 }
 
-function FilterButton({ category, isActive, onClick }) {
-  return (
-    <button 
-      className={`filter-btn ${isActive ? 'active' : ''}`}
-      onClick={() => onClick(category)}
-    >
-      {category}
-    </button>
-  )
-}
-
 // Main Cards Container Component
 export default function Cards({ addToCart, cartItems = [], updateCartItemQuantity, darkMode = false, products = [], productsVersion = 0 }) {
   const showToast = useToast();
-  const [activeFilter, setActiveFilter] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [reviews, setReviews] = useState([])
 
@@ -162,45 +150,12 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     loadReviews();
   }, []);
 
-  // Get unique categories (memoized)
-  const categories = useMemo(() => {
-    try {
-      const savedCategories = JSON.parse(localStorage.getItem('ecommerce_categories') || '[]');
-      console.log('=== CATEGORIES DEBUG ===');
-      console.log('Saved categories:', savedCategories);
-      console.log('Products:', products);
-      console.log('Product categories:', products.map(p => p.category));
-      if (savedCategories.length === 0) {
-        const categories = ['All', ...new Set(products.map(product => product.category))];
-        console.log('Generated categories:', categories);
-        return categories;
-      }
-      console.log('Using saved categories:', savedCategories);
-      return savedCategories;
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      const categories = ['All', ...new Set(products.map(product => product.category))];
-      console.log('Generated categories (error):', categories);
-      return categories;
-    }
-  }, [products])
-
-  // Filter products (frontend filtering)
+  // Filter products (search only)
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = activeFilter === 'All' || product.category === activeFilter
-    return matchesSearch && matchesFilter
+    return matchesSearch
   })
-
-  // Handle filter change
-  const handleFilterChange = (category) => {
-    console.log('=== HANDLE FILTER CHANGE ===');
-    console.log('Category clicked:', category);
-    console.log('Current activeFilter:', activeFilter);
-    setActiveFilter(category)
-    console.log('New activeFilter:', category);
-  }
 
   // Handle add to cart
   const handleAddToCart = (product) => {
@@ -304,27 +259,6 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
             </button>
           )}
         </div>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="filter-container">
-        <h3 className="filter-title">Filter by Category:</h3>
-        <div className="filter-buttons">
-          {categories.map((category) => (
-            <FilterButton
-              key={category}
-              category={category}
-              isActive={activeFilter === category}
-              onClick={handleFilterChange}
-            />
-          ))}
-        </div>
-        {/* Show products count for regular users */}
-        {!isAdmin && (
-          <div className="products-count-simple">
-            <p>Products Count: {filteredProducts.length}</p>
-          </div>
-        )}
       </div>
 
       {/* Products Count and Stock Stats - Only for Admins */}
