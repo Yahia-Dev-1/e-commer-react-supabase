@@ -116,7 +116,7 @@ export default function Orders({ user, orders = [] }) {
     try {
       await addReviewToSupabase({
         productId: selectedProduct.id,
-        userId: user?.id,
+        userId: user?.email || 'anonymous@example.com',
         userName: user?.email || 'Anonymous',
         rating: reviewData.rating,
         comment: reviewData.comment
