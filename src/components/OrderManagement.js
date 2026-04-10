@@ -120,22 +120,32 @@ export default function OrderManagement({ darkMode = false }) {
   };
 
   const getStatusColor = (status) => {
+    console.log('Status:', status);
+    let color;
     switch (status) {
       case 'Delivered':
-        return '#4CAF50';
+        color = '#4CAF50';
+        break;
       case 'Shipped':
-        return '#2196F3';
+        color = '#2196F3';
+        break;
       case 'Processing':
-        return '#FF9800';
+        color = '#FF9800';
+        break;
       case 'Preparing':
-        return '#9C27B0';
+        color = '#9C27B0';
+        break;
       case 'pending':
-        return '#FF5722';
+        color = '#FF5722';
+        break;
       case 'approved':
-        return '#00BCD4';
+        color = '#00BCD4';
+        break;
       default:
-        return '#666';
+        color = '#666';
     }
+    console.log('Color:', color);
+    return color;
   };
 
   const formatDate = (dateString) => {
