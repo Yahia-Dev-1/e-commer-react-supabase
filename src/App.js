@@ -73,6 +73,7 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [products, setProducts] = useState([])
   const [productsVersion, setProductsVersion] = useState(0) // For forcing re-renders
+  const [categoryFilter, setCategoryFilter] = useState('All') // For database-level filtering
   
   // 🆕 Alert Modal state
   const [alertModal, setAlertModal] = useState({
@@ -132,15 +133,15 @@ function AppContent() {
       try {
         setIsLoadingProducts(true)
         const { getProductsFromSupabase } = await import('./utils/supabase')
-        
-        // 🆕 Fetch ONLY from Supabase (no localStorage)
-        const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0)
-        
+
+        // 🆕 Fetch from Supabase with category filter
+        const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0, categoryFilter)
+
         if (!isMounted) return
-        
+
         console.log('📥 Supabase fetch:', supabaseProducts.length, 'products')
         setProducts(supabaseProducts)
-        
+
       } catch (error) {
         console.error('❌ Error fetching products from Supabase:', error)
         showToast('❌ Failed to load products from database. Please check Supabase connection.', 'error')
@@ -179,7 +180,7 @@ function AppContent() {
       unsubscribe()
       window.removeEventListener('productsUpdated', handleProductsUpdated)
     }
-  }, [])
+  }, [categoryFilter])
 
   // Fallback: load from localStorage initially (for faster UI)
   const loadProducts = () => {
@@ -759,13 +760,15 @@ function AppContent() {
       <Routes>
         <Route path='/' element={
           <Suspense fallback={<LoadingSpinner />}>
-            <Cards 
-              addToCart={addToCart} 
+            <Cards
+              addToCart={addToCart}
               cartItems={cartItems}
               updateCartItemQuantity={updateCartItemQuantity}
-              darkMode={true} 
+              darkMode={true}
               products={products}
               productsVersion={productsVersion}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
             />
           </Suspense>
         } />
