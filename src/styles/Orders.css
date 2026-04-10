@@ -232,6 +232,51 @@
   background: #c0392b;
 }
 
+/* Order Shipping Styles */
+.order-shipping {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-shipping h4 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.order-shipping p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 5px 0;
+}
+
+.order-shipping strong {
+  color: #ffffff;
+}
+
+.order-shipping-status {
+  background: #2a2a2a;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.order-shipping-status h4 {
+  color: #ffffff;
+  margin-bottom: 10px;
+}
+
+.order-shipping-status p {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 5px 0;
+}
+
+.order-shipping-status strong {
+  color: #ffffff;
+}
+
 /* Tracking Modal Styles */
 .tracking-modal-overlay {
   position: fixed;
