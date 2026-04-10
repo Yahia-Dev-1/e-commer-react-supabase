@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, getOrdersByUser } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -17,19 +17,14 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     const loadOrders = async () => {
       if (user) {
         try {
-          // Get orders from Supabase filtered by user email
-          const userEmail = user.email || localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser');
-          if (userEmail) {
-            const orders = await getOrdersByUser(userEmail);
-            console.log('=== ORDERS FROM SUPABASE (USER PAGE) ===');
-            console.log('📥 Orders loaded from Supabase:', orders.length);
-            console.log('All orders data:', orders);
-            setUserOrders(orders || []);
-          } else {
-            // Fallback to all orders if no email
-            const { data: allOrders } = await getOrdersFromSupabase(100, 0);
-            setUserOrders(allOrders || []);
-          }
+          // Get orders from Supabase
+          const { data: allOrders } = await getOrdersFromSupabase(100, 0);
+          console.log('=== ORDERS FROM SUPABASE (USER PAGE) ===');
+          console.log('📥 Orders loaded from Supabase:', allOrders.length);
+          console.log('All orders data:', allOrders);
+          
+          // Show all orders (no filtering since userEmail not in database)
+          setUserOrders(allOrders || []);
         } catch (error) {
           console.log('=== ERROR LOADING ORDERS (USER PAGE) ===');
           console.log('Using localStorage orders:', error.message);
@@ -50,14 +45,8 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       
       console.log('🔄 Orders updated from Supabase:', supabaseOrders.length);
       
-      // Filter by user email
-      const userEmail = user.email || localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser');
-      if (userEmail) {
-        const userSpecificOrders = supabaseOrders.filter(order => order.user_email === userEmail);
-        setUserOrders(userSpecificOrders || []);
-      } else {
-        setUserOrders(supabaseOrders || []);
-      }
+      // Show all orders (no filtering since userEmail not in database)
+      setUserOrders(supabaseOrders || []);
     });
 
     return () => unsubscribe();
