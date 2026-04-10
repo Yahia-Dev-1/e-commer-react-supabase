@@ -345,7 +345,7 @@ export default function Orders({ user, orders = [] }) {
       {/* Review Modal */}
       {showReviewModal && selectedProduct && (
         <div className="tracking-modal-overlay" onClick={handleCloseReviewModal}>
-          <div className="tracking-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="tracking-modal review-modal" onClick={(e) => e.stopPropagation()}>
             <div className="tracking-header">
               <h2>Rate Product</h2>
               <button className="close-tracking-btn" onClick={handleCloseReviewModal}>×</button>

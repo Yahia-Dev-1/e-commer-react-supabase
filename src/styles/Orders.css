@@ -8,16 +8,26 @@
 .orders-header {
   text-align: center;
   margin-bottom: 2rem;
+  padding: 30px 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .orders-header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   color: #ffffff;
   margin-bottom: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .orders-header p {
   color: rgba(255, 255, 255, 0.8);
+  font-size: 1.1rem;
 }
 
 .loading {
@@ -91,8 +101,16 @@
 .order-card {
   background: #2a2a2a;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.order-card:hover {
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
 }
 
 .order-header {
@@ -202,36 +220,51 @@
 .order-total strong {
   font-size: 1.1rem;
   color: #ffffff;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.order-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .track-order-btn {
-  background: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .track-order-btn:hover {
-  background: #764ba2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .cancel-order-btn {
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .cancel-order-btn:hover {
   background: #c0392b;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
 }
 
 /* Order Shipping Styles */
@@ -277,6 +310,89 @@
 
 .order-shipping-status strong {
   color: #ffffff;
+}
+
+/* Review Modal Styles */
+.review-modal {
+  background: #2a2a2a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.review-modal .form-group {
+  margin-bottom: 20px;
+}
+
+.review-modal .form-group label {
+  color: #ffffff;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.review-modal .form-group select,
+.review-modal .form-group input,
+.review-modal .form-group textarea {
+  background: #1a1a2e;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 12px;
+  color: #ffffff;
+  font-size: 14px;
+  width: 100%;
+}
+
+.review-modal .form-group select:focus,
+.review-modal .form-group input:focus,
+.review-modal .form-group textarea:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.review-modal .form-group p {
+  color: rgba(255, 255, 255, 0.8);
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.review-modal .form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.review-modal .form-actions button {
+  flex: 1;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.review-modal .form-actions button[type="submit"] {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.review-modal .form-actions button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.review-modal .form-actions button[type="button"] {
+  background: #e74c3c;
+  color: white;
+  border: none;
+}
+
+.review-modal .form-actions button[type="button"]:hover {
+  background: #c0392b;
 }
 
 /* Tracking Modal Styles */
