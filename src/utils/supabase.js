@@ -196,10 +196,15 @@ export const subscribeToUsers = (callback) => {
 export const addOrderToSupabase = async (order) => {
   try {
     // Use only columns that exist in orders table: id, status, total, shipping, created_at
+    const shippingData = {
+      ...order.shipping,
+      items: order.items || []
+    };
+
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0,
-      shipping: JSON.stringify(order.shipping || {})
+      shipping: JSON.stringify(shippingData)
     };
 
     if (order.orderNumber) {
