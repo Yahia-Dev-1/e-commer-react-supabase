@@ -351,9 +351,7 @@ export default function AddProducts({ darkMode = false }) {
       title: editingProduct.title,
       image: editingProduct.image,
       description: editingProduct.description,
-      category: editingProduct.category,
-      updated_at: new Date().toISOString(),
-      updated_by: `${localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail') || 'Admin'} (Admin)`
+      category: editingProduct.category
     }
 
     // Update in Supabase
