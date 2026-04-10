@@ -236,10 +236,11 @@ export default function OrderManagement({ darkMode = false }) {
                       </div>
                       <div className="item-details">
                         <h5>{item.name || item.title || 'Unknown Product'}</h5>
+                        <p>Code: #{item.id || 'N/A'}</p>
                         <p>Price: ${item.price || '0.00'}</p>
                         <p>Quantity: {item.quantity || 0}</p>
                         <p>Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
-                        <button 
+                        <button
                           className="view-details-btn"
                           onClick={() => {
                             setSelectedItem(item);
