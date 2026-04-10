@@ -414,39 +414,39 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 
 /* Desktop - Show normal navigation */
-@media (min-width: 769px) {
+@media (min-width: 901px) {
   .nav-container {
     height: 80px;
   }
-  
+
   .nav-brand {
     gap: 12px;
   }
-  
+
   .nav-logo {
     width: 55px;
     height: 55px;
   }
-  
+
   .nav-brand-text {
     font-size: 2.2rem;
   }
-  
+
   .nav-brand-text.admin-text {
     font-size: 1rem;
   }
-  
+
   .nav-links {
     display: flex !important;
   }
-  
+
   .hamburger-menu {
     display: none !important;
   }
 }
 
 /* Tablet - Show hamburger menu */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .nav-container {
     padding: 0 15px;
     height: 60px;
