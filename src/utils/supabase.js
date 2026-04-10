@@ -199,8 +199,7 @@ export const addOrderToSupabase = async (order) => {
     const orderData = {
       status: 'pending',
       total: parseFloat(order.total) || 0,
-      shipping: JSON.stringify(order.shipping || {}),
-      items: order.items || []
+      shipping: JSON.stringify(order.shipping || {})
     };
 
     if (order.orderNumber) {
