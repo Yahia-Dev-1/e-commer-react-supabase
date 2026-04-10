@@ -14,8 +14,7 @@ export default function OrderManagement({ darkMode = false }) {
   const [deleteReason, setDeleteReason] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [editForm, setEditForm] = useState({
-    status: 'pending',
-    estimatedDelivery: ''
+    status: 'pending'
   });
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -49,8 +48,7 @@ export default function OrderManagement({ darkMode = false }) {
   const handleEditOrder = (order) => {
     setSelectedOrder(order);
     setEditForm({
-      status: order.status || 'pending',
-      estimatedDelivery: order.estimatedDelivery || ''
+      status: order.status || 'pending'
     });
     setShowEditModal(true);
   };
@@ -62,9 +60,8 @@ export default function OrderManagement({ darkMode = false }) {
       console.log('Selected order:', selectedOrder);
       console.log('Order ID:', selectedOrder.id);
       console.log('New status:', editForm.status);
-      console.log('Estimated delivery:', editForm.estimatedDelivery);
 
-      await updateOrderStatus(selectedOrder.id, editForm.status, {}, editForm.estimatedDelivery);
+      await updateOrderStatus(selectedOrder.id, editForm.status);
       showToast('✅ Order updated successfully', 'success');
       setShowEditModal(false);
       loadOrders();
@@ -120,7 +117,6 @@ export default function OrderManagement({ darkMode = false }) {
   };
 
   const getStatusColor = (status) => {
-    console.log('Status:', status);
     let color;
     switch (status) {
       case 'Delivered':
@@ -144,7 +140,6 @@ export default function OrderManagement({ darkMode = false }) {
       default:
         color = '#666';
     }
-    console.log('Color:', color);
     return color;
   };
 
@@ -354,16 +349,6 @@ export default function OrderManagement({ darkMode = false }) {
                   <option value="Shipped">Shipped</option>
                   <option value="Delivered">Delivered</option>
                 </select>
-              </div>
-
-              <div className="form-group">
-                <label>Estimated Delivery Time</label>
-                <input
-                  type="text"
-                  value={editForm.estimatedDelivery || ''}
-                  onChange={(e) => setEditForm({ ...editForm, estimatedDelivery: e.target.value })}
-                  placeholder="e.g., 2-3 days, 1 week"
-                />
               </div>
 
               <div className="form-actions">
