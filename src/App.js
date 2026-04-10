@@ -844,13 +844,11 @@ function AppContent() {
         } />
       </Routes>
       
-      {/* 🆕 Floating Action Buttons (Cart & Notifications) */}
+      {/* 🆕 Floating Action Buttons (Cart) */}
       {location.pathname !== '/login' && (
         <Suspense fallback={null}>
           <FloatingButtons 
             cartItemsCount={cartItems.length}
-            unreadNotifications={notifications.filter(n => !n.read).length}
-            onNotificationClick={() => setShowNotifications(!showNotifications)}
           />
         </Suspense>
       )}
