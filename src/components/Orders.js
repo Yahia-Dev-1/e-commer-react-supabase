@@ -120,11 +120,11 @@ export default function Orders({ user, orders = [] }) {
 
   const getTrackingSteps = (status, order) => {
     const steps = [
-      { id: 1, title: 'تم استلام الطلب', description: 'تم استلام طلبك', completed: true },
-      { id: 2, title: '1 بيتراجع', description: 'في انتظار موافقة الإدارة', completed: status === 'approved' || status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 3, title: '2 بيجهز', description: 'نحن نجهز طلبك', completed: status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 4, title: '3 خرج للتوصيل', description: 'طلبك في الطريق إليك', completed: status === 'Shipped' || status === 'Delivered' },
-      { id: 5, title: '4 وصل', description: 'تم تسليم طلبك', completed: status === 'Delivered' }
+      { id: 1, title: 'Order Placed', description: 'Your order has been received', completed: true },
+      { id: 2, title: 'Pending', description: 'Waiting for admin approval', completed: status === 'approved' || status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 3, title: 'Processing', description: 'We are preparing your order', completed: status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 4, title: 'Shipped', description: 'Your order is on its way', completed: status === 'Shipped' || status === 'Delivered' },
+      { id: 5, title: 'Delivered', description: 'Your order has been delivered', completed: status === 'Delivered' }
     ];
     return steps;
   };
