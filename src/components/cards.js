@@ -148,7 +148,6 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
   const [reviews, setReviews] = useState([])
 
   // Products are now passed from App.js, no need to load from localStorage
-  console.log(`📦 Cards: Received ${products.length} products from App.js (version: ${productsVersion})`)
 
   // Load reviews from Supabase
   useEffect(() => {
@@ -156,20 +155,12 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
       try {
         const reviewsData = await getReviewsFromSupabase(null, 50, 0);
         setReviews(reviewsData);
-        console.log('=== REVIEWS LOADED ===');
-        console.log('Reviews count:', reviewsData.length);
       } catch (error) {
         console.error('Error loading reviews:', error);
       }
     };
     loadReviews();
   }, []);
-
-  // Log when products change
-  useEffect(() => {
-    console.log(`🔄 Cards: Products updated - ${products.length} products (version: ${productsVersion})`)
-    console.log('📋 Products titles:', products.map(p => p.title))
-  }, [products, productsVersion])
 
   // Get unique categories (memoized)
   const categories = useMemo(() => {
