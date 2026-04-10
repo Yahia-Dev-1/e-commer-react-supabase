@@ -119,28 +119,41 @@ export default function OrderManagement({ darkMode = false }) {
   const getStatusColor = (status) => {
     let color;
     switch (status) {
-      case 'Delivered':
+      case 'وصل':
         color = '#4CAF50';
         break;
-      case 'Shipped':
+      case 'خرج للتوصيل':
         color = '#2196F3';
         break;
-      case 'Processing':
+      case 'بيجهز':
         color = '#FF9800';
         break;
-      case 'Preparing':
-        color = '#9C27B0';
-        break;
-      case 'pending':
+      case 'بيتراجع':
         color = '#FF5722';
-        break;
-      case 'approved':
-        color = '#00BCD4';
         break;
       default:
         color = '#666';
     }
     return color;
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case 'Delivered':
+        return '4 وصل';
+      case 'Shipped':
+        return '3 خرج للتوصيل';
+      case 'Processing':
+        return '2 بيجهز';
+      case 'Preparing':
+        return '2 بيجهز';
+      case 'pending':
+        return '1 بيتراجع';
+      case 'approved':
+        return '1 بيتراجع';
+      default:
+        return status;
+    }
   };
 
   const formatDate = (dateString) => {
@@ -215,11 +228,11 @@ export default function OrderManagement({ darkMode = false }) {
                   <p className="order-date">{formatDateTime(order.created_at)}</p>
                 </div>
                 <div className="order-status">
-                  <span 
+                  <span
                     className="status-badge"
                     style={{ backgroundColor: getStatusColor(order.status) }}
                   >
-                    {order.status}
+                    {getStatusLabel(order.status)}
                   </span>
                 </div>
               </div>
@@ -336,18 +349,16 @@ export default function OrderManagement({ darkMode = false }) {
 
             <form onSubmit={handleSaveOrder} className="edit-order-form">
               <div className="form-group">
-                <label>Status</label>
+                <label>الحالة</label>
                 <select
                   value={editForm.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
                   required
                 >
-                  <option value="pending">Pending Approval</option>
-                  <option value="approved">Approved</option>
-                  <option value="Processing">Processing</option>
-                  <option value="Preparing">Preparing</option>
-                  <option value="Shipped">Shipped</option>
-                  <option value="Delivered">Delivered</option>
+                  <option value="pending">1 بيتراجع</option>
+                  <option value="Processing">2 بيجهز</option>
+                  <option value="Shipped">3 خرج للتوصيل</option>
+                  <option value="Delivered">4 وصل</option>
                 </select>
               </div>
 
