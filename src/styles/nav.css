@@ -879,3 +879,77 @@ body {
     font-size: 0.65rem;
   }
 }
+
+/* Modern Animations and Styles for Nav */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.nav-container {
+  animation: slideDown 0.5s ease-out;
+}
+
+.nav-links a {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nav-links a::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::before {
+  width: 100%;
+}
+
+.nav-links a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.cart-nav-link:hover {
+  animation: pulse 0.3s ease-in-out;
+}
+
+.notifications-btn:hover {
+  animation: pulse 0.3s ease-in-out;
+}
+
+.logout-btn:hover,
+.login-btn:hover,
+.register-btn:hover {
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+  background-size: 200% 100%;
+}
+
+.cart-count {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.notification-badge {
+  animation: pulse 1.5s ease-in-out infinite;
+}
