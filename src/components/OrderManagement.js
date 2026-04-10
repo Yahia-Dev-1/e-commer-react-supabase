@@ -4,7 +4,7 @@ import { useToast } from '../contexts/ToastContext';
 import { getOrdersFromSupabase, updateOrderStatus, deleteOrderFromSupabase, restoreProductQuantities } from '../utils/supabase';
 
 export default function OrderManagement({ darkMode = false }) {
-  const showToast = useToast();
+  const { showToast } = useToast();
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
