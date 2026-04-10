@@ -73,7 +73,6 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true)
   const [products, setProducts] = useState([])
   const [productsVersion, setProductsVersion] = useState(0) // For forcing re-renders
-  const [categoryFilter, setCategoryFilter] = useState('All') // For database-level filtering
   
   // 🆕 Alert Modal state
   const [alertModal, setAlertModal] = useState({
@@ -134,8 +133,8 @@ function AppContent() {
         setIsLoadingProducts(true)
         const { getProductsFromSupabase } = await import('./utils/supabase')
 
-        // 🆕 Fetch from Supabase with category filter
-        const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0, categoryFilter)
+        // 🆕 Fetch from Supabase
+        const { data: supabaseProducts } = await getProductsFromSupabase(PRODUCTS_PER_PAGE, 0)
 
         if (!isMounted) return
 
@@ -180,7 +179,7 @@ function AppContent() {
       unsubscribe()
       window.removeEventListener('productsUpdated', handleProductsUpdated)
     }
-  }, [categoryFilter])
+  }, [])
 
   // Fallback: load from localStorage initially (for faster UI)
   const loadProducts = () => {
@@ -767,8 +766,6 @@ function AppContent() {
               darkMode={true}
               products={products}
               productsVersion={productsVersion}
-              categoryFilter={categoryFilter}
-              setCategoryFilter={setCategoryFilter}
             />
           </Suspense>
         } />

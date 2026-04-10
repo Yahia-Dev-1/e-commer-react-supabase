@@ -141,9 +141,9 @@ function FilterButton({ category, isActive, onClick }) {
 }
 
 // Main Cards Container Component
-export default function Cards({ addToCart, cartItems = [], updateCartItemQuantity, darkMode = false, products = [], productsVersion = 0, categoryFilter = 'All', setCategoryFilter = null }) {
+export default function Cards({ addToCart, cartItems = [], updateCartItemQuantity, darkMode = false, products = [], productsVersion = 0 }) {
   const showToast = useToast();
-  const [activeFilter, setActiveFilter] = useState(categoryFilter || 'All')
+  const [activeFilter, setActiveFilter] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
   const [reviews, setReviews] = useState([])
 
@@ -161,13 +161,6 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     };
     loadReviews();
   }, []);
-
-  // Sync activeFilter with categoryFilter prop
-  useEffect(() => {
-    if (categoryFilter) {
-      setActiveFilter(categoryFilter)
-    }
-  }, [categoryFilter])
 
   // Get unique categories (memoized)
   const categories = useMemo(() => {
@@ -192,11 +185,12 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     }
   }, [products])
 
-  // Filter products (only search filter, category filter is on database level)
+  // Filter products (frontend filtering)
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+    const matchesFilter = activeFilter === 'All' || product.category === activeFilter
+    return matchesSearch && matchesFilter
   })
 
   // Handle filter change
@@ -205,10 +199,6 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
     console.log('Category clicked:', category);
     console.log('Current activeFilter:', activeFilter);
     setActiveFilter(category)
-    // Use setCategoryFilter if available (database-level filtering)
-    if (setCategoryFilter) {
-      setCategoryFilter(category)
-    }
     console.log('New activeFilter:', category);
   }
 

@@ -81,19 +81,13 @@ export const updateProductInSupabase = async (productId, updates) => {
 };
 
 // 🆕 Optimized: Get products with pagination (default 50 products)
-export const getProductsFromSupabase = async (limit = 50, offset = 0, category = null) => {
+export const getProductsFromSupabase = async (limit = 50, offset = 0) => {
   try {
-    let query = supabase
+    const { data, error, count } = await supabase
       .from('products')
       .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false });
-
-    // Add category filter if provided
-    if (category && category !== 'All') {
-      query = query.eq('category', category);
-    }
-
-    const { data, error, count } = await query.range(offset, offset + limit - 1);
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
 
     if (error) throw error;
     return { data: data || [], count };
