@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, getOrdersByUser } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [], darkMode = false }) {
@@ -17,14 +17,19 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     const loadOrders = async () => {
       if (user) {
         try {
-          // Get orders from Supabase
-          const { data: allOrders } = await getOrdersFromSupabase(100, 0);
-          console.log('=== ORDERS FROM SUPABASE (USER PAGE) ===');
-          console.log('📥 Orders loaded from Supabase:', allOrders.length);
-          console.log('All orders data:', allOrders);
-          
-          // Show all orders (no filtering since userEmail not in database)
-          setUserOrders(allOrders || []);
+          // Get orders from Supabase filtered by user email
+          const userEmail = user.email || localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser');
+          if (userEmail) {
+            const orders = await getOrdersByUser(userEmail);
+            console.log('=== ORDERS FROM SUPABASE (USER PAGE) ===');
+            console.log('📥 Orders loaded from Supabase:', orders.length);
+            console.log('All orders data:', orders);
+            setUserOrders(orders || []);
+          } else {
+            // Fallback to all orders if no email
+            const { data: allOrders } = await getOrdersFromSupabase(100, 0);
+            setUserOrders(allOrders || []);
+          }
         } catch (error) {
           console.log('=== ERROR LOADING ORDERS (USER PAGE) ===');
           console.log('Using localStorage orders:', error.message);
@@ -45,8 +50,14 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       
       console.log('🔄 Orders updated from Supabase:', supabaseOrders.length);
       
-      // Show all orders (no filtering since userEmail not in database)
-      setUserOrders(supabaseOrders || []);
+      // Filter by user email
+      const userEmail = user.email || localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser');
+      if (userEmail) {
+        const userSpecificOrders = supabaseOrders.filter(order => order.user_email === userEmail);
+        setUserOrders(userSpecificOrders || []);
+      } else {
+        setUserOrders(supabaseOrders || []);
+      }
     });
 
     return () => unsubscribe();
@@ -62,6 +73,10 @@ export default function Orders({ user, orders = [], darkMode = false }) {
         return '#FF9800';
       case 'Preparing':
         return '#9C27B0';
+      case 'pending':
+        return '#FF5722';
+      case 'approved':
+        return '#00BCD4';
       default:
         return '#666';
     }
@@ -128,13 +143,23 @@ export default function Orders({ user, orders = [], darkMode = false }) {
     }
   };
 
-  const getTrackingSteps = (status) => {
+  const getTrackingSteps = (status, order) => {
     const steps = [
       { id: 1, title: 'Order Placed', description: 'Your order has been received', completed: true },
-      { id: 2, title: 'Processing', description: 'We are preparing your order', completed: status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 3, title: 'Preparing', description: 'Your items are being prepared', completed: status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
-      { id: 4, title: 'Shipped', description: 'Your order is on its way', completed: status === 'Shipped' || status === 'Delivered' },
-      { id: 5, title: 'Delivered', description: 'Your order has been delivered', completed: status === 'Delivered' }
+      { id: 2, title: 'Pending Approval', description: 'Waiting for admin approval', completed: status === 'approved' || status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 3, title: 'Processing', description: 'We are preparing your order', completed: status === 'Processing' || status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 4, title: 'Preparing', description: order?.preparation_start_date && order?.preparation_end_date 
+        ? `Preparing from ${formatDate(order.preparation_start_date)} to ${formatDate(order.preparation_end_date)}`
+        : 'Your items are being prepared', 
+        completed: status === 'Preparing' || status === 'Shipped' || status === 'Delivered' },
+      { id: 5, title: 'Shipped', description: order?.shipping_start_date && order?.shipping_end_date 
+        ? `Shipping from ${formatDate(order.shipping_start_date)} to ${formatDate(order.shipping_end_date)}`
+        : 'Your order is on its way', 
+        completed: status === 'Shipped' || status === 'Delivered' },
+      { id: 6, title: 'Delivered', description: order?.estimated_delivery_date 
+        ? `Expected delivery by ${formatDate(order.estimated_delivery_date)}`
+        : 'Your order has been delivered', 
+        completed: status === 'Delivered' }
     ];
     return steps;
   };
@@ -262,14 +287,14 @@ export default function Orders({ user, orders = [], darkMode = false }) {
             </div>
             
             <div className="tracking-steps">
-              {getTrackingSteps(selectedOrder.status).map((step, index) => (
+              {getTrackingSteps(selectedOrder.status, selectedOrder).map((step, index) => (
                 <div key={step.id} className={`tracking-step ${step.completed ? 'completed' : ''}`}>
                   <div className="step-number">{step.completed ? '✓' : step.id}</div>
                   <div className="step-content">
                     <h4>{step.title}</h4>
                     <p>{step.description}</p>
                   </div>
-                  {index < getTrackingSteps(selectedOrder.status).length - 1 && (
+                  {index < getTrackingSteps(selectedOrder.status, selectedOrder).length - 1 && (
                     <div className={`step-connector ${step.completed ? 'completed' : ''}`}></div>
                   )}
                 </div>
@@ -277,7 +302,10 @@ export default function Orders({ user, orders = [], darkMode = false }) {
             </div>
 
             <div className="tracking-footer">
-              <p>Estimated delivery: {formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))}</p>
+              <p>Estimated delivery: {selectedOrder?.estimated_delivery_date ? formatDate(selectedOrder.estimated_delivery_date) : formatDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000))}</p>
+              {selectedOrder?.shipping_location && (
+                <p>Shipping from: {selectedOrder.shipping_location}</p>
+              )}
             </div>
           </div>
         </div>

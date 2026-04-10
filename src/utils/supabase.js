@@ -315,4 +315,59 @@ export const subscribeToOrders = (callback) => {
   };
 };
 
+// 🆕 Update order status and tracking information
+export const updateOrderStatus = async (orderId, status, trackingInfo = {}) => {
+  try {
+    const updateData = {
+      status: status,
+      ...trackingInfo
+    };
+    
+    const { data, error } = await supabase
+      .from('orders')
+      .update(updateData)
+      .eq('id', orderId)
+      .select();
+    
+    if (error) throw error;
+    return data[0];
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    throw error;
+  }
+};
+
+// 🆕 Get orders by user email
+export const getOrdersByUser = async (userEmail) => {
+  try {
+    const { data, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('user_email', userEmail)
+      .order('created_at', { ascending: false });
+    
+    if (error) throw error;
+    
+    // Parse shipping field from TEXT back to JSON for UI
+    const parsedData = (data || []).map(order => {
+      try {
+        return {
+          ...order,
+          shipping: JSON.parse(order.shipping || '{}')
+        };
+      } catch (e) {
+        return {
+          ...order,
+          shipping: {}
+        };
+      }
+    });
+    
+    return parsedData;
+  } catch (error) {
+    console.error('Error getting orders by user:', error);
+    throw error;
+  }
+};
+
 export { supabase };

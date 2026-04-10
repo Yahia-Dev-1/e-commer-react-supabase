@@ -22,6 +22,7 @@ const Modal = lazy(() => import('./components/Modal'))
 const AlertModal = lazy(() => import('./components/AlertModal'))
 const Admin = lazy(() => import('./components/Admin'))
 const FloatingButtons = lazy(() => import('./components/FloatingButtons'))
+const OrderManagement = lazy(() => import('./components/OrderManagement'))
 
 // Loading component
 const LoadingSpinner = () => (
@@ -813,6 +814,11 @@ function AppContent() {
         <Route path='/category-management' element={
           <Suspense fallback={<LoadingSpinner />}>
             <CategoryManagement darkMode={true} />
+          </Suspense>
+        } />
+        <Route path='/order-management' element={
+          <Suspense fallback={<LoadingSpinner />}>
+            <OrderManagement darkMode={true} />
           </Suspense>
         } />
       </Routes>
