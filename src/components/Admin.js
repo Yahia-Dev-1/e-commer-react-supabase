@@ -87,15 +87,25 @@ export default function Admin({ darkMode = true }) {
       const existingUser = allUsers.find(user => user.email === admin.email);
       if (!existingUser) {
         try {
-          database.registerUser({
-            email: admin.email,
-            password: admin.password,
-            name: admin.name
-          });
-          console.log(`Added protected admin: ${admin.email}`);
+          // Check if user exists in localStorage before registering
+          const localStorageUsers = database.getUsers();
+          const userInLocalStorage = localStorageUsers.find(user => user.email === admin.email);
+          
+          if (!userInLocalStorage) {
+            database.registerUser({
+              email: admin.email,
+              password: admin.password,
+              name: admin.name
+            });
+            console.log(`Added protected admin: ${admin.email}`);
+          } else {
+            console.log(`Protected admin ${admin.email} already exists in localStorage`);
+          }
         } catch (error) {
-          console.log(`Protected admin ${admin.email} already exists or error occurred:`, error.message);
+          console.log(`Protected admin ${admin.email} error:`, error.message);
         }
+      } else {
+        console.log(`Protected admin ${admin.email} already exists`);
       }
     });
 

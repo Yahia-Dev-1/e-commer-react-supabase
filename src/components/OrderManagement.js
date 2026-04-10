@@ -38,6 +38,11 @@ export default function OrderManagement({ darkMode = false }) {
   const handleSaveOrder = async (e) => {
     e.preventDefault();
     try {
+      console.log('=== UPDATING ORDER ===');
+      console.log('Selected order:', selectedOrder);
+      console.log('Order ID:', selectedOrder.id);
+      console.log('New status:', editForm.status);
+      
       await updateOrderStatus(selectedOrder.id, editForm.status);
       showToast('✅ Order updated successfully', 'success');
       setShowEditModal(false);
