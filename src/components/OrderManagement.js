@@ -221,40 +221,48 @@ export default function OrderManagement({ darkMode = false }) {
 
               {/* Order Items */}
               {(() => {
-                const items = order.items || (order.shipping && JSON.parse(order.shipping)?.items) || [];
+                let items = order.items || [];
+                if (!items.length && order.shipping) {
+                  try {
+                    const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
+                    items = shippingData.items || [];
+                  } catch (error) {
+                    console.error('Error parsing shipping data:', error);
+                  }
+                }
                 return items.length > 0 ? (
                   <div className="order-items">
                     <h4>📦 Order Items</h4>
                     {items.map((item, index) => (
                       <div key={index} className="order-item">
-                      <div className="item-image">
-                        <img 
-                          src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'} 
-                          alt={item.name || 'Product'} 
-                          onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
-                          }}
-                        />
+                        <div className="item-image">
+                          <img 
+                            src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'} 
+                            alt={item.name || 'Product'} 
+                            onError={(e) => {
+                              e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                            }}
+                          />
+                        </div>
+                        <div className="item-details">
+                          <h5>{item.name || item.title || 'Unknown Product'}</h5>
+                          <p>Code: #{item.id || 'N/A'}</p>
+                          <p>Price: ${item.price || '0.00'}</p>
+                          <p>Quantity: {item.quantity || 0}</p>
+                          <p>Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
+                          <button
+                            className="view-details-btn"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setShowDetailsModal(true);
+                            }}
+                          >
+                            View Details
+                          </button>
+                        </div>
                       </div>
-                      <div className="item-details">
-                        <h5>{item.name || item.title || 'Unknown Product'}</h5>
-                        <p>Code: #{item.id || 'N/A'}</p>
-                        <p>Price: ${item.price || '0.00'}</p>
-                        <p>Quantity: {item.quantity || 0}</p>
-                        <p>Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
-                        <button
-                          className="view-details-btn"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setShowDetailsModal(true);
-                          }}
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
                 ) : null;
               })()}
 
