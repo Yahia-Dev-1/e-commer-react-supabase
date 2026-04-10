@@ -331,6 +331,122 @@
   color: #fff;
 }
 
+/* Order Items Styles */
+.order-items {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+}
+
+.order-management-container.dark-mode .order-items {
+  background: #2a2a2a;
+}
+
+.order-items h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.order-management-container.dark-mode .order-items h4 {
+  color: #fff;
+}
+
+.order-item {
+  display: flex;
+  gap: 15px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  border: 1px solid #eee;
+}
+
+.order-management-container.dark-mode .order-item {
+  background: #3a3a3a;
+  border-color: #444;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.item-details h5 {
+  margin: 0 0 5px 0;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.order-management-container.dark-mode .item-details h5 {
+  color: #fff;
+}
+
+.item-details p {
+  margin: 2px 0;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.order-management-container.dark-mode .item-details p {
+  color: #aaa;
+}
+
+/* Shipping Details Styles */
+.order-shipping {
+  background: #f0f4ff;
+  padding: 15px;
+  border-radius: 6px;
+  margin: 15px 0;
+}
+
+.order-management-container.dark-mode .order-shipping {
+  background: #1a1f3a;
+}
+
+.order-shipping h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.order-management-container.dark-mode .order-shipping h4 {
+  color: #fff;
+}
+
+.order-shipping p {
+  margin: 5px 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.order-management-container.dark-mode .order-shipping p {
+  color: #ccc;
+}
+
+.order-shipping pre {
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+.order-management-container.dark-mode .order-shipping pre {
+  background: #2a2a2a;
+  color: #fff;
+}
+
 .order-timeline h4 {
   margin: 0 0 10px 0;
   color: #333;
