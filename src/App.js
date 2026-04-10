@@ -218,21 +218,6 @@ function AppContent() {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Create admin-test@gmail.com user if it doesn't exist
-        const users = database.getUsers();
-        if (!users.some(user => user.email === 'admin-test@gmail.com')) {
-          try {
-            database.registerUser({
-              email: 'admin-test@gmail.com',
-              password: 'admin123',
-              name: 'Admin Test'
-            });
-            console.log('Created admin-test@gmail.com user in App.js');
-          } catch (error) {
-            console.log('admin-test@gmail.com already exists:', error.message);
-          }
-        }
-
         const savedUserEmail = localStorage.getItem('currentUserEmail')
         const savedCartItems = localStorage.getItem('cartItems')
         
