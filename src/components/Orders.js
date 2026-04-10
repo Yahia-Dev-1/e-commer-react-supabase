@@ -115,20 +115,6 @@ export default function Orders({ user, orders = [], darkMode = false }) {
       setUserOrders(prev => prev.filter(o => o.id !== orderId));
 
       showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');
-
-      // 🆕 Send notification to admin
-      const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
-      const notification = {
-        id: Date.now(),
-        type: 'cancelled_order',
-        message: `Order #${orderToCancel.orderNumber || 'Unknown'} cancelled by ${user?.email || 'Unknown'}`,
-        data: orderToCancel,
-        date: new Date().toISOString(),
-        read: false
-      };
-      adminNotifications.unshift(notification);
-      localStorage.setItem('admin_notifications', JSON.stringify(adminNotifications));
-      console.log('📢 Admin notification sent for cancelled order:', notification);
     }
   };
 
