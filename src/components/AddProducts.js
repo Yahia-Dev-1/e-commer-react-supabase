@@ -183,16 +183,41 @@ export default function AddProducts({ darkMode = false }) {
     }
   }, [navigate])
 
-  const loadProducts = () => {
+  const loadProducts = async () => {
     try {
-      const storedProducts = localStorage.getItem('ecommerce_products')
-      if (storedProducts) {
-        const parsedProducts = JSON.parse(storedProducts)
-        setProducts(parsedProducts)
+      // Fetch from Supabase first
+      const { getProductsFromSupabase } = await import('../utils/supabase')
+      const { data: supabaseProducts } = await getProductsFromSupabase(100, 0)
+      
+      if (supabaseProducts && supabaseProducts.length > 0) {
+        setProducts(supabaseProducts)
+        // Also save to localStorage for fallback
+        try {
+          localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts))
+        } catch (e) {
+          console.warn('localStorage quota exceeded')
+        }
+        console.log('📥 Loaded products from Supabase:', supabaseProducts.length)
+      } else {
+        // Fallback to localStorage
+        const storedProducts = localStorage.getItem('ecommerce_products')
+        if (storedProducts) {
+          const parsedProducts = JSON.parse(storedProducts)
+          setProducts(parsedProducts)
+        }
       }
     } catch (error) {
       console.error('Error loading products:', error)
-      setProducts([])
+      // Fallback to localStorage
+      try {
+        const storedProducts = localStorage.getItem('ecommerce_products')
+        if (storedProducts) {
+          const parsedProducts = JSON.parse(storedProducts)
+          setProducts(parsedProducts)
+        }
+      } catch (e) {
+        setProducts([])
+      }
     }
   }
 
@@ -350,6 +375,9 @@ export default function AddProducts({ darkMode = false }) {
     const updatedProductsLocal = products.map(product => product.id === editingProduct.id ? updatedProductLocal : product)
     setProducts(updatedProductsLocal)
     try { localStorage.setItem('ecommerce_products', JSON.stringify(updatedProductsLocal)) } catch {}
+
+    // Reload products from Supabase to get the latest data
+    await loadProducts()
 
     window.dispatchEvent(new Event('productsUpdated'))
     setMessage(`✅ Product "${editingProduct.title}" updated`)
