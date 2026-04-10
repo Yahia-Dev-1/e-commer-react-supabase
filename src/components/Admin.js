@@ -587,12 +587,6 @@ export default function Admin({ darkMode = true }) {
           Users Management
         </button>
         <button 
-          className={`tab-btn ${activeTab === 'products' ? 'active' : ''}`}
-          onClick={() => setActiveTab('products')}
-        >
-          Products Management
-        </button>
-        <button 
           className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
