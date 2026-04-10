@@ -752,6 +752,9 @@
 .reviews-section {
   margin-top: 60px;
   padding: 40px 20px;
+  background: #1a1a2e;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .reviews-title {
