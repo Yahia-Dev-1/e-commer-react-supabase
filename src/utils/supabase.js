@@ -30,7 +30,6 @@ export const addProductToSupabase = async (product) => {
     // Add extra fields for UI only
     if (data && data[0]) {
       data[0].description = product.description || '';
-      data[0].category = product.category || 'other';
       data[0].createdBy = product.createdBy || 'Admin';
       data[0].isProtected = product.isProtected || false;
     }

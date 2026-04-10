@@ -317,7 +317,7 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
       {/* No Products Message */}
       {filteredProducts.length === 0 && (
         <div className="no-products">
-          <p>No products found in this category</p>
+          <p>No products found</p>
         </div>
       )}
 

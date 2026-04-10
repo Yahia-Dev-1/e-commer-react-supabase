@@ -11,13 +11,8 @@ export default function AddProducts({ darkMode = false }) {
   const [isLoading, setIsLoading] = useState(true)
   const [message, setMessage] = useState('')
   const [showForm, setShowForm] = useState(false)
-  const [showCategoriesSection, setShowCategoriesSection] = useState(false)
-  const [showCategoryForm, setShowCategoryForm] = useState(false)
-  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
   const [products, setProducts] = useState([])
   const [productList,setProductList]= useState([])
-  const [categories, setCategories] = useState(['electronics', 'clothing', 'books', 'home', 'sports', 'other'])
-  const [newCategory, setNewCategory] = useState('')
   
   // Sync productList with products from Supabase
   useEffect(()=>{
@@ -44,8 +39,7 @@ export default function AddProducts({ darkMode = false }) {
     price: '',
     quantity: 1,
     image: '',
-    description: '',
-    category: 'electronics'
+    description: ''
   })
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -92,7 +86,6 @@ export default function AddProducts({ darkMode = false }) {
         // If no users exist, allow access (first time setup)
         setUser({ email: 'admin@gmail.com' })
         loadProducts()
-        loadCategories()
         setIsLoading(false)
         return
       }
@@ -111,7 +104,6 @@ export default function AddProducts({ darkMode = false }) {
       if (adminEmails.includes(currentUserEmail)) {
         setUser({ email: currentUserEmail })
         loadProducts()
-        loadCategories()
         setIsLoading(false)
         return
       }
@@ -129,7 +121,6 @@ export default function AddProducts({ darkMode = false }) {
     setUser(currentUser)
 
     loadProducts()
-    loadCategories()
     
     // Preload images after products are loaded
     setTimeout(() => {
@@ -166,18 +157,8 @@ export default function AddProducts({ darkMode = false }) {
 
     window.addEventListener('storage', handleStorageChange)
 
-    // Click outside listener for category dropdown
-    const handleClickOutside = (event) => {
-      if (!event.target.closest('.category-selector')) {
-        setShowCategoryDropdown(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-
     return () => {
       window.removeEventListener('storage', handleStorageChange)
-      document.removeEventListener('mousedown', handleClickOutside)
       clearTimeout(window.storageTimeout)
     }
   }, [navigate])
@@ -220,25 +201,12 @@ export default function AddProducts({ darkMode = false }) {
     }
   }
 
-  const loadCategories = () => {
-    try {
-      const storedCategories = localStorage.getItem('ecommerce_categories')
-      if (storedCategories) {
-        const parsedCategories = JSON.parse(storedCategories)
-        setCategories(parsedCategories)
-      }
-    } catch (error) {
-      console.error('Error loading categories:', error)
-    }
-  }
-
   // Function to clean up storage
   const cleanupStorage = () => {
     try {
       // Clean up old data
       const keysToClean = [
         'ecommerce_products_old',
-        'ecommerce_categories_old',
         'cartItems_old',
         'users_old'
       ]
@@ -296,7 +264,6 @@ export default function AddProducts({ darkMode = false }) {
       quantity: parseInt(newProduct.quantity),
       image: newProduct.image,
       description: newProduct.description || '',
-      category: newProduct.category || 'other',
       createdBy: `${localStorage.getItem('currentUserEmail') || 'Admin'}`,
       isProtected: isProtectedAdmin()
     }
@@ -387,74 +354,9 @@ export default function AddProducts({ darkMode = false }) {
       price: '',
       quantity: 1,
       image: '',
-      description: '',
-      category: 'electronics'
+      description: ''
     })
     setMessage('Form cleared successfully!')
-    setTimeout(() => setMessage(''), 3000)
-  }
-
-  // Function to add new category
-  // Function to delete category
-  const handleDeleteCategory = (categoryToDelete) => {
-    if (window.confirm(`Are you sure you want to delete the category "${categoryToDelete}"? This will also remove it from all products.`)) {
-      try {
-        // Delete category from category list
-        const updatedCategories = categories.filter(cat => cat !== categoryToDelete)
-        setCategories(updatedCategories)
-        localStorage.setItem('ecommerce_categories', JSON.stringify(updatedCategories))
-
-        // Update products that use this category
-        const updatedProducts = products.map(product => {
-          if (product.category === categoryToDelete) {
-            return {
-              ...product,
-              category: 'Other' // Set default category
-            }
-          }
-          return product
-        })
-
-        setProducts(updatedProducts)
-        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts))
-
-        // Send custom event to update products on home page
-        window.dispatchEvent(new Event('productsUpdated'))
-
-        setMessage(`Category "${categoryToDelete}" deleted successfully! Products moved to "Other" category.`)
-        setTimeout(() => setMessage(''), 4000)
-        console.log(`Category "${categoryToDelete}" deleted and products updated`)
-      } catch (error) {
-        console.error('Error deleting category:', error)
-        setMessage('Error deleting category')
-        setTimeout(() => setMessage(''), 3000)
-      }
-    }
-  }
-
-  const handleAddCategory = (e) => {
-    e.preventDefault()
-    
-    if (!newCategory.trim()) {
-      setMessage('Please enter a category name')
-      return
-    }
-
-    const categoryName = newCategory.trim().toLowerCase()
-    
-    if (categories.includes(categoryName)) {
-      setMessage('This category already exists')
-      return
-    }
-
-    const updatedCategories = [...categories, categoryName]
-    setCategories(updatedCategories)
-    localStorage.setItem('ecommerce_categories', JSON.stringify(updatedCategories))
-    
-    setNewCategory('')
-    setShowCategoryForm(false)
-    setMessage(`Category "${categoryName}" added successfully!`)
-    
     setTimeout(() => setMessage(''), 3000)
   }
 
@@ -516,7 +418,7 @@ export default function AddProducts({ darkMode = false }) {
       )}
 
       {/* All Products from Supabase */}
-      {!showCategoriesSection && productList && productList.length > 0 && (
+      {productList && productList.length > 0 && (
         <div className="products-section" style={{ marginTop: '16px' }}>
           <div className="products-header">
             <h2>All Products ({productList.length})</h2>
@@ -528,8 +430,6 @@ export default function AddProducts({ darkMode = false }) {
       )}
 
       <div className="admin-actions">
-        {!showCategoriesSection && (
-          <>
         <button 
               className="add-product-btn"
               onClick={() => {
@@ -539,31 +439,10 @@ export default function AddProducts({ darkMode = false }) {
             >
               {showForm ? 'Cancel' : 'Add New Product'}
             </button>
-
-          </>
-        )}
-        <button // Categories Management button
-          className="categories-management-btn"
-          onClick={() => {
-            setShowCategoriesSection(!showCategoriesSection)
-            if (!showCategoriesSection) {
-              // Scroll to categories section when showing
-              setTimeout(() => {
-                const categoriesSection = document.querySelector('.categories-section')
-                if (categoriesSection) {
-                  categoriesSection.scrollIntoView({ behavior: 'smooth' })
-                }
-              }, 100)
-            }
-          }}
-          title="Manage product categories"
-        >
-          {showCategoriesSection ? '⬆️ Back to Top' : '📂 Categories'}
-        </button>
       </div>
 
       {/* Product Form */}
-      {showForm && !showCategoriesSection && (
+      {showForm && (
         <div className="product-form-container">
           <h2>{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
           
@@ -609,40 +488,6 @@ export default function AddProducts({ darkMode = false }) {
                   min="1"
               required
             />
-              </div>
-          </div>
-
-          <div className="form-group">
-              <label htmlFor="category">Category *</label>
-              <div className="category-selector">
-                <button
-                  type="button"
-                  className="category-dropdown-btn"
-                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                >
-                  {editingProduct ? editingProduct.category : newProduct.category}
-                  <span className="dropdown-arrow">▼</span>
-                </button>
-                {showCategoryDropdown && (
-                  <div className="category-dropdown">
-                    {categories.map(category => (
-                      <div
-                        key={category}
-                        className="category-option"
-                        onClick={() => {
-                          if (editingProduct) {
-                            setEditingProduct(prev => ({ ...prev, category }))
-                          } else {
-                            setNewProduct(prev => ({ ...prev, category }))
-                          }
-                          setShowCategoryDropdown(false)
-                        }}
-                      >
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
           </div>
 
@@ -767,10 +612,9 @@ export default function AddProducts({ darkMode = false }) {
       )}
 
       {/* Products Display Section */}
-      {!showCategoriesSection && (
-        <div className="products-section">
-          <div className="products-header">
-            <h2>Products Management ({products.length})</h2>
+      <div className="products-section">
+        <div className="products-header">
+          <h2>Products Management ({products.length})</h2>
       </div>
 
         {products.length === 0 ? (
@@ -827,7 +671,6 @@ export default function AddProducts({ darkMode = false }) {
                     <p className="price">${product.price}</p>
                     <p className="quantity">Quantity: {product.quantity || 1}</p>
 
-                    <p className="category">{product.category}</p>
                     {product.description && (
                       <p className="description">{product.description}</p>
                     )}
@@ -865,7 +708,7 @@ export default function AddProducts({ darkMode = false }) {
                     </button>
                   <button
                     className="delete-btn"
-                      onClick={async () => {
+                    onClick={async () => {
                         const productToDelete = products.find(p => p.id === product.id)
 
                         // Check if trying to delete a protected product
@@ -904,72 +747,6 @@ export default function AddProducts({ darkMode = false }) {
           </div>
         )}
       </div>
-      )}
-
-      {/* Categories Management Section */}
-      {showCategoriesSection && (
-        <div className="categories-section">
-        <div className="categories-header">
-          <h2>Categories Management ({categories.length})</h2>
-          <div className="categories-actions">
-            <button 
-              className="add-category-btn"
-              onClick={() => setShowCategoryForm(!showCategoryForm)}
-            >
-              {showCategoryForm ? 'Cancel' : '➕ Add New Category'}
-            </button>
-            <button 
-              className="back-to-top-btn"
-              onClick={() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-            >
-              ⬆️ Back to Top
-            </button>
-          </div>
-        </div>
-
-        {showCategoryForm && (
-          <div className="category-form">
-            <form onSubmit={handleAddCategory}>
-              <div className="form-group">
-                <label htmlFor="newCategory">Category Name</label>
-                <input
-                  type="text"
-                  id="newCategory"
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder="Enter category name"
-                  required
-                />
-              </div>
-              <button type="submit" className="submit-btn">Add Category</button>
-            </form>
-          </div>
-        )}
-
-        <div className="categories-grid">
-          {categories.map(category => (
-            <div key={category} className="category-card">
-              <div className="category-info">
-                <h3>{category.charAt(0).toUpperCase() + category.slice(1)}</h3>
-                <p>Products in this category: {products.filter(p => p.category === category).length}</p>
-              </div>
-              <div className="category-actions">
-                <button 
-                  className="delete-category-btn"
-                  onClick={() => handleDeleteCategory(category)}
-                  disabled={category === 'other'}
-                  title={category === 'other' ? 'Cannot delete default category' : 'Delete category'}
-                >
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      )}
     </div>
   )
 }

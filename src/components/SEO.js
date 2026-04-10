@@ -143,20 +143,6 @@ const SEO = ({
           }
         };
 
-      case 'category':
-        return {
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          "name": title,
-          "description": description,
-          "url": url,
-          "mainEntity": {
-            "@type": "ItemList",
-            "name": title,
-            "description": description
-          }
-        };
-
       case 'article':
         return {
           "@context": "https://schema.org",

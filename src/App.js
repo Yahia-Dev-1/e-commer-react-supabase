@@ -14,7 +14,6 @@ import { ToastProvider, useToast } from './contexts/ToastContext';
 const About = lazy(() => import('./components/About'))
 const Services = lazy(() => import('./components/Services'))
 const AddProducts = lazy(() => import('./components/AddProducts'))
-const CategoryManagement = lazy(() => import('./components/CategoryManagement'))
 const Cards = lazy(() => import('./components/cards'))
 const Login = lazy(() => import('./components/Login'))
 const Orders = lazy(() => import('./components/Orders'))
@@ -834,11 +833,6 @@ function AppContent() {
               products={products}
               productsVersion={productsVersion}
             />
-          </Suspense>
-        } />
-        <Route path='/category-management' element={
-          <Suspense fallback={<LoadingSpinner />}>
-            <CategoryManagement darkMode={true} />
           </Suspense>
         } />
         <Route path='/order-management' element={
