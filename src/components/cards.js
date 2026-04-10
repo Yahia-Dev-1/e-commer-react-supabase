@@ -166,13 +166,22 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
   const categories = useMemo(() => {
     try {
       const savedCategories = JSON.parse(localStorage.getItem('ecommerce_categories') || '[]');
+      console.log('=== CATEGORIES DEBUG ===');
+      console.log('Saved categories:', savedCategories);
+      console.log('Products:', products);
+      console.log('Product categories:', products.map(p => p.category));
       if (savedCategories.length === 0) {
-        return ['All', ...new Set(products.map(product => product.category))];
+        const categories = ['All', ...new Set(products.map(product => product.category))];
+        console.log('Generated categories:', categories);
+        return categories;
       }
+      console.log('Using saved categories:', savedCategories);
       return savedCategories;
     } catch (error) {
       console.error('Error loading categories:', error);
-      return ['All', ...new Set(products.map(product => product.category))];
+      const categories = ['All', ...new Set(products.map(product => product.category))];
+      console.log('Generated categories (error):', categories);
+      return categories;
     }
   }, [products])
 
