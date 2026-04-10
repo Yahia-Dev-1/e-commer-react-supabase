@@ -174,19 +174,36 @@ export default function Orders({ user, orders = [] }) {
               </div>
 
               <div className="order-items">
-                {order.items && order.items.map((item, index) => (
-                  <div key={index} className="order-item">
-                    <div className="item-image">
-                      <img src={item.image} alt={item.name} />
+                {(() => {
+                  let items = order.items || [];
+                  if (!items.length && order.shipping) {
+                    try {
+                      const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
+                      items = shippingData.items || [];
+                    } catch (error) {
+                      console.error('Error parsing shipping data:', error);
+                    }
+                  }
+                  return items.length > 0 ? items.map((item, index) => (
+                    <div key={index} className="order-item">
+                      <div className="item-image">
+                        <img
+                          src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'}
+                          alt={item.name || 'Product'}
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                          }}
+                        />
+                      </div>
+                      <div className="item-details">
+                        <h4>{item.name || item.title || 'Unknown Product'}</h4>
+                        <p className="item-price">Price: ${item.price || '0.00'}</p>
+                        <p className="item-quantity">Quantity: {item.quantity || 0}</p>
+                        <p className="item-total">Total: ${((item.price || 0) * (item.quantity || 0)).toFixed(2)}</p>
+                      </div>
                     </div>
-                    <div className="item-details">
-                      <h4>{item.name}</h4>
-                      <p className="item-price">${item.price}</p>
-                      <p className="item-quantity">Quantity: {item.quantity}</p>
-                      <p className="item-total">Total: ${(item.price * item.quantity).toFixed(2)}</p>
-                    </div>
-                  </div>
-                ))}
+                  )) : null;
+                })()}
               </div>
 
               {/* Shipping Details */}
