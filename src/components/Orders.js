@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities } from '../utils/supabase';
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities, addReviewToSupabase } from '../utils/supabase';
 
 
 export default function Orders({ user, orders = [] }) {
@@ -12,6 +12,9 @@ export default function Orders({ user, orders = [] }) {
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [userOrders, setUserOrders] = useState([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -94,6 +97,36 @@ export default function Orders({ user, orders = [] }) {
   const closeTracking = () => {
     setShowTracking(false);
     setSelectedOrder(null);
+  };
+
+  const handleOpenReviewModal = (product) => {
+    setSelectedProduct(product);
+    setReviewData({ rating: 5, comment: '' });
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
+    setSelectedProduct(null);
+    setReviewData({ rating: 5, comment: '' });
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    try {
+      await addReviewToSupabase({
+        productId: selectedProduct.id,
+        userId: user?.id,
+        userName: user?.email || 'Anonymous',
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      });
+      showToast('✅ Review submitted successfully', 'success');
+      handleCloseReviewModal();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      showToast('❌ Failed to submit review', 'error');
+    }
   };
 
   // 🆕 Function to cancel order for user
@@ -238,20 +271,39 @@ export default function Orders({ user, orders = [] }) {
                   <strong>${order.total.toFixed(2)}</strong>
                 </div>
                 <div className="order-actions">
-                  <button 
+                  <button
                     className="track-order-btn"
                     onClick={() => handleTrackOrder(order)}
                   >
                     Track Order
                   </button>
                   {order.status === 'Processing' && (
-                    <button 
+                    <button
                       className="cancel-order-btn"
                       onClick={() => cancelOrder(order.id)}
                     >
                       Cancel Order
                     </button>
                   )}
+                  {order.status === 'Delivered' && (() => {
+                    let items = order.items || [];
+                    if (!items.length && order.shipping) {
+                      try {
+                        const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
+                        items = shippingData.items || [];
+                      } catch (error) {
+                        console.error('Error parsing shipping data:', error);
+                      }
+                    }
+                    return items.length > 0 ? (
+                      <button
+                        className="track-order-btn"
+                        onClick={() => handleOpenReviewModal(items[0])}
+                      >
+                        Rate Product
+                      </button>
+                    ) : null;
+                  })()}
                 </div>
               </div>
             </div>
@@ -289,8 +341,71 @@ export default function Orders({ user, orders = [] }) {
           </div>
         </div>
       )}
-      
-      
+
+      {/* Review Modal */}
+      {showReviewModal && selectedProduct && (
+        <div className="tracking-modal-overlay" onClick={handleCloseReviewModal}>
+          <div className="tracking-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="tracking-header">
+              <h2>Rate Product</h2>
+              <button className="close-tracking-btn" onClick={handleCloseReviewModal}>×</button>
+            </div>
+
+            <form onSubmit={handleSubmitReview} className="edit-order-form">
+              <div className="form-group">
+                <label>Product</label>
+                <p style={{ color: 'rgba(255, 255, 255, 0.8)' }}>{selectedProduct.name || selectedProduct.title}</p>
+              </div>
+
+              <div className="form-group">
+                <label>Rating</label>
+                <select
+                  value={reviewData.rating}
+                  onChange={(e) => setReviewData({ ...reviewData, rating: parseInt(e.target.value) })}
+                  required
+                >
+                  <option value={5}>⭐⭐⭐⭐⭐ (5)</option>
+                  <option value={4}>⭐⭐⭐⭐ (4)</option>
+                  <option value={3}>⭐⭐⭐ (3)</option>
+                  <option value={2}>⭐⭐ (2)</option>
+                  <option value={1}>⭐ (1)</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label>Comment (Optional)</label>
+                <textarea
+                  value={reviewData.comment}
+                  onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                  placeholder="Share your experience with this product..."
+                  rows={4}
+                  style={{
+                    background: '#1a1a2e',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '6px',
+                    padding: '10px',
+                    color: '#ffffff',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="track-order-btn">Submit Review</button>
+                <button
+                  type="button"
+                  className="cancel-order-btn"
+                  onClick={handleCloseReviewModal}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 } 
