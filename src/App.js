@@ -555,8 +555,24 @@ function AppContent() {
       return
     }
     
-    // Generate 4-digit order number
-    const orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
+    // Generate unique 4-digit order number
+    const { getOrdersFromSupabase } = await import('./utils/supabase');
+    const existingOrders = await getOrdersFromSupabase(100, 0);
+    const existingOrderNumbers = new Set((existingOrders.data || []).map(order => order.orderNumber));
+    
+    let orderNumber;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    do {
+      orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
+      attempts++;
+    } while (existingOrderNumbers.has(orderNumber) && attempts < maxAttempts);
+    
+    if (attempts >= maxAttempts) {
+      showToast('❌ Could not generate unique order number. Please try again.', 'error');
+      return;
+    }
     
     const newOrder = {
       orderNumber: orderNumber,
