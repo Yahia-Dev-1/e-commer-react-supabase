@@ -6,7 +6,7 @@ import database from '../utils/database';
 import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities } from '../utils/supabase';
 
 
-export default function Orders({ user, orders = [], darkMode = false }) {
+export default function Orders({ user, orders = [] }) {
   const showToast = useToast();
   const [loading, setLoading] = useState(true);
   const [showTracking, setShowTracking] = useState(false);
@@ -142,7 +142,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
   }
 
   return (
-    <div className={`orders-container ${darkMode ? 'dark-mode' : ''}`}>
+    <div className="orders-container">
       <div className="orders-header">
         <h1>My Orders</h1>
         <p>Welcome back, {user?.name || 'User'}!</p>
