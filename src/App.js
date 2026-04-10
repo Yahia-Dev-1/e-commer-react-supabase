@@ -757,6 +757,8 @@ function AppContent() {
           <Suspense fallback={<LoadingSpinner />}>
             <Cards 
               addToCart={addToCart} 
+              cartItems={cartItems}
+              updateCartItemQuantity={updateCartItemQuantity}
               darkMode={true} 
               products={products}
               productsVersion={productsVersion}

@@ -17,7 +17,7 @@ const isCurrentUserAdmin = () => {
 };
 
 // Optimized Card Component with lazy loading images
-function Card({ image, title, description, price, quantity, status, onAddToCart }) {
+function Card({ image, title, description, price, quantity, status, onAddToCart, onIncreaseQuantity, onDecreaseQuantity, cartQuantity = 0 }) {
   // Ensure all required properties exist
   const safeTitle = title || 'Untitled Product';
   const safeDescription = description || 'No description available';
@@ -34,6 +34,7 @@ function Card({ image, title, description, price, quantity, status, onAddToCart 
 
   const isOutOfStock = safeQuantity <= 0 || safeStatus === 'out_of_stock';
   const isDiscontinued = safeStatus === 'discontinued';
+  const isInCart = cartQuantity > 0;
   const isPending = safeStatus === 'pending';
   const isLowStock = safeQuantity > 0 && safeQuantity <= 5;
   const isInStock = safeQuantity > 5 && safeStatus === 'available';
@@ -89,17 +90,39 @@ function Card({ image, title, description, price, quantity, status, onAddToCart 
           <span className="price-value">{safePrice}</span>
           <div className="price-decoration"></div>
         </div>
-        <button 
-          className={`card-btn ${isOutOfStock ? 'disabled' : ''} ${isLowStock ? 'low-stock' : ''} ${isInStock ? 'in-stock' : ''}`} 
-          onClick={handleClick}
-          disabled={isOutOfStock}
-          style={{ 
-            cursor: isOutOfStock ? 'not-allowed' : 'pointer',
-            opacity: isOutOfStock ? 0.5 : 1
-          }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="m397.78 316h-205.13a15 15 0 0 1 -14.65-11.67l-34.54-150.48a15 15 0 0 1 14.62-18.36h274.27a15 15 0 0 1 14.65 18.36l-34.6 150.48a15 15 0 0 1 -14.62 11.67zm-193.19-30h181.25l27.67-120.48h-236.6z"></path><path d="m222 450a57.48 57.48 0 1 1 57.48-57.48 57.54 57.54 0 0 1 -57.48 57.48zm0-84.95a27.48 27.48 0 1 0 27.48 27.47 27.5 27.5 0 0 0 -27.48-27.47z"></path><path d="m368.42 450a57.48 57.48 0 1 1 57.48-57.48 57.54 57.54 0 0 1 -57.48 57.48zm0-84.95a27.48 27.48 0 1 0 27.48 27.47 27.5 27.5 0 0 0 -27.48-27.47z"></path><path d="m158.08 165.49a15 15 0 0 1 -14.23-10.26l-25.71-77.23h-47.44a15 15 0 1 1 0-30h58.3a15 15 0 0 1 14.23 10.26l29.13 87.49a15 15 0 0 1 -14.23 19.74z"></path></svg>
-        </button>
+        {isInCart ? (
+          <div className="quantity-controls">
+            <button 
+              className="quantity-btn decrease-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDecreaseQuantity();
+              }}
+            >
+              -
+            </button>
+            <span className="quantity-display">{cartQuantity}</span>
+            <button 
+              className="quantity-btn increase-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                onIncreaseQuantity();
+              }}
+            >
+              +
+            </button>
+          </div>
+        ) : (
+          <button 
+            className="add-to-cart-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart();
+            }}
+          >
+            Add to Cart
+          </button>
+        )}
       </div>
     </div>
   )
@@ -117,7 +140,7 @@ function FilterButton({ category, isActive, onClick }) {
 }
 
 // Main Cards Container Component
-export default function Cards({ addToCart, darkMode = false, products = [], productsVersion = 0 }) {
+export default function Cards({ addToCart, cartItems = [], updateCartItemQuantity, darkMode = false, products = [], productsVersion = 0 }) {
   const showToast = useToast();
   const [activeFilter, setActiveFilter] = useState('All')
   const [searchTerm, setSearchTerm] = useState('')
@@ -138,21 +161,20 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
       if (savedCategories.length === 0) {
         return ['All', ...new Set(products.map(product => product.category))];
       }
-      return ['All', ...savedCategories];
+      return savedCategories;
     } catch (error) {
+      console.error('Error loading categories:', error);
       return ['All', ...new Set(products.map(product => product.category))];
     }
   }, [products])
 
-  // Filter products based on active filter and search term (memoized)
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => {
-      const matchesCategory = activeFilter === 'All' || product.category === activeFilter
-      const matchesSearch = (product.title && product.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                           (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      return matchesCategory && matchesSearch
-    })
-  }, [products, activeFilter, searchTerm])
+  // Filter products
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = activeFilter === 'All' || product.category === activeFilter
+    return matchesSearch && matchesFilter
+  })
 
   // Handle filter change
   const handleFilterChange = (category) => {
@@ -164,6 +186,34 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
     if (addToCart) {
       addToCart(product)
     }
+  }
+
+  // Handle increase quantity
+  const handleIncreaseQuantity = (productId) => {
+    if (updateCartItemQuantity) {
+      const cartItem = cartItems.find(item => item.id === productId)
+      if (cartItem) {
+        updateCartItemQuantity(productId, cartItem.quantity + 1)
+      }
+    }
+  }
+
+  // Handle decrease quantity
+  const handleDecreaseQuantity = (productId) => {
+    if (updateCartItemQuantity) {
+      const cartItem = cartItems.find(item => item.id === productId)
+      if (cartItem && cartItem.quantity > 1) {
+        updateCartItemQuantity(productId, cartItem.quantity - 1)
+      } else if (cartItem && cartItem.quantity === 1) {
+        updateCartItemQuantity(productId, 0)
+      }
+    }
+  }
+
+  // Get cart quantity for a product
+  const getCartQuantity = (productId) => {
+    const cartItem = cartItems.find(item => item.id === productId)
+    return cartItem ? cartItem.quantity : 0
   }
 
   // Function to refresh products (now triggers App.js to reload)
@@ -293,7 +343,7 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
       {/* Products Grid */}
       <div className='cards-container'>
         {filteredProducts.map((product) => (
-          <Card
+          <Card 
             key={product.id}
             image={product.image}
             title={product.title}
@@ -301,7 +351,10 @@ export default function Cards({ addToCart, darkMode = false, products = [], prod
             description={product.description}
             price={product.price}
             quantity={product.quantity}
+            cartQuantity={getCartQuantity(product.id)}
             onAddToCart={() => handleAddToCart(product)}
+            onIncreaseQuantity={() => handleIncreaseQuantity(product.id)}
+            onDecreaseQuantity={() => handleDecreaseQuantity(product.id)}
           />
         ))}
       </div>
