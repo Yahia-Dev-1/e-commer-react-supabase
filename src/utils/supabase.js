@@ -438,4 +438,85 @@ export const restoreProductQuantities = async (order) => {
   }
 };
 
+// Review functions
+export const addReviewToSupabase = async (review) => {
+  try {
+    const reviewData = {
+      productId: review.productId,
+      userId: review.userId,
+      userName: review.userName || 'Anonymous',
+      rating: review.rating,
+      comment: review.comment || '',
+      createdAt: new Date().toISOString()
+    };
+
+    console.log('=== ADDING REVIEW TO SUPABASE ===');
+    console.log('Review data:', reviewData);
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .insert([reviewData])
+      .select();
+
+    if (error) {
+      console.error('=== ERROR ADDING REVIEW ===');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      throw error;
+    }
+
+    console.log('✅ Review added successfully:', data);
+    return data[0];
+  } catch (error) {
+    console.error('Error adding review to Supabase:', error);
+    throw error;
+  }
+};
+
+export const getReviewsFromSupabase = async (productId = null, limit = 50, offset = 0) => {
+  try {
+    let query = supabase.from('reviews').select('*');
+
+    if (productId) {
+      query = query.eq('productId', productId);
+    }
+
+    query = query.order('createdAt', { ascending: false }).range(offset, offset + limit - 1);
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    console.log('=== REVIEWS FROM SUPABASE ===');
+    console.log(`Reviews count: ${data?.length || 0}`);
+    return data || [];
+  } catch (error) {
+    console.error('Error fetching reviews from Supabase:', error);
+    return [];
+  }
+};
+
+export const getProductRating = async (productId) => {
+  try {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('productId', productId);
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      return { averageRating: 0, reviewCount: 0 };
+    }
+
+    const totalRating = data.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = totalRating / data.length;
+
+    return { averageRating, reviewCount: data.length };
+  } catch (error) {
+    console.error('Error getting product rating:', error);
+    return { averageRating: 0, reviewCount: 0 };
+  }
+};
+
 export { supabase };
