@@ -350,8 +350,7 @@ export default function AddProducts({ darkMode = false }) {
       quantity: parseInt(editingProduct.quantity),
       title: editingProduct.title,
       image: editingProduct.image,
-      description: editingProduct.description,
-      category: editingProduct.category
+      description: editingProduct.description
     }
 
     // Update in Supabase
