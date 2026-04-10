@@ -555,15 +555,11 @@ function AppContent() {
       return
     }
     
-    // Generate descriptive order number based on products
-    const firstProductName = cartItems[0]?.title || 'Product';
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    const orderName = `${firstProductName} - ${totalItems} items`;
-    const orderNumber = `ORD-${Date.now().toString().slice(-6)}-${orderName}`;
+    // Generate 4-digit order number
+    const orderNumber = `#${Math.floor(1000 + Math.random() * 9000)}`;
     
     const newOrder = {
       orderNumber: orderNumber,
-      orderName: orderName,
       date: new Date().toISOString(),
       status: 'Processing',
       userId: user?.id,

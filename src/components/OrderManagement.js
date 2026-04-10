@@ -6,11 +6,13 @@ import { getOrdersFromSupabase, updateOrderStatus, deleteOrderFromSupabase, rest
 export default function OrderManagement({ darkMode = false }) {
   const showToast = useToast();
   const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteReason, setDeleteReason] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [editForm, setEditForm] = useState({
     status: 'pending'
   });
@@ -18,6 +20,18 @@ export default function OrderManagement({ darkMode = false }) {
   useEffect(() => {
     loadOrders();
   }, []);
+
+  useEffect(() => {
+    const filtered = orders.filter(order => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        order.orderNumber?.toLowerCase().includes(searchLower) ||
+        order.status?.toLowerCase().includes(searchLower) ||
+        order.total?.toString().includes(searchLower)
+      );
+    });
+    setFilteredOrders(filtered);
+  }, [orders, searchTerm]);
 
   const loadOrders = async () => {
     try {
@@ -120,11 +134,25 @@ export default function OrderManagement({ darkMode = false }) {
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
     });
   };
 
@@ -146,19 +174,35 @@ export default function OrderManagement({ darkMode = false }) {
         <p>Manage and track all orders</p>
       </div>
 
-      {orders.length === 0 ? (
+      {/* Search Bar */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search orders by number, status, or total..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        {searchTerm && (
+          <button className="clear-search" onClick={() => setSearchTerm('')}>
+            ×
+          </button>
+        )}
+      </div>
+
+      {filteredOrders.length === 0 ? (
         <div className="no-orders">
           <h3>No Orders Yet</h3>
           <p>Orders will appear here once customers place them.</p>
         </div>
       ) : (
         <div className="orders-list">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <div key={order.id} className="order-card">
               <div className="order-header">
                 <div className="order-info">
-                  <h3>Order #{order.orderNumber}</h3>
-                  <p className="order-date">{formatDate(order.created_at)}</p>
+                  <h3>{order.orderNumber}</h3>
+                  <p className="order-date">{formatDateTime(order.created_at)}</p>
                 </div>
                 <div className="order-status">
                   <span 

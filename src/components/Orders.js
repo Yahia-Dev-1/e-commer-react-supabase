@@ -154,7 +154,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
             <div key={order.id} className="order-card">
               <div className="order-header">
                 <div className="order-info">
-                  <h3>Order #{order.orderNumber}</h3>
+                  <h3>{order.orderNumber}</h3>
                   <p className="order-date">{formatDate(order.date)}</p>
                 </div>
                 <div className="order-status">
@@ -241,7 +241,7 @@ export default function Orders({ user, orders = [], darkMode = false }) {
         <div className="tracking-modal-overlay" onClick={closeTracking}>
           <div className="tracking-modal" onClick={(e) => e.stopPropagation()}>
             <div className="tracking-header">
-              <h2>Track Order #{selectedOrder.orderNumber}</h2>
+              <h2>Track Order {selectedOrder.orderNumber}</h2>
               <button className="close-tracking-btn" onClick={closeTracking}>×</button>
             </div>
             
