@@ -195,7 +195,11 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
 
   // Handle filter change
   const handleFilterChange = (category) => {
+    console.log('=== HANDLE FILTER CHANGE ===');
+    console.log('Category clicked:', category);
+    console.log('Current activeFilter:', activeFilter);
     setActiveFilter(category)
+    console.log('New activeFilter:', category);
   }
 
   // Handle add to cart
