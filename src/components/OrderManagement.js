@@ -16,6 +16,8 @@ export default function OrderManagement({ darkMode = false }) {
   const [editForm, setEditForm] = useState({
     status: 'pending'
   });
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     loadOrders();
@@ -228,6 +230,15 @@ export default function OrderManagement({ darkMode = false }) {
                         <p>Price: ${item.price}</p>
                         <p>Quantity: {item.quantity}</p>
                         <p>Total: ${(item.price * item.quantity).toFixed(2)}</p>
+                        <button 
+                          className="view-details-btn"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setShowDetailsModal(true);
+                          }}
+                        >
+                          View Details
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -333,7 +344,7 @@ export default function OrderManagement({ darkMode = false }) {
             </div>
 
             <div className="delete-reason-form">
-              <p>Please select a reason for deleting this order:</p>
+              <p>Please select a reason for deletion:</p>
               <div className="reason-options">
                 <label className="reason-option">
                   <input
@@ -342,7 +353,7 @@ export default function OrderManagement({ darkMode = false }) {
                     checked={deleteReason === 'Incomplete data'}
                     onChange={(e) => setDeleteReason(e.target.value)}
                   />
-                  <span>📝 Incomplete data - Order data is incomplete</span>
+                  <span>❌ Incomplete data - Missing required information</span>
                 </label>
                 <label className="reason-option">
                   <input
@@ -360,7 +371,7 @@ export default function OrderManagement({ darkMode = false }) {
                     checked={deleteReason === 'Product out of stock'}
                     onChange={(e) => setDeleteReason(e.target.value)}
                   />
-                  <span>📦 Product out of stock - Product is no longer available</span>
+                  <span>❌ Product out of stock - Items unavailable</span>
                 </label>
                 <label className="reason-option">
                   <input
@@ -369,7 +380,7 @@ export default function OrderManagement({ darkMode = false }) {
                     checked={deleteReason === 'Customer request'}
                     onChange={(e) => setDeleteReason(e.target.value)}
                   />
-                  <span>👤 Customer request - Customer requested cancellation</span>
+                  <span>❌ Customer request - Customer asked to cancel</span>
                 </label>
                 <label className="reason-option">
                   <input
@@ -378,24 +389,44 @@ export default function OrderManagement({ darkMode = false }) {
                     checked={deleteReason === 'Other'}
                     onChange={(e) => setDeleteReason(e.target.value)}
                   />
-                  <span>🔍 Other - Other reason</span>
+                  <span>❌ Other - Different reason</span>
                 </label>
               </div>
+              <button className="delete-btn" onClick={confirmDeleteOrder} disabled={!deleteReason}>
+                Delete Order
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="form-actions">
-                <button 
-                  className="delete-btn" 
-                  onClick={confirmDeleteOrder}
-                  disabled={!deleteReason}
-                >
-                  Delete Order
-                </button>
-                <button 
-                  className="cancel-btn" 
-                  onClick={() => setShowDeleteModal(false)}
-                >
-                  Cancel
-                </button>
+      {/* Product Details Modal */}
+      {showDetailsModal && selectedItem && (
+        <div className="modal-overlay" onClick={() => setShowDetailsModal(false)}>
+          <div className="modal-content product-details-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Product Details</h2>
+              <button className="close-btn" onClick={() => setShowDetailsModal(false)}>×</button>
+            </div>
+
+            <div className="product-details-content">
+              <div className="product-details-image">
+                <img src={selectedItem.image} alt={selectedItem.name} />
+              </div>
+              <div className="product-details-info">
+                <h3>{selectedItem.name}</h3>
+                <div className="detail-item">
+                  <span className="detail-label">Price:</span>
+                  <span className="detail-value">${selectedItem.price}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Quantity:</span>
+                  <span className="detail-value">{selectedItem.quantity}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Total:</span>
+                  <span className="detail-value">${(selectedItem.price * selectedItem.quantity).toFixed(2)}</span>
+                </div>
               </div>
             </div>
           </div>
