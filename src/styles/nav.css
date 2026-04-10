@@ -414,7 +414,7 @@ body {
 /* ===== RESPONSIVE DESIGN ===== */
 
 /* Desktop - Show normal navigation */
-@media (min-width: 901px) {
+@media (min-width: 1201px) {
   .nav-container {
     height: 80px;
   }
@@ -446,7 +446,7 @@ body {
 }
 
 /* Tablet - Show hamburger menu */
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   .nav-container {
     padding: 0 15px;
     height: 60px;
