@@ -3,12 +3,14 @@ import { Link, useNavigate } from 'react-router-dom'
 import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 import { useToast } from '../contexts/ToastContext';
 import '../styles/cart.css'
+import Modal from './Modal'
 
 export default function Cart({ cartItems, updateQuantity, clearCart, createOrder, darkMode = false, products = [] }) {
   const showToast = useToast();
   const navigate = useNavigate()
   const [showAnimation, setShowAnimation] = useState(false)
   const [showShippingForm, setShowShippingForm] = useState(false)
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' })
   const [shippingData, setShippingData] = useState({
     fullName: '',
     phone: '',
@@ -69,7 +71,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
       if (showToast && typeof showToast === 'function') {
         showToast(`Sorry, only ${availableQuantity} items available for this product.`, 'warning')
       } else {
-        alert(`Sorry, only ${availableQuantity} items available for this product.`)
+        setAlertModal({ isOpen: true, title: 'Warning', message: `Sorry, only ${availableQuantity} items available for this product.` })
       }
       updateQuantity(itemId, availableQuantity)
     } else {
@@ -383,6 +385,14 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type="alert"
+      />
     </div>
   )
 }   

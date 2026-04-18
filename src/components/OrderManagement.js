@@ -42,9 +42,10 @@ export default function OrderManagement({ darkMode = false }) {
     const filtered = orders.filter(order => {
       const searchLower = searchTerm.toLowerCase();
       return (
-        order.orderNumber?.toLowerCase().includes(searchLower) ||
+        order.status !== 'rejected' &&
+        (order.orderNumber?.toLowerCase().includes(searchLower) ||
         order.status?.toLowerCase().includes(searchLower) ||
-        order.total?.toString().includes(searchLower)
+        order.total?.toString().includes(searchLower))
       );
     });
     setFilteredOrders(filtered);
@@ -217,7 +218,7 @@ export default function OrderManagement({ darkMode = false }) {
             read: false
           });
         } catch (error) {
-          console.error('Error adding notification to Supabase:', error);
+          showToast('Error adding notification to Supabase', 'error');
         }
       }
       
@@ -238,7 +239,7 @@ export default function OrderManagement({ darkMode = false }) {
     if (!reason) return;
 
     try {
-      await updateOrderStatus(orderId, 'rejected', reason);
+      await updateOrderStatus(orderId, 'rejected', {}, null, reason);
       
       // Restore product quantities
       const order = orders.find(o => o.id === orderId);
@@ -246,6 +247,9 @@ export default function OrderManagement({ darkMode = false }) {
         await restoreProductQuantities(order);
         addRejectionNotification(order, reason);
       }
+      
+      // Reload orders to update the display
+      await loadOrders();
       
       showToast('Order rejected successfully', 'success');
     } catch (error) {
@@ -513,12 +517,6 @@ export default function OrderManagement({ darkMode = false }) {
                   >
                     Reject
                   </button>
-                  <button
-                    className="delete-order-btn"
-                    onClick={() => handleDeleteOrder(order.id)}
-                  >
-                    Delete
-                  </button>
                 </div>
               </div>
             </div>
@@ -535,7 +533,7 @@ export default function OrderManagement({ darkMode = false }) {
               <div className="order-header">
                 <div className="order-info">
                   <h3 style={{ color: '#ffffff' }}>🎉 Event Booking</h3>
-                  <p className="order-date">{formatDateTime(booking.createdAt)}</p>
+                  <p className="order-date">{formatDateTime(booking.createdat)}</p>
                 </div>
                 <div className="order-status">
                   <span
@@ -549,10 +547,10 @@ export default function OrderManagement({ darkMode = false }) {
 
               <div className="event-details">
                 <h4>📅 Event Information</h4>
-                <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
-                <p><strong>Place:</strong> {booking.eventPlace}</p>
-                {booking.orderDetails && (
-                  <p><strong>Details:</strong> {booking.orderDetails}</p>
+                <p><strong>Date & Time:</strong> {formatDate(booking.eventdate)}</p>
+                <p><strong>Place:</strong> {booking.eventplace}</p>
+                {booking.orderdetails && (
+                  <p><strong>Details:</strong> {booking.orderdetails}</p>
                 )}
               </div>
 
@@ -708,15 +706,15 @@ export default function OrderManagement({ darkMode = false }) {
               <h2 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>❌ Rejected Event Bookings</h2>
               {eventBookings.filter(booking => booking.status === 'rejected').map((booking, index) => (
                 <div key={index} className="order-card rejected-order-card" onClick={() => {
-                  if (booking.rejectionReason) {
-                    setRejectionReason(booking.rejectionReason);
+                  if (booking.rejectionreason) {
+                    setRejectionReason(booking.rejectionreason);
                     setShowRejectionModal(true);
                   }
                 }}>
                   <div className="order-header">
                     <div className="order-info">
                       <h3 style={{ color: '#ffffff' }}>🎉 Event Booking</h3>
-                      <p className="order-date">{formatDateTime(booking.createdAt)}</p>
+                      <p className="order-date">{formatDateTime(booking.createdat)}</p>
                     </div>
                     <div className="order-status">
                       <span className="status-badge rejected-badge">
@@ -725,18 +723,18 @@ export default function OrderManagement({ darkMode = false }) {
                     </div>
                   </div>
 
-                  {booking.rejectionReason && (
+                  {booking.rejectionreason && (
                     <div className="rejection-info">
-                      <p><strong>Reason:</strong> {booking.rejectionReason}</p>
+                      <p><strong>Reason:</strong> {booking.rejectionreason}</p>
                     </div>
                   )}
 
                   <div className="event-details">
                     <h4>📅 Event Information</h4>
-                    <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
-                    <p><strong>Place:</strong> {booking.eventPlace}</p>
-                    {booking.orderDetails && (
-                      <p><strong>Details:</strong> {booking.orderDetails}</p>
+                    <p><strong>Date & Time:</strong> {formatDate(booking.eventdate)}</p>
+                    <p><strong>Place:</strong> {booking.eventplace}</p>
+                    {booking.orderdetails && (
+                      <p><strong>Details:</strong> {booking.orderdetails}</p>
                     )}
                   </div>
 

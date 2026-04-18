@@ -11,8 +11,8 @@
 
 /* Floating Button Base Styles */
 .floating-btn {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
@@ -41,7 +41,7 @@
 }
 
 .cart-float-btn i {
-  font-size: 24px;
+  font-size: 32px;
   color: white;
 }
 

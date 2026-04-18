@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Chat.css';
 import { useToast } from '../contexts/ToastContext';
 import { sendMessage, getMessages, markMessagesAsRead, subscribeToMessages, getAllConversations, deleteConversation } from '../utils/supabase';
+import Modal from './Modal';
 
 export default function Chat({ user }) {
   const showToast = useToast();
@@ -12,6 +13,7 @@ export default function Chat({ user }) {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [showConversationList, setShowConversationList] = useState(false);
   const messagesEndRef = useRef(null);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
 
   const adminEmail = 'yahiapro400@gmail.com';
   const isAdmin = user?.email === adminEmail;
@@ -109,13 +111,13 @@ export default function Chat({ user }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Conversation deleted successfully', 'success');
       } else {
-        alert('Conversation deleted successfully');
+        setAlertModal({ isOpen: true, title: 'Success', message: 'Conversation deleted successfully' });
       }
     } catch (error) {
             if (showToast && typeof showToast === 'function') {
         showToast('Failed to delete conversation', 'error');
       } else {
-        alert('Failed to delete conversation');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Failed to delete conversation' });
       }
     }
   };
@@ -129,7 +131,7 @@ export default function Chat({ user }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Please login to send messages', 'error');
       } else {
-        alert('Please login to send messages');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Please login to send messages' });
       }
       return;
     }
@@ -155,7 +157,7 @@ export default function Chat({ user }) {
             if (showToast && typeof showToast === 'function') {
         showToast('Failed to send message. Please try again.', 'error');
       } else {
-        alert('Failed to send message. Please try again.');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Failed to send message. Please try again.' });
       }
     }
   };
@@ -172,9 +174,9 @@ export default function Chat({ user }) {
   if (!user) {
     return (
       <div className="chat-container">
-        <div className="chat-login-prompt">
-          <h3>Please login to chat with admin</h3>
-        </div>
+        <button onClick={() => window.location.href = '/login'} className="login-btn">
+          Login
+        </button>
       </div>
     );
   }
@@ -289,6 +291,14 @@ export default function Chat({ user }) {
           Send
         </button>
       </form>
+
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type="alert"
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
 import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities, addReviewToSupabase, deleteOrderFromSupabase } from '../utils/supabase';
+import Modal from './Modal';
 export default function Orders({ user, orders = [] }) {
   const showToast = useToast();
   const [loading, setLoading] = useState(true);
@@ -20,6 +21,7 @@ export default function Orders({ user, orders = [] }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [notifications, setNotifications] = useState([]);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -38,8 +40,10 @@ export default function Orders({ user, orders = [] }) {
 
         // Load event bookings from Supabase
         try {
-          const { getEventBookingsByUser } = await import('../utils/supabase');
-          const userEvents = await getEventBookingsByUser(user.email);
+          const { getEventBookingsFromSupabase } = await import('../utils/supabase');
+          const { data: eventBookingsData } = await getEventBookingsFromSupabase(100, 0);
+          // Filter by user email
+          const userEvents = eventBookingsData.filter(booking => booking.useremail === user.email);
           setEventBookings(userEvents);
         } catch (error) {
           console.error('Error loading event bookings from Supabase:', error);
@@ -143,13 +147,13 @@ export default function Orders({ user, orders = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Order deleted successfully', 'success');
       } else {
-        alert('Order deleted successfully');
+        setAlertModal({ isOpen: true, title: 'Success', message: 'Order deleted successfully' });
       }
     } catch (error) {
             if (showToast && typeof showToast === 'function') {
         showToast('Failed to delete order', 'error');
       } else {
-        alert('Failed to delete order');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Failed to delete order' });
       }
     }
   };
@@ -179,7 +183,7 @@ export default function Orders({ user, orders = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('❌ You can only cancel orders that are still being processed.', 'error');
       } else {
-        alert('You can only cancel orders that are still being processed.');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'You can only cancel orders that are still being processed.' });
       }
       return;
     }
@@ -194,7 +198,31 @@ export default function Orders({ user, orders = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');
       } else {
-        alert('Order cancelled successfully. Products returned to stock.');
+        setAlertModal({ isOpen: true, title: 'Success', message: 'Order cancelled successfully. Products returned to stock.' });
+      }
+    }
+  };
+
+  // Function to cancel order for user
+  const handleCancelOrder = async (orderId) => {
+    if (window.confirm('Are you sure you want to cancel this order?')) {
+      try {
+        const { updateOrderStatus } = await import('../utils/supabase');
+        await updateOrderStatus(orderId, 'rejected', 'Cancelled by user');
+        
+        // Reload orders
+        const { getOrdersFromSupabase } = await import('../utils/supabase');
+        const { data: ordersData } = await getOrdersFromSupabase(100, 0);
+        setUserOrders(ordersData || []);
+        
+        if (showToast && typeof showToast === 'function') {
+          showToast('Order cancelled successfully', 'success');
+        }
+      } catch (error) {
+        console.error('Error cancelling order:', error);
+        if (showToast && typeof showToast === 'function') {
+          showToast('Failed to cancel order', 'error');
+        }
       }
     }
   };
@@ -352,8 +380,8 @@ export default function Orders({ user, orders = [] }) {
               <h3 style={{ color: '#e0e0e0', marginBottom: '20px' }}>Your Orders</h3>
               {userOrders.filter(order => order.status !== 'rejected').map((order) => (
                 <div key={order.id} className={`order-card ${order.status === 'rejected' ? 'rejected' : ''}`} onClick={() => {
-                  if (order.status === 'rejected' && order.rejectionReason) {
-                    setRejectionReason(order.rejectionReason);
+                  if (order.status === 'rejected' && order.rejectionreason) {
+                    setRejectionReason(order.rejectionreason);
                     setShowRejectionModal(true);
                   }
                 }}>
@@ -448,32 +476,12 @@ export default function Orders({ user, orders = [] }) {
                   >
                     Track Order
                   </button>
-                  {order.status === 'Processing' && (
-                    <button
-                      className="cancel-order-btn"
-                      onClick={() => cancelOrder(order.id)}
-                    >
-                      Cancel Order
-                    </button>
-                  )}
-                  {order.status === 'Delivered' && (() => {
-                    let items = order.items || [];
-                    if (!items.length && order.shipping) {
-                      try {
-                        const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
-                        items = shippingData.items || [];
-                      } catch (error) {
-                                              }
-                    }
-                    return items.length > 0 ? (
-                      <button
-                        className="track-order-btn"
-                        onClick={() => handleOpenReviewModal(items[0])}
-                      >
-                        Rate Product
-                      </button>
-                    ) : null;
-                  })()}
+                  <button
+                    className="cancel-order-btn"
+                    onClick={() => handleCancelOrder(order.id)}
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             </div>
@@ -487,15 +495,15 @@ export default function Orders({ user, orders = [] }) {
           <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>🎉 Event Bookings</h3>
           {eventBookings.filter(booking => booking.status !== 'rejected').map((booking, index) => (
             <div key={index} className={`order-card ${booking.status === 'rejected' ? 'rejected' : ''}`} onClick={() => {
-              if (booking.status === 'rejected' && booking.rejectionReason) {
-                setRejectionReason(booking.rejectionReason);
+              if (booking.status === 'rejected' && booking.rejectionreason) {
+                setRejectionReason(booking.rejectionreason);
                 setShowRejectionModal(true);
               }
             }}>
               <div className="order-header">
                 <div className="order-info">
                   <h3>🎉 Event Booking</h3>
-                  <p className="order-date">{formatDate(booking.createdAt)}</p>
+                  <p className="order-date">{formatDate(booking.createdat)}</p>
                 </div>
                 <div className="order-status">
                   {booking.status === 'rejected' ? (
@@ -515,10 +523,10 @@ export default function Orders({ user, orders = [] }) {
 
               <div className="event-details">
                 <h4>📅 Event Information</h4>
-                <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
-                <p><strong>Place:</strong> {booking.eventPlace}</p>
-                {booking.orderDetails && (
-                  <p><strong>Details:</strong> {booking.orderDetails}</p>
+                <p><strong>Date & Time:</strong> {formatDate(booking.eventdate)}</p>
+                <p><strong>Place:</strong> {booking.eventplace}</p>
+                {booking.orderdetails && (
+                  <p><strong>Details:</strong> {booking.orderdetails}</p>
                 )}
               </div>
 
@@ -669,8 +677,8 @@ export default function Orders({ user, orders = [] }) {
           <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>❌ Rejected Orders</h3>
           {userOrders.filter(order => order.status === 'rejected').map((order) => (
             <div key={order.id} className="order-card rejected-order-card" onClick={() => {
-              if (order.rejectionReason) {
-                setRejectionReason(order.rejectionReason);
+              if (order.rejectionreason) {
+                setRejectionReason(order.rejectionreason);
                 setShowRejectionModal(true);
               }
             }}>
@@ -686,9 +694,9 @@ export default function Orders({ user, orders = [] }) {
                 </div>
               </div>
 
-              {order.rejectionReason && (
+              {order.rejectionreason && (
                 <div className="rejection-info">
-                  <p><strong>Reason:</strong> {order.rejectionReason}</p>
+                  <p><strong>Reason:</strong> {order.rejectionreason}</p>
                 </div>
               )}
 
@@ -745,15 +753,15 @@ export default function Orders({ user, orders = [] }) {
           <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>❌ Rejected Event Bookings</h3>
           {eventBookings.filter(booking => booking.status === 'rejected').map((booking, index) => (
             <div key={index} className="order-card rejected-order-card" onClick={() => {
-              if (booking.rejectionReason) {
-                setRejectionReason(booking.rejectionReason);
+              if (booking.rejectionreason) {
+                setRejectionReason(booking.rejectionreason);
                 setShowRejectionModal(true);
               }
             }}>
               <div className="order-header">
                 <div className="order-info">
-                  <h3>🎉 Event Booking</h3>
-                  <p className="order-date">{formatDate(booking.createdAt)}</p>
+                  <h3 style={{ color: '#ffffff' }}>🎉 Event Booking</h3>
+                  <p className="order-date">{formatDate(booking.createdat)}</p>
                 </div>
                 <div className="order-status">
                   <span className="status-badge rejected-badge">
@@ -762,18 +770,18 @@ export default function Orders({ user, orders = [] }) {
                 </div>
               </div>
 
-              {booking.rejectionReason && (
+              {booking.rejectionreason && (
                 <div className="rejection-info">
-                  <p><strong>Reason:</strong> {booking.rejectionReason}</p>
+                  <p><strong>Reason:</strong> {booking.rejectionreason}</p>
                 </div>
               )}
 
               <div className="event-details">
                 <h4>📅 Event Information</h4>
-                <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
-                <p><strong>Place:</strong> {booking.eventPlace}</p>
-                {booking.orderDetails && (
-                  <p><strong>Details:</strong> {booking.orderDetails}</p>
+                <p><strong>Date & Time:</strong> {formatDate(booking.eventdate)}</p>
+                <p><strong>Place:</strong> {booking.eventplace}</p>
+                {booking.orderdetails && (
+                  <p><strong>Details:</strong> {booking.orderdetails}</p>
                 )}
               </div>
 
@@ -790,7 +798,7 @@ export default function Orders({ user, orders = [] }) {
                     if (showToast && typeof showToast === 'function') {
                       showToast('Event booking deleted successfully', 'success');
                     } else {
-                      alert('Event booking deleted successfully');
+                      setAlertModal({ isOpen: true, title: 'Success', message: 'Event booking deleted successfully' });
                     }
                   }}
                 >
@@ -863,6 +871,14 @@ export default function Orders({ user, orders = [] }) {
           </div>
         </div>
       )}
+
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type="alert"
+      />
 
     </div>
   );

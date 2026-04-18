@@ -95,19 +95,6 @@ header, nav, main, section, article, aside, footer, div, span, p, h1, h2, h3, h4
     box-shadow: none !important;
 }
 
-.login-prompt {
-    background: rgba(26, 26, 46, 0.95);
-    color: #e0e0e0;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-}
-
-.login-prompt h2 {
-    color: #e0e0e0;
-}
-
-.login-prompt p {
-    color: rgba(224, 224, 224, 0.8);
-}
 
 .App {
     padding-top: 0px; /* We don't need padding-top here since we added it to body */
@@ -120,30 +107,6 @@ header, nav, main, section, article, aside, footer, div, span, p, h1, h2, h3, h4
     box-shadow: none !important;
 }
 
-.login-prompt {
-    text-align: center;
-    padding: 60px 20px;
-    background: rgba(26, 26, 46, 0.95);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    margin: 20px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.login-prompt h2 {
-    color: #e0e0e0;
-    font-size: 28px;
-    margin-bottom: 15px;
-    font-weight: 600;
-}
-
-.login-prompt p {
-    color: rgba(224, 224, 224, 0.8);
-    font-size: 16px;
-    margin-bottom: 30px;
-}
 
 .login-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

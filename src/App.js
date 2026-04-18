@@ -213,10 +213,16 @@ function AppContent() {
         // Check for saved user email in localStorage
         const savedUserEmail = localStorage.getItem('currentUserEmail')
         if (savedUserEmail) {
-          const users = JSON.parse(localStorage.getItem('users') || '[]')
-          const savedUser = users.find(user => user.email === savedUserEmail)
-          if (savedUser) {
-            setUser(savedUser)
+          // Get user from Supabase
+          try {
+            const { getUsersFromSupabase } = await import('./utils/supabase');
+            const users = await getUsersFromSupabase();
+            const savedUser = users.find(user => user.email === savedUserEmail);
+            if (savedUser) {
+              setUser(savedUser);
+            }
+          } catch (error) {
+            console.error('Error loading user from Supabase:', error);
           }
         }
         
@@ -369,7 +375,7 @@ function AppContent() {
         if (showToast && typeof showToast === 'function') {
           showToast(`Sorry, only ${availableQuantity} items available.`, 'warning')
         } else {
-          alert(`Sorry, only ${availableQuantity} items available.`)
+          showAlert('Warning', `Sorry, only ${availableQuantity} items available.`)
         }
         return
       }
@@ -710,33 +716,13 @@ function AppContent() {
           user ? (
             <Suspense fallback={<LoadingSpinner />}>
               <EventBooking
-                darkMode={true}
                 products={products}
               />
             </Suspense>
           ) : (
-            <div className="login-prompt">
-              <h2>Login Required</h2>
-              <p>Please login to book an event</p>
-              <button onClick={() => navigate('/login')} className="login-btn">
-                Login
-              </button>
-            </div>
-          )
-        } />
-        <Route path='/chat' element={
-          user ? (
-            <Suspense fallback={<LoadingSpinner />}>
-              <Chat user={user} />
-            </Suspense>
-          ) : (
-            <div className="login-prompt">
-              <h2>Login Required</h2>
-              <p>Please login to chat with admin</p>
-              <button onClick={() => navigate('/login')} className="login-btn">
-                Login
-              </button>
-            </div>
+            <button onClick={() => navigate('/login')} className="login-btn">
+              Login
+            </button>
           )
         } />
         <Route path='/cart' element={
@@ -752,13 +738,9 @@ function AppContent() {
               />
             </Suspense>
           ) : (
-            <div className="login-prompt">
-              <h2>Login Required</h2>
-              <p>Please login to view your cart</p>
-              <button onClick={() => navigate('/login')} className="login-btn">
-                Login
-              </button>
-            </div>
+            <button onClick={() => navigate('/login')} className="login-btn">
+              Login
+            </button>
           )
         } />
         <Route path='/login' element={
@@ -772,13 +754,9 @@ function AppContent() {
               <Orders user={user} orders={orders} darkMode={true} />
             </Suspense>
           ) : (
-            <div className="login-prompt">
-              <h2>Login Required</h2>
-              <p>Please login to view your orders</p>
-              <button onClick={() => navigate('/login')} className="login-btn">
-                Login
-              </button>
-            </div>
+            <button onClick={() => navigate('/login')} className="login-btn">
+              Login
+            </button>
           )
         } />
         <Route path='/admin' element={
@@ -806,7 +784,7 @@ function AppContent() {
       {location.pathname !== '/login' && (
         <Suspense fallback={null}>
           <FloatingButtons 
-            cartItemsCount={cartItems.length}
+            cartItemsCount={cartCount}
           />
         </Suspense>
       )}

@@ -643,31 +643,6 @@
   font-size: 1.1rem;
 }
 
-/* Login Prompt */
-.login-prompt {
-  min-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  margin: 20px;
-  backdrop-filter: blur(10px);
-}
-
-.login-prompt h2 {
-  color: #fff;
-  font-size: 2rem;
-  margin-bottom: 15px;
-}
-
-.login-prompt p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.1rem;
-  margin-bottom: 25px;
-}
 
 .login-btn {
   padding: 12px 30px;

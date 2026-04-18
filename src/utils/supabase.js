@@ -306,11 +306,16 @@ export const subscribeToOrders = (callback) => {
 };
 
 // 🆕 Update order status (only status column exists)
-export const updateOrderStatus = async (orderId, status, trackingInfo = {}, estimatedDelivery = null) => {
+export const updateOrderStatus = async (orderId, status, trackingInfo = {}, estimatedDelivery = null, rejectionReason = null) => {
   try {
     const updateData = {
       status: status
     };
+
+    // Add rejectionReason if provided
+    if (rejectionReason) {
+      updateData.rejectionreason = rejectionReason;
+    }
 
     // Try to update with estimatedDelivery first
     if (estimatedDelivery) {
@@ -744,14 +749,14 @@ export const deleteEventFromSupabase = async (eventId) => {
 export const addEventBookingToSupabase = async (booking) => {
   try {
     const bookingData = {
-      userEmail: booking.userEmail,
-      eventDate: booking.eventDate,
-      eventPlace: booking.eventPlace,
-      orderDetails: booking.orderDetails || '',
+      useremail: booking.userEmail,
+      eventdate: booking.eventDate,
+      eventplace: booking.eventPlace,
+      orderdetails: booking.orderDetails || '',
       products: booking.products || [],
       total: parseFloat(booking.total) || 0,
       status: booking.status || 'pending',
-      createdAt: booking.createdAt || new Date().toISOString()
+      createdat: booking.createdAt || new Date().toISOString()
     };
 
     const { data, error } = await supabase
@@ -773,7 +778,7 @@ export const getEventBookingsFromSupabase = async (limit = 50, offset = 0) => {
     const { data, error, count } = await supabase
       .from('event_bookings')
       .select('*', { count: 'exact' })
-      .order('createdAt', { ascending: false })
+      .order('createdat', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
@@ -789,8 +794,8 @@ export const getEventBookingsByUser = async (userEmail) => {
     const { data, error } = await supabase
       .from('event_bookings')
       .select('*')
-      .eq('userEmail', userEmail)
-      .order('createdAt', { ascending: false });
+      .eq('useremail', userEmail)
+      .order('createdat', { ascending: false });
 
     if (error) throw error;
     return data || [];
@@ -804,7 +809,7 @@ export const updateEventBookingStatus = async (bookingId, status, rejectionReaso
   try {
     const updateData = { status };
     if (rejectionReason) {
-      updateData.rejectionReason = rejectionReason;
+      updateData.rejectionreason = rejectionReason;
     }
 
     const { data, error } = await supabase

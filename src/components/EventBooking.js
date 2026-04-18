@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '../contexts/ToastContext';
 import '../styles/EventBooking.css';
+import Modal from './Modal';
 
 export default function EventBooking({ darkMode = false, products = [] }) {
   const showToast = useToast();
@@ -11,6 +12,8 @@ export default function EventBooking({ darkMode = false, products = [] }) {
   const [eventPlace, setEventPlace] = useState('');
   const [orderDetails, setOrderDetails] = useState('');
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
 
   useEffect(() => {
     const currentUserEmail = localStorage.getItem('currentUserEmail');
@@ -49,7 +52,7 @@ export default function EventBooking({ darkMode = false, products = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Please select at least one product', 'error');
       } else {
-        alert('Please select at least one product');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Please select at least one product' });
       }
       return;
     }
@@ -58,7 +61,7 @@ export default function EventBooking({ darkMode = false, products = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Please fill in event date and place', 'error');
       } else {
-        alert('Please fill in event date and place');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Please fill in event date and place' });
       }
       return;
     }
@@ -74,7 +77,7 @@ export default function EventBooking({ darkMode = false, products = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Event date must be at least 2 days in the future', 'error');
       } else {
-        alert('Event date must be at least 2 days in the future');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Event date must be at least 2 days in the future' });
       }
       return;
     }
@@ -97,6 +100,7 @@ export default function EventBooking({ darkMode = false, products = [] }) {
     };
 
     // Save to Supabase
+    setLoading(true);
     try {
       const { addEventBookingToSupabase } = await import('../utils/supabase');
       await addEventBookingToSupabase(eventData);
@@ -104,7 +108,7 @@ export default function EventBooking({ darkMode = false, products = [] }) {
       if (showToast && typeof showToast === 'function') {
         showToast('Event booking submitted successfully!', 'success');
       } else {
-        alert('Event booking submitted successfully!');
+        setAlertModal({ isOpen: true, title: 'Success', message: 'Event booking submitted successfully!' });
       }
       
       // Clear form
@@ -118,10 +122,12 @@ export default function EventBooking({ darkMode = false, products = [] }) {
     } catch (error) {
       console.error('Error saving event booking to Supabase:', error);
       if (showToast && typeof showToast === 'function') {
-        showToast('Failed to save event booking', 'error');
+        showToast('Failed to submit event booking. Please try again.', 'error');
       } else {
-        alert('Failed to save event booking');
+        setAlertModal({ isOpen: true, title: 'Error', message: 'Failed to submit event booking. Please try again.' });
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,6 +137,12 @@ export default function EventBooking({ darkMode = false, products = [] }) {
 
   return (
     <div className={`event-booking-page ${darkMode ? 'dark-mode' : ''}`}>
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner"></div>
+          <p>Submitting your event booking...</p>
+        </div>
+      )}
       <div className="event-booking-container">
         <div className="event-booking-header">
           <h1>🎉 Event Booking</h1>
@@ -253,6 +265,14 @@ export default function EventBooking({ darkMode = false, products = [] }) {
           </div>
         </form>
       </div>
+
+      <Modal
+        isOpen={alertModal.isOpen}
+        onClose={() => setAlertModal({ isOpen: false, title: '', message: '' })}
+        title={alertModal.title}
+        message={alertModal.message}
+        type="alert"
+      />
     </div>
   );
 }

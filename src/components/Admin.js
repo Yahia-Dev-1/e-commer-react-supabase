@@ -863,46 +863,6 @@ export default function Admin({ darkMode = true }) {
           </div>
         )}
 
-        {activeTab === 'stats' && (
-          <div className="stats-section">
-            <div className="section-header">
-              <h2>📊 Advanced Stats</h2>
-              <button className="refresh-btn" onClick={loadData}>
-                Refresh Data
-              </button>
-            </div>
-
-            <div className="analytics-grid">
-              <div className="analytics-card">
-                <h3>📅 Recent Activity</h3>
-                <div className="recent-activity">
-                  {orders.slice(0, 5).map(order => (
-                    <div key={order.id} className="activity-item">
-                      <span className="activity-icon">🛒</span>
-                      <span className="activity-text">Order #{order.orderNumber} - ${order.total.toFixed(2)}</span>
-                      <span className="activity-time">{formatShortDate(order.date)}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="analytics-card">
-                <h3>🎯 Quick Actions</h3>
-                <div className="quick-actions">
-                  <button className="quick-action-btn" onClick={() => setActiveTab('users')}>
-                    👥 Manage Users
-                  </button>
-                  <button className="quick-action-btn" onClick={clearDatabase}>
-                    🗑️ Clear Database
-                  </button>
-                  <button className="quick-action-btn" onClick={addProtectedAdmins}>
-                    🛡️ Add Protected Admins
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
 
       </div>

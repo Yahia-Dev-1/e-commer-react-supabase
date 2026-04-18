@@ -465,22 +465,6 @@ export default function AddProducts({ darkMode = false }) {
           </div>
 
           <div className="form-group">
-              <label htmlFor="status">Product Status *</label>
-              <select
-                id="status"
-                name="status"
-                value={editingProduct ? editingProduct.status : newProduct.status}
-                onChange={editingProduct ? handleEditInputChange : handleInputChange}
-                required
-              >
-                <option value="pending">Pending Review</option>
-                <option value="available">Available</option>
-                <option value="out_of_stock">Out of Stock</option>
-                <option value="discontinued">Discontinued</option>
-              </select>
-          </div>
-
-          <div className="form-group">
               <label htmlFor="image">Product Image *</label>
               <div className="image-upload-container">
             <input
@@ -564,64 +548,7 @@ export default function AddProducts({ darkMode = false }) {
             />
           </div>
 
-          <div className="form-group">
-            <label>
-              <input
-                type="checkbox"
-                name="bookAnEvent"
-                checked={editingProduct ? editingProduct.bookAnEvent : newProduct.bookAnEvent}
-                onChange={(e) => {
-                  if (editingProduct) {
-                    setEditingProduct(prev => ({ ...prev, bookAnEvent: e.target.checked }))
-                  } else {
-                    setNewProduct(prev => ({ ...prev, bookAnEvent: e.target.checked }))
-                  }
-                }}
-              />
-              Book an Event
-            </label>
-          </div>
-
-          {(editingProduct ? editingProduct.bookAnEvent : newProduct.bookAnEvent) && (
-            <>
-              <div className="form-group">
-                <label htmlFor="place">Place</label>
-                <input
-                  type="text"
-                  id="place"
-                  name="place"
-                  value={editingProduct ? editingProduct.place : newProduct.place}
-                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
-                  placeholder="Enter event location"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="date">Date</label>
-                <input
-                  type="date"
-                  id="date"
-                  name="date"
-                  value={editingProduct ? editingProduct.date : newProduct.date}
-                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="orderDetails">Order Details</label>
-                <textarea
-                  id="orderDetails"
-                  name="orderDetails"
-                  value={editingProduct ? editingProduct.orderDetails : newProduct.orderDetails}
-                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
-                  rows="3"
-                  placeholder="Enter order details"
-                />
-              </div>
-            </>
-          )}
-
-            <div className="form-actions">
+          <div className="form-actions">
               <button type="submit" className="submit-btn">
                 {editingProduct ? 'Update Product' : 'Add Product'}
               </button>
@@ -661,7 +588,7 @@ export default function AddProducts({ darkMode = false }) {
                       alt={product.title} 
                       loading="eager"
                       decoding="async"
-                      fetchPriority="high"
+                      fetchpriority="high"
                       style={{border: '2px solid red'}}
                     />
                     <div className="image-placeholder" style={{ display: 'none' }}>
