@@ -1,6 +1,8 @@
 import './styles/App.css';
 import Nav from './components/nav';
 import Cart from './components/cart';
+import EventBooking from './components/EventBooking';
+import Chat from './components/Chat';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async';
 import { useState, useEffect, Suspense, lazy } from 'react'
@@ -137,12 +139,10 @@ function AppContent() {
 
         if (!isMounted) return
 
-        console.log('📥 Supabase fetch:', supabaseProducts.length, 'products')
-        setProducts(supabaseProducts)
+                setProducts(supabaseProducts)
 
       } catch (error) {
-        console.error('❌ Error fetching products from Supabase:', error)
-        showToast('❌ Failed to load products from database. Please check Supabase connection.', 'error')
+                showToast('❌ Failed to load products from database. Please check Supabase connection.', 'error')
       } finally {
         if (isMounted) setIsLoadingProducts(false)
       }
@@ -154,21 +154,18 @@ function AppContent() {
     const unsubscribe = subscribeToProducts((supabaseProducts) => {
       if (!isMounted) return
       
-      console.log('🔄 Supabase: Products updated!', supabaseProducts.length, 'items')
-      setProducts(supabaseProducts)
+            setProducts(supabaseProducts)
       
       // Also save to localStorage for offline support (limit to 20 items)
       try {
         localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts.slice(0, 20)))
       } catch (e) {
-        console.warn('localStorage quota exceeded in realtime sync')
-      }
+              }
     }, PRODUCTS_PER_PAGE)
 
     // 🆕 Listen for productsUpdated event from AddProducts page
     const handleProductsUpdated = () => {
-      console.log('🔄 productsUpdated event received - refreshing products')
-      fetchProducts()
+            fetchProducts()
     }
     window.addEventListener('productsUpdated', handleProductsUpdated)
 
@@ -194,48 +191,36 @@ function AppContent() {
         }
       }
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    }
+          }
   }
 
   // Handle products update
   const handleProductsUpdate = () => {
-    console.log('🔄 App.js: Products updated, reloading...')
-    // Reload immediately and also with delay to ensure we get the latest data
+        // Reload immediately and also with delay to ensure we get the latest data
     loadProducts()
     setProductsVersion(prev => prev + 1)
-    console.log('✅ App.js: Products reloaded immediately')
-    
+        
     setTimeout(() => {
       loadProducts()
       setProductsVersion(prev => prev + 1)
-      console.log('✅ App.js: Products reloaded with delay')
-    }, 100)
+          }, 100)
   }
 
-  // Check for saved user and cart data on component mount
+  // Check for saved user on component mount
   useEffect(() => {
     const initializeApp = async () => {
       try {
+        // Check for saved user email in localStorage
         const savedUserEmail = localStorage.getItem('currentUserEmail')
-        const savedCartItems = localStorage.getItem('cartItems')
-        
         if (savedUserEmail) {
-          const savedUser = database.getUsers().find(user => user.email === savedUserEmail)
+          const users = JSON.parse(localStorage.getItem('users') || '[]')
+          const savedUser = users.find(user => user.email === savedUserEmail)
           if (savedUser) {
             setUser(savedUser)
           }
         }
         
-        if (savedCartItems) {
-          try {
-            const parsedCartItems = JSON.parse(savedCartItems)
-            setCartItems(parsedCartItems)
-          } catch (error) {
-            console.error('Error loading cart items:', error)
-            setCartItems([])
-          }
-        }
+        setCartItems([])
 
         // Load products initially
         loadProducts()
@@ -245,22 +230,9 @@ function AppContent() {
           const supabaseOrders = await getOrdersFromSupabase()
           if (supabaseOrders && supabaseOrders.length > 0) {
             setOrders(supabaseOrders)
-            // Sync to localStorage for offline
-            localStorage.setItem('ecommerce_orders', JSON.stringify(supabaseOrders))
-            console.log('📦 Loaded', supabaseOrders.length, 'orders from Supabase')
-          } else {
-            // Fallback to localStorage
-            const localOrders = localStorage.getItem('ecommerce_orders')
-            if (localOrders) {
-              setOrders(JSON.parse(localOrders))
-            }
           }
         } catch (error) {
-          console.log('Using localStorage orders:', error.message)
-          const localOrders = localStorage.getItem('ecommerce_orders')
-          if (localOrders) {
-            setOrders(JSON.parse(localOrders))
-          }
+          console.error('Error loading orders from Supabase:', error)
         }
         
         // Listen for product updates
@@ -271,8 +243,7 @@ function AppContent() {
         // Clean up localStorage to prevent quota issues
         cleanupLocalStorage()
       } catch (error) {
-        console.error('Error initializing app:', error)
-      } finally {
+              } finally {
         setIsLoading(false)
       }
     }
@@ -281,10 +252,7 @@ function AppContent() {
     
     // Subscribe to orders real-time updates
     const unsubscribeOrders = subscribeToOrders((supabaseOrders) => {
-      console.log('🔄 Supabase: Orders updated!', supabaseOrders.length, 'orders')
       setOrders(supabaseOrders)
-      // Sync to localStorage for offline
-      localStorage.setItem('ecommerce_orders', JSON.stringify(supabaseOrders))
     })
     
     // Cleanup function for event listeners
@@ -299,8 +267,7 @@ function AppContent() {
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'ecommerce_products') {
-        console.log('🔄 App.js: localStorage changed, reloading products...')
-        loadProducts()
+                loadProducts()
         setProductsVersion(prev => prev + 1)
       }
     }
@@ -343,32 +310,12 @@ function AppContent() {
             ? { ...item, quantity: newQuantity }
             : item
         )
-        try {
-          const limitedItems = updatedItems.slice(-20)
-          localStorage.setItem('cartItems', JSON.stringify(limitedItems))
-          return limitedItems
-        } catch (error) {
-          if (error.name === 'QuotaExceededError') {
-            cleanupLocalStorage()
-            showToast('Storage was full. Please try again.', 'warning')
-          }
-          return updatedItems
-        }
+        return updatedItems
       })
     } else {
       setCartItems(prevItems => {
         const updatedItems = [...prevItems, { ...product, quantity: 1 }]
-        try {
-          const limitedItems = updatedItems.slice(-20)
-          localStorage.setItem('cartItems', JSON.stringify(limitedItems))
-          return limitedItems
-        } catch (error) {
-          if (error.name === 'QuotaExceededError') {
-            cleanupLocalStorage()
-            showToast('Storage was full. Please try again.', 'warning')
-          }
-          return updatedItems
-        }
+        return updatedItems
       })
     }
   }
@@ -393,12 +340,12 @@ function AppContent() {
       
       return 0
     } catch (error) {
-      console.error('Error checking available quantity:', error)
-      return 0
+            return 0
     }
   }
 
   const updateCartItemQuantity = (id, newQuantity) => {
+                
     if (newQuantity <= 0) {
       setCartItems(prevItems => {
         const updatedItems = prevItems.filter(item => item.id !== id)
@@ -410,9 +357,7 @@ function AppContent() {
           return limitedItems
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded, clearing old data...')
-            cleanupLocalStorage()
-            showToast('Storage was full, some data was cleared. Please try again.', 'warning')
+                        cleanupLocalStorage()
           }
           return updatedItems
         }
@@ -421,12 +366,16 @@ function AppContent() {
       // 🆕 Check stock availability
       const availableQuantity = checkAvailableQuantity(id)
       if (newQuantity > availableQuantity) {
-        showToast(`Sorry, only ${availableQuantity} items available.`, 'warning')
+        if (showToast && typeof showToast === 'function') {
+          showToast(`Sorry, only ${availableQuantity} items available.`, 'warning')
+        } else {
+          alert(`Sorry, only ${availableQuantity} items available.`)
+        }
         return
       }
-      
+
       setCartItems(prevItems => {
-        const updatedItems = prevItems.map(item => 
+        const updatedItems = prevItems.map(item =>
           item.id === id ? { ...item, quantity: newQuantity } : item
         )
         
@@ -437,9 +386,7 @@ function AppContent() {
           return limitedItems
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded, clearing old data...')
-            cleanupLocalStorage()
-            showToast('Storage was full, some data was cleared. Please try again.', 'warning')
+                        cleanupLocalStorage()
           }
           return updatedItems
         }
@@ -457,8 +404,7 @@ function AppContent() {
           localStorage.setItem('cartItems', JSON.stringify(limitedItems))
         } catch (error) {
           if (error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded in useEffect, clearing old data...')
-            try {
+                        try {
               // Clear old data and retry with minimal data
               localStorage.removeItem('cartItems')
               localStorage.removeItem('ecommerce_products')
@@ -474,8 +420,7 @@ function AppContent() {
               
               localStorage.setItem('cartItems', JSON.stringify(minimalCartItems))
             } catch (retryError) {
-              console.error('Failed to save cart in useEffect:', retryError)
-            }
+                          }
           }
         }
       } else {
@@ -507,10 +452,8 @@ function AppContent() {
         }
       })
       
-      console.log('LocalStorage cleaned successfully')
-    } catch (error) {
-      console.error('Error cleaning localStorage:', error)
-    }
+          } catch (error) {
+          }
   }
 
   const clearCart = () => {
@@ -575,48 +518,40 @@ function AppContent() {
     
     // 🆕 Save to Supabase ONLY (no localStorage fallback)
     try {
-      console.log('📝 Saving order to Supabase:', newOrder.orderNumber)
-      const supabaseOrder = await addOrderToSupabase(newOrder)
-      console.log('✅ Order saved to Supabase:', supabaseOrder.orderNumber, supabaseOrder.id)
-      setOrders(prevOrders => [supabaseOrder, ...prevOrders])
+            const supabaseOrder = await addOrderToSupabase(newOrder)
+            setOrders(prevOrders => [supabaseOrder, ...prevOrders])
     } catch (error) {
-      console.error('❌ ERROR saving order to Supabase:', error)
-      showToast('❌ Failed to save order. Please check Supabase connection and try again.', 'error');
+            showToast('❌ Failed to save order. Please check Supabase connection and try again.', 'error');
       return // Stop here - don't proceed if order not saved
     }
-    
-    // ✅ Deduct quantities from Supabase immediately after successful order
-    await subtractProductQuantities(cartItems)
     
     // ✅ Clear cart after order is created
     setCartItems([])
     localStorage.removeItem('cartItems')
 
-    // 🆕 Send notification to admin
+    // Send notification to admin
     sendAdminNotification('new_order', newOrder)
   }
 
-  // 🆕 Function to send notification to admin
-  const sendAdminNotification = (type, data) => {
-    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]')
-    const notification = {
-      id: Date.now(),
-      type: type,
-      message: type === 'new_order' 
-        ? `New order #${data.orderNumber} placed by ${data.userEmail || 'Unknown'}. Total: $${data.total.toFixed(2)}`
-        : type === 'cancelled_order'
-        ? `Order #${data.orderNumber} cancelled by ${data.userEmail || 'Unknown'}`
-        : 'Unknown notification',
-      data: data,
-      date: new Date().toISOString(),
-      read: false
+  // Function to send notification to admin
+  const sendAdminNotification = async (type, data) => {
+    try {
+      const { addNotificationToSupabase } = await import('./utils/supabase');
+      await addNotificationToSupabase({
+        userEmail: 'admin@system.com',
+        type: type,
+        message: type === 'new_order' 
+          ? `New order #${data.orderNumber} placed by ${data.userEmail || 'Unknown'}. Total: $${data.total.toFixed(2)}`
+          : `${type}: ${JSON.stringify(data)}`,
+        data: data,
+        read: false
+      });
+    } catch (error) {
+      console.error('Error sending admin notification to Supabase:', error);
     }
-    adminNotifications.unshift(notification)
-    localStorage.setItem('admin_notifications', JSON.stringify(adminNotifications))
-    console.log('📢 Admin notification sent:', notification)
   }
 
-  // 🆕 Function to deduct quantity from Supabase after successful purchase
+  // Function to deduct quantity from Supabase after successful purchase
   const subtractProductQuantities = async (purchasedItems) => {
     try {
       for (const item of purchasedItems) {
@@ -626,31 +561,25 @@ function AppContent() {
           if (product) {
             const newQuantity = Math.max(0, (product.quantity || 0) - item.quantity)
             await updateProductInSupabase(item.id, { quantity: newQuantity })
-            console.log(`✅ Subtracted ${item.quantity} from product ${item.id}, new quantity: ${newQuantity}`)
-          }
+                      }
         } catch (error) {
-          console.warn(`Could not update product ${item.id}:`, error.message)
-        }
+                  }
       }
-      console.log('Product quantities updated after purchase')
-    } catch (error) {
-      console.error('Error updating product quantities:', error)
-    }
+          } catch (error) {
+          }
   }
 
   const handleLogin = async (userData) => {
     setUser(userData)
-    // Save current user email to localStorage for admin access
+    
+    // Save user email to localStorage for persistence
     localStorage.setItem('currentUserEmail', userData.email)
     
     // Save user to Supabase
     try {
       await addUserToSupabase(userData)
-      console.log('✅ User saved to Supabase:', userData.email)
-    } catch (error) {
-      console.error('❌ ERROR saving user to Supabase:', error)
-      console.error('❌ Error details:', error.message, error.code || '')
-    }
+          } catch (error) {
+                }
     
     // Merge cart items from this user with existing cart
     const existingCart = JSON.parse(localStorage.getItem('cartItems') || '[]')
@@ -675,8 +604,7 @@ function AppContent() {
               localStorage.setItem('cartItems', JSON.stringify(updatedItems))
             } catch (error) {
               if (error.name === 'QuotaExceededError') {
-                console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
-                cleanupLocalStorage()
+                                cleanupLocalStorage()
                 showToast('Storage was full, some data was cleared. Please try again.', 'warning')
               }
             }
@@ -692,8 +620,7 @@ function AppContent() {
               localStorage.setItem('cartItems', JSON.stringify(updatedItems))
             } catch (error) {
               if (error.name === 'QuotaExceededError') {
-                console.warn('LocalStorage quota exceeded in handleLogin, clearing old data...')
-                cleanupLocalStorage()
+                                cleanupLocalStorage()
                 showToast('Storage was full, some data was cleared. Please try again.', 'warning')
               }
             }
@@ -735,8 +662,8 @@ function AppContent() {
     setPendingProduct(null)
   }
 
-  // Calculate cart count - show number of unique items
-  const cartCount = cartItems.length
+  // Calculate cart count - show total quantity of items
+  const cartCount = cartItems.reduce((total, item) => total + (item.quantity || 0), 0)
 
   // Function to toggle dark mode (disabled - always dark)
   // Dark mode is always enabled (no toggle needed)
@@ -779,11 +706,44 @@ function AppContent() {
             <Services darkMode={true} />
           </Suspense>
         } />
+        <Route path='/event-booking' element={
+          user ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <EventBooking
+                darkMode={true}
+                products={products}
+              />
+            </Suspense>
+          ) : (
+            <div className="login-prompt">
+              <h2>Login Required</h2>
+              <p>Please login to book an event</p>
+              <button onClick={() => navigate('/login')} className="login-btn">
+                Login
+              </button>
+            </div>
+          )
+        } />
+        <Route path='/chat' element={
+          user ? (
+            <Suspense fallback={<LoadingSpinner />}>
+              <Chat user={user} />
+            </Suspense>
+          ) : (
+            <div className="login-prompt">
+              <h2>Login Required</h2>
+              <p>Please login to chat with admin</p>
+              <button onClick={() => navigate('/login')} className="login-btn">
+                Login
+              </button>
+            </div>
+          )
+        } />
         <Route path='/cart' element={
           user ? (
             <Suspense fallback={<LoadingSpinner />}>
-              <Cart 
-                cartItems={cartItems} 
+              <Cart
+                cartItems={cartItems}
                 updateQuantity={updateCartItemQuantity}
                 clearCart={clearCart}
                 createOrder={createOrder}

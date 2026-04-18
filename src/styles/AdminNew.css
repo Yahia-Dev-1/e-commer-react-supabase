@@ -12,7 +12,7 @@
 
 .shipping-status-section h4 {
   margin: 0 0 15px 0;
-  color: #1f2937;
+  color: #ffffff;
   font-size: 1.1rem;
   font-weight: 600;
 }
@@ -24,7 +24,7 @@
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
+  color: #e0e0e0;
   background: white;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -49,7 +49,7 @@
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 500;
-  color: #374151;
+  color: #e0e0e0;
   background: white;
   transition: all 0.3s ease;
 }
@@ -66,7 +66,7 @@
 }
 
 .delivery-time-input::placeholder {
-  color: #9ca3af;
+  color: #e0e0e0;
 }
 
 /* Reject Button Styling */
@@ -173,6 +173,51 @@
   transform: translateY(0);
 }
 
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.admin {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.role-badge.user {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  color: #667eea;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.make-admin-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  margin-right: 8px;
+}
+
+.make-admin-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.make-admin-btn:active {
+  transform: translateY(0);
+}
+
 .add-admin-btn:hover {
   background: linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%);
   transform: translateY(-2px);
@@ -240,21 +285,11 @@
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
+  font-weight: 500;
   letter-spacing: 0.5px;
-}
-
-.status-badge.active {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-}
-
-.status-badge.inactive {
-  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-  color: white;
-  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Products Grid Professional Styling */
@@ -336,7 +371,6 @@
   font-weight: 700;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
@@ -356,7 +390,6 @@
   font-weight: 700;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
@@ -398,7 +431,6 @@
   margin-bottom: 10px;
   background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
@@ -769,8 +801,8 @@
 }
 
 .order-item .item-image img {
-  width: 80px;
-  height: 80px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
   border-radius: 8px;
 }
@@ -810,11 +842,10 @@
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
+  width: 35px;
+  height: 35px;
   border: 3px solid rgba(255,255,255,0.1);
   border-top-color: #667eea;
-  border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
@@ -942,15 +973,6 @@
   font-weight: 500;
 }
 
-.status-badge.active {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
-}
-
-.status-badge.inactive {
-  background: rgba(158, 158, 158, 0.2);
-  color: #9e9e9e;
-}
 
 /* Responsive */
 @media (max-width: 768px) {

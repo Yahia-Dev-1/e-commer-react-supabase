@@ -12,13 +12,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  z-index: 2000;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-container:hover {
-  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  border-bottom-color: rgba(102, 126, 234, 0.5);
 }
 
 body, html, #root, .App {
@@ -69,21 +70,21 @@ body {
 }
 
 .nav-logo {
-  width: 120px;  
-  height: 120px;   
+  width: 40px;
+  height: 40px;
   object-fit: contain;
-  border-radius: 20px;
+  border-radius: 10px;
   transition: all 0.3s ease;
+  filter: brightness(1.2);
 }
 
 .nav-brand-text {
-  font-size: 2.5rem;
-  font-weight: 800;
+  font-size: 1.2rem;
+  font-weight: 700;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-shadow: none;
 }
 
@@ -122,7 +123,7 @@ body {
 }
 
 .nav-links a {
-  color: #e8e8e8;
+  color: #ffffff;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.95rem;
@@ -148,7 +149,7 @@ body {
 
 .nav-links a.active {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: #ffffff;
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
   transform: translateY(-2px);
   border-color: rgba(102, 126, 234, 0.6);
@@ -161,7 +162,7 @@ body {
   align-items: center;
   gap: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: #ffffff;
   padding: 14px 24px;
   border-radius: 30px;
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
@@ -182,12 +183,12 @@ body {
 .cart-nav-link svg {
   width: 20px;
   height: 20px;
-  fill: white;
+  fill: currentColor;
 }
 
 .cart-count {
   background: #ff6b6b;
-  color: white;
+  color: #ffffff;
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -217,7 +218,7 @@ body {
   position: relative;
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #e8e8e8;
+  color: #ffffff;
   padding: 12px;
   border-radius: 50%;
   cursor: pointer;
@@ -229,7 +230,7 @@ body {
 
 .notifications-btn:hover {
   background: rgba(102, 126, 234, 0.15);
-  color: #667eea;
+  color: #ffffff;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
@@ -246,7 +247,7 @@ body {
   top: -5px;
   right: -5px;
   background: #ff6b6b;
-  color: white;
+  color: #ffffff;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -275,7 +276,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #e8e8e8;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -287,7 +288,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.9rem;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
@@ -295,7 +296,7 @@ body {
 
 .logout-btn {
   background: rgba(244, 67, 54, 0.15);
-  color: #ff6b6b;
+  color: #ffffff;
   border: 1px solid rgba(244, 67, 54, 0.2);
   padding: 8px 16px;
   border-radius: 20px;
@@ -329,12 +330,13 @@ body {
 
 .login-btn {
   background: rgba(255, 255, 255, 0.08);
-  color: #e8e8e8;
+  color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .login-btn:hover {
   background: rgba(102, 126, 234, 0.15);
+  color: #ffffff;
   color: #667eea;
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
@@ -424,16 +426,16 @@ body {
   }
 
   .nav-logo {
-    width: 55px;
-    height: 55px;
+    width: 40px;
+    height: 40px;
   }
 
   .nav-brand-text {
-    font-size: 2.2rem;
+    font-size: 1.2rem;
   }
 
   .nav-brand-text.admin-text {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .nav-links {
@@ -465,16 +467,16 @@ body {
   }
   
   .nav-logo {
-    width: 40px;
-    height: 40px;
+    width: 35px;
+    height: 35px;
   }
-  
+
   .nav-brand-text {
-    font-size: 1.5rem;
+    font-size: 1.1rem;
   }
-  
+
   .nav-brand-text.admin-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
   
   .hamburger-menu {
@@ -587,16 +589,16 @@ body {
   }
   
   .nav-logo {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
   }
-  
+
   .nav-brand-text {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
-  
+
   .nav-brand-text.admin-text {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
   
   .hamburger-menu {

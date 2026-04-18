@@ -9,11 +9,11 @@ import { getReviewsFromSupabase } from '../utils/supabase'
 const isCurrentUserAdmin = () => {
   const currentUserEmail = localStorage.getItem('currentUserEmail');
   if (!currentUserEmail) return false;
-  
+
   const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
   const defaultAdminEmails = ['yahiapro400@gmail.com'];
   const allAdminEmails = adminEmails.length > 0 ? adminEmails : defaultAdminEmails;
-  
+
   return allAdminEmails.includes(currentUserEmail);
 };
 
@@ -144,17 +144,18 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
         const reviewsData = await getReviewsFromSupabase(null, 50, 0);
         setReviews(reviewsData);
       } catch (error) {
-        console.error('Error loading reviews:', error);
-      }
+              }
     };
     loadReviews();
   }, []);
 
   // Filter products (search only)
   const filteredProducts = products.filter(product => {
-    const matchesSearch = product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        product.description.toLowerCase().includes(searchTerm.toLowerCase())
-    return matchesSearch
+    const title = (product.title || '').toLowerCase();
+    const description = (product.description || '').toLowerCase();
+    const search = searchTerm.toLowerCase();
+    const matchesSearch = title.includes(search) || description.includes(search);
+    return matchesSearch;
   })
 
   // Handle add to cart
@@ -166,23 +167,29 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
 
   // Handle increase quantity
   const handleIncreaseQuantity = (productId) => {
+                
     if (updateCartItemQuantity) {
       const cartItem = cartItems.find(item => item.id === productId)
       if (cartItem) {
-        updateCartItemQuantity(productId, cartItem.quantity + 1)
-      }
+        const newQuantity = cartItem.quantity + 1;
+                updateCartItemQuantity(productId, newQuantity)
+      } else {
+              }
     }
   }
 
   // Handle decrease quantity
   const handleDecreaseQuantity = (productId) => {
+                
     if (updateCartItemQuantity) {
       const cartItem = cartItems.find(item => item.id === productId)
       if (cartItem && cartItem.quantity > 1) {
-        updateCartItemQuantity(productId, cartItem.quantity - 1)
+        const newQuantity = cartItem.quantity - 1;
+                updateCartItemQuantity(productId, newQuantity)
       } else if (cartItem && cartItem.quantity === 1) {
-        updateCartItemQuantity(productId, 0)
-      }
+                updateCartItemQuantity(productId, 0)
+      } else {
+              }
     }
   }
 
@@ -194,8 +201,7 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
 
   // Function to refresh products (now triggers App.js to reload)
   const refreshProducts = () => {
-    console.log('🔄 Cards: Requesting refresh from App.js...')
-    window.dispatchEvent(new CustomEvent('productsUpdated'))
+        window.dispatchEvent(new CustomEvent('productsUpdated'))
   }
 
   // Function to clear all products from localStorage
@@ -206,11 +212,9 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
         localStorage.removeItem('has_default_products')
         // Trigger App.js to reload products
         window.dispatchEvent(new CustomEvent('productsUpdated'))
-        console.log('🗑️ All products cleared from localStorage')
-        showToast('All products have been cleared successfully!', 'success')
+                showToast('All products have been cleared successfully!', 'success')
       } catch (error) {
-        console.error('Error clearing products:', error)
-        showToast('Error clearing products', 'error')
+                showToast('Error clearing products', 'error')
       }
     }
   }
@@ -333,7 +337,7 @@ export default function Cards({ addToCart, cartItems = [], updateCartItemQuantit
                     <span className="review-username">{review.username || 'Anonymous'}</span>
                     <div className="review-rating">
                       {[...Array(5)].map((_, i) => (
-                        <span key={i} className={i < review.rating ? 'star filled' : 'star'}>
+                        <span key={i} className="star">
                           ★
                         </span>
                       ))}

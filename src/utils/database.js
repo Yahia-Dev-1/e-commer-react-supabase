@@ -32,7 +32,7 @@ class Database {
           }
         ];
         localStorage.setItem(this.usersKey, JSON.stringify(defaultUsers));
-        
+
         // Add to admin list
         const adminEmails = ['yahiapro400@gmail.com'];
         localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
@@ -48,8 +48,7 @@ class Database {
 
       this.saveLastSaveTime();
     } catch (error) {
-      console.error('Error initializing database:', error);
-    }
+          }
   }
 
   // Ensure protected admins exist
@@ -59,11 +58,9 @@ class Database {
       
       // Ensure users is an array
       if (!Array.isArray(users)) {
-        console.warn('Users is not an array, resetting');
-        users = [];
+                users = [];
       }
       
-      const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
       let updated = false;
 
       const protectedAdmins = [
@@ -76,6 +73,8 @@ class Database {
         }
       ];
 
+      const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
+
       protectedAdmins.forEach(admin => {
         const existingUser = users.find(user => user.email === admin.email);
         if (!existingUser) {
@@ -87,13 +86,11 @@ class Database {
           };
           users.push(newAdmin);
           updated = true;
-          console.log(`Added missing protected admin: ${admin.email}`);
-        } else if (!existingUser.isProtected) {
+                  } else if (!existingUser.isProtected) {
           // Update existing user to be protected
           existingUser.isProtected = true;
           updated = true;
-          console.log(`Updated user to protected admin: ${admin.email}`);
-        }
+                  }
 
         // Ensure admin email is in admin list
         if (!adminEmails.includes(admin.email)) {
@@ -105,11 +102,9 @@ class Database {
       if (updated) {
         localStorage.setItem(this.usersKey, JSON.stringify(users));
         localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
-        console.log('Protected admins ensured successfully');
-      }
+              }
     } catch (error) {
-      console.error('Error ensuring protected admins:', error);
-    }
+          }
   }
 
   // Setup auto save functionality
@@ -157,10 +152,8 @@ class Database {
       localStorage.setItem(this.ordersKey, JSON.stringify(orders));
       this.saveLastSaveTime();
       
-      console.log('All data saved successfully');
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
+          } catch (error) {
+          }
   }
 
   // Get all users - Synchronous (from localStorage only)
@@ -173,15 +166,13 @@ class Database {
       
       // Ensure we always return an array
       if (!Array.isArray(parsed)) {
-        console.warn('Users data corrupted, resetting to empty array');
-        localStorage.removeItem(this.usersKey);
+                localStorage.removeItem(this.usersKey);
         return [];
       }
       
       return parsed;
     } catch (error) {
-      console.error('Error reading user data:', error);
-      // Clear corrupted data
+            // Clear corrupted data
       localStorage.removeItem(this.usersKey);
       return [];
     }
@@ -197,8 +188,7 @@ class Database {
         return supabaseUsers;
       }
     } catch (error) {
-      console.log('Supabase users fetch failed:', error.message);
-    }
+          }
     
     // Fallback to localStorage
     return this.getUsers();
@@ -210,8 +200,7 @@ class Database {
       const orders = localStorage.getItem(this.ordersKey);
       return orders ? JSON.parse(orders) : [];
     } catch (error) {
-      console.error('Error reading orders:', error);
-      return [];
+            return [];
     }
   }
 
@@ -270,7 +259,7 @@ class Database {
             adminEmails.push(userData.email);
             localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
           }
-          
+
           return newUser;
         } else {
           throw new Error('Cannot register with protected admin email');
@@ -287,8 +276,7 @@ class Database {
         name: userData.name
       });
       
-      console.log(' User registered to Supabase:', newUser);
-      
+            
       // Also save to localStorage for fallback
       const localStorageUser = {
         id: newUser.id,
@@ -306,8 +294,7 @@ class Database {
       
       return localStorageUser;
     } catch (error) {
-      console.error('Error registering user:', error);
-      throw error;
+            throw error;
     }
   }
 
@@ -322,13 +309,12 @@ class Database {
 
     orders.push(newOrder);
     
-    // 🆕 Handle quota exceeded error
+    // Handle quota exceeded error
     try {
       localStorage.setItem(this.ordersKey, JSON.stringify(orders.slice(-10)))
     } catch (error) {
       if (error.name === 'QuotaExceededError') {
-        console.warn('⚠️ LocalStorage quota exceeded, saving minimal data only')
-        // Save only the last 5 orders with minimal data
+                // Save only the last 5 orders with minimal data
         const minimalOrders = orders.slice(-5).map(order => ({
           id: order.id,
           orderNumber: order.orderNumber,
@@ -372,17 +358,14 @@ class Database {
       const userIndex = users.findIndex(user => user.id === userId);
       
       if (userIndex === -1) {
-        console.error('User not found for update:', userId);
-        return null;
+                return null;
       }
 
       let userToUpdate = users[userIndex];
       
       // Check if trying to modify a protected admin
       if (this.isProtectedAdmin(userToUpdate.email) && !this.canModifyProtectedAdmin()) {
-        console.error('Unauthorized attempt to modify protected admin:', userToUpdate.email);
-        console.error('❌ Cannot modify protected admin accounts!\n\nOnly yahiapro400@gmail.com can modify protected admins.');
-        return null;
+                        return null;
       }
 
       // Prevent modification of protected admin properties
@@ -399,8 +382,7 @@ class Database {
       
       return users[userIndex];
     } catch (error) {
-      console.error('Error updating user:', error);
-      return null;
+            return null;
     }
   }
 
@@ -410,29 +392,24 @@ class Database {
     const userToDelete = users.find(user => user.id === userId);
     
     if (!userToDelete) {
-      console.error('User not found for deletion:', userId);
-      return false;
+            return false;
     }
 
     // Enhanced protection for protected admins
     if (this.isProtectedAdmin(userToDelete.email)) {
-      console.error('Attempted to delete protected admin:', userToDelete.email);
-      console.error('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.');
-      return false;
+                  return false;
     }
 
     // Check if current user is authorized to delete admins
     const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    
+
     if (adminEmails.includes(userToDelete.email) && !this.canModifyProtectedAdmin()) {
-      console.error('Unauthorized attempt to delete admin:', userToDelete.email);
-      console.error('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.');
-      return false;
+                  return false;
     }
 
     const filteredUsers = users.filter(user => user.id !== userId);
     localStorage.setItem(this.usersKey, JSON.stringify(filteredUsers));
-    
+
     // Remove from admin list if it's an admin
     if (adminEmails.includes(userToDelete.email)) {
       const updatedAdminEmails = adminEmails.filter(email => email !== userToDelete.email);
@@ -449,8 +426,7 @@ class Database {
       const lastSave = localStorage.getItem(this.lastSaveKey);
       return lastSave ? new Date(lastSave) : null;
     } catch (error) {
-      console.error('Error reading last save time:', error);
-      return null;
+            return null;
     }
   }
 
@@ -465,8 +441,7 @@ class Database {
       };
       return JSON.stringify(data, null, 2);
     } catch (error) {
-      console.error('Error exporting data:', error);
-      return null;
+            return null;
     }
   }
 
@@ -485,8 +460,7 @@ class Database {
       }
       return true;
     } catch (error) {
-      console.error('Error importing data:', error);
-      return false;
+            return false;
     }
   }
 
@@ -503,12 +477,12 @@ class Database {
     try {
       const users = this.getUsers();
       const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-      
+
       // Remove existing protected admins
-      const filteredUsers = users.filter(user => 
+      const filteredUsers = users.filter(user =>
         user.email !== 'yahiapro400@gmail.com'
       );
-      
+
       // Add fresh protected admins
       const protectedAdmins = [
         {
@@ -521,27 +495,25 @@ class Database {
           isProtected: true
         }
       ];
-      
+
       // Add protected admins to users
       protectedAdmins.forEach(admin => {
         filteredUsers.push(admin);
       });
-      
+
       // Update admin emails list
-      const updatedAdminEmails = adminEmails.filter(email => 
+      const updatedAdminEmails = adminEmails.filter(email =>
         email !== 'yahiapro400@gmail.com'
       );
       updatedAdminEmails.push('yahiapro400@gmail.com');
-      
+
       // Save to localStorage
       localStorage.setItem(this.usersKey, JSON.stringify(filteredUsers));
       localStorage.setItem('admin_emails', JSON.stringify(updatedAdminEmails));
       
-      console.log('Protected admins reset successfully');
-      return true;
+            return true;
     } catch (error) {
-      console.error('Error resetting protected admins:', error);
-      return false;
+            return false;
     }
   }
 
@@ -572,8 +544,7 @@ class Database {
         items: Object.keys(localStorage).length
       };
     } catch (error) {
-      console.error('Error calculating storage stats:', error);
-      return { used: 0, total: 10 * 1024 * 1024, percentage: 0, items: 0 };
+            return { used: 0, total: 10 * 1024 * 1024, percentage: 0, items: 0 };
     }
   }
 

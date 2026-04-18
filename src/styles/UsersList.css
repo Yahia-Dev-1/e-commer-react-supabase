@@ -61,7 +61,7 @@
 
 .users-table th {
   background: rgba(102, 126, 234, 0.1);
-  color: #667eea;
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -78,12 +78,12 @@
 
 .user-status.admin {
   background: rgba(102, 126, 234, 0.2);
-  color: #667eea;
+  color: #ffffff;
 }
 
 .user-status.regular {
   background: rgba(72, 187, 120, 0.2);
-  color: #48bb78;
+  color: #ffffff;
 }
 
 .user-actions {
@@ -102,12 +102,12 @@
 
 .user-action-btn.edit {
   background: rgba(102, 126, 234, 0.2);
-  color: #667eea;
+  color: #ffffff;
 }
 
 .user-action-btn.delete {
   background: rgba(245, 101, 101, 0.2);
-  color: #f56565;
+  color: #ffffff;
 }
 
 .user-action-btn:hover {

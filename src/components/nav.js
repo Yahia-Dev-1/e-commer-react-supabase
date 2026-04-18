@@ -38,20 +38,20 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
 
   // Load unread notifications
   useEffect(() => {
-    const loadUnreadNotifications = () => {
+    const loadUnreadNotifications = async () => {
       if (user) {
-        const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]')
-        const userNotifications = allNotifications.filter(notification => 
-          notification.userEmail === user.email && !notification.read
-        )
-        setUnreadNotifications(userNotifications.length)
+        try {
+          const { getNotificationsForUser } = await import('../utils/supabase');
+          const userNotifications = await getNotificationsForUser(user.email);
+          const unreadCount = userNotifications.filter(n => !n.read).length;
+          setUnreadNotifications(unreadCount);
+        } catch (error) {
+          console.error('Error loading notifications from Supabase:', error);
+        }
       }
     }
-
+    
     loadUnreadNotifications()
-    // Check for new notifications every 30 seconds
-    const interval = setInterval(loadUnreadNotifications, 30000)
-    return () => clearInterval(interval)
   }, [user])
 
   // Close notifications when clicking outside
@@ -98,7 +98,8 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
         {user ? (
           <>
             <Link to='/orders' onClick={closeMenu}>My Orders</Link>
-            
+            <Link to='/event-booking' onClick={closeMenu}>🎉 Event Booking</Link>
+
             {/* Admin Links - Only for specific admin accounts */}
             {['yahiapro400@gmail.com', 'yahiacool2009@gmail.com'].includes(user.email) && (
               <>
@@ -128,13 +129,16 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
               <button className="notifications-close-btn" onClick={closeNotifications}>
                 ×
               </button>
-              <Notifications onNotificationsUpdate={() => {
+              <Notifications userEmail={user.email} onNotificationsUpdate={async () => {
                 // Update unread count when notifications are updated
-                const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]')
-                const userNotifications = allNotifications.filter(notification => 
-                  notification.userEmail === user.email && !notification.read
-                )
-                setUnreadNotifications(userNotifications.length)
+                try {
+                  const { getNotificationsForUser } = await import('../utils/supabase');
+                  const userNotifications = await getNotificationsForUser(user.email);
+                  const unreadCount = userNotifications.filter(n => !n.read).length;
+                  setUnreadNotifications(unreadCount);
+                } catch (error) {
+                  console.error('Error updating notifications count:', error);
+                }
               }} darkMode={darkMode} />
             </div>
           </>

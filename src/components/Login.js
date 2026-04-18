@@ -49,8 +49,39 @@ export default function Login({ onLogin, darkMode = false }) {
       }
 
       if (isLogin) {
-        // Login
-        const user = database.validateLogin(formData.email, formData.password);
+        // Login - Try Supabase first
+        let user = null;
+
+        // Try to get user from Supabase
+        try {
+          const supabaseUsers = await getUsersFromSupabase();
+          if (Array.isArray(supabaseUsers)) {
+            const supabaseUser = supabaseUsers.find(u =>
+              u.email.toLowerCase() === formData.email.toLowerCase() &&
+              u.password === formData.password
+            );
+            if (supabaseUser) {
+              user = supabaseUser;
+              // Sync to localStorage
+              const localUsers = database.getUsers();
+              const localUserExists = localUsers.some(u => u.email === supabaseUser.email);
+              if (!localUserExists) {
+                database.registerUser({
+                  email: supabaseUser.email,
+                  password: supabaseUser.password,
+                  name: supabaseUser.name
+                });
+              }
+            }
+          }
+        } catch (error) {
+                  }
+
+        // Fallback to localStorage
+        if (!user) {
+          user = database.validateLogin(formData.email, formData.password);
+        }
+
         if (user) {
           setSuccess('Login successful!');
           // Save current user email to localStorage for admin access
@@ -94,8 +125,7 @@ export default function Login({ onLogin, darkMode = false }) {
             navigate('/');
           }, 1000);
         } catch (error) {
-          console.error('Registration error:', error);
-          // Fallback to localStorage only
+                    // Fallback to localStorage only
           try {
             const newUser = database.registerUser({
               email: formData.email,
@@ -115,8 +145,7 @@ export default function Login({ onLogin, darkMode = false }) {
       }
     } catch (error) {
       setError('An unexpected error occurred');
-      console.error('Login error:', error);
-    } finally {
+          } finally {
       setIsLoading(false);
     }
   };
@@ -206,11 +235,7 @@ export default function Login({ onLogin, darkMode = false }) {
           </p>
         </div>
 
-        {/* Display database info for development */}
-        <div className="debug-info" style={{ marginTop: '20px', fontSize: '12px', color: '#666' }}>
-          <p>Registered Users: {database.getUsers().length}</p>
-          <p>Saved Orders: {database.getOrders().length}</p>
-        </div>
+       
       </div>
       
       

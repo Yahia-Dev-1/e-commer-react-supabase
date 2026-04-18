@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import '../styles/AdminNew.css';
 import database from '../utils/database';
-import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase, getUsersFromSupabase, restoreProductQuantities } from '../utils/supabase';
+import { subscribeToUsers, deleteUserFromSupabase, updateProductInSupabase, getProductsFromSupabase, getOrdersFromSupabase, subscribeToOrders, deleteOrderFromSupabase, getUsersFromSupabase, restoreProductQuantities, getAllNotificationsFromSupabase, markNotificationAsReadInSupabase, deleteNotificationFromSupabase } from '../utils/supabase';
 
 export default function Admin({ darkMode = true }) {
-  const showToast = useToast();
+  const { showToast } = useToast();
   const [users, setUsers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
@@ -33,17 +33,14 @@ export default function Admin({ darkMode = true }) {
       
       if (userExists) {
         setIsAuthorized(true);
-        console.log('Authorization granted');
-      } else {
+              } else {
         addProtectedAdmins();
         setTimeout(() => {
           setIsAuthorized(true);
-          console.log('Authorization granted after adding user');
-        }, 500);
+                  }, 500);
       }
     } else {
-      console.log('User not in admin list, authorization denied');
-      setIsAuthorized(false);
+            setIsAuthorized(false);
     }
   }, []);
 
@@ -54,10 +51,8 @@ export default function Admin({ darkMode = true }) {
     let allUsers = [];
     try {
       allUsers = await getUsersFromSupabase();
-      console.log('Users loaded from Supabase:', allUsers.length);
-    } catch (error) {
-      console.log('Error loading users from Supabase:', error.message);
-      // Fallback to localStorage
+          } catch (error) {
+            // Fallback to localStorage
       allUsers = database.getUsers();
     }
     
@@ -65,15 +60,9 @@ export default function Admin({ darkMode = true }) {
     let allOrders = [];
     try {
       const { data: supabaseOrders } = await getOrdersFromSupabase(100, 0);
-      console.log('=== ORDERS FROM SUPABASE ===');
-      console.log('Orders loaded from Supabase:', supabaseOrders.length);
-      console.log('Orders data:', supabaseOrders);
-      allOrders = supabaseOrders || [];
+                        allOrders = supabaseOrders || [];
     } catch (error) {
-      console.log('=== ERROR LOADING ORDERS ===');
-      console.log('Using localStorage orders:', error.message);
-      console.log('Error:', error);
-      allOrders = database.getOrders();
+                        allOrders = database.getOrders();
     }
     
     const protectedAdmins = [
@@ -98,16 +87,12 @@ export default function Admin({ darkMode = true }) {
               password: admin.password,
               name: admin.name
             });
-            console.log(`Added protected admin: ${admin.email}`);
-          } else {
-            console.log(`Protected admin ${admin.email} already exists in localStorage`);
-          }
+                      } else {
+                      }
         } catch (error) {
-          console.log(`Protected admin ${admin.email} error:`, error.message);
-        }
+                  }
       } else {
-        console.log(`Protected admin ${admin.email} already exists`);
-      }
+              }
     });
 
     const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
@@ -117,9 +102,8 @@ export default function Admin({ darkMode = true }) {
       }
     });
     localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
-    
+
     const updatedUsers = database.getUsers();
-    
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
     const defaultAdminEmails = ['yahiapro400@gmail.com'];
     const finalAdminEmails = savedAdminEmails.length > 0 ? savedAdminEmails : defaultAdminEmails;
@@ -154,10 +138,8 @@ export default function Admin({ darkMode = true }) {
               password: admin.password,
               name: admin.name
             });
-            console.log(`Initialized protected admin: ${admin.email}`);
-          } catch (error) {
-            console.log(`Protected admin ${admin.email} already exists:`, error.message);
-          }
+                      } catch (error) {
+                      }
         }
 
         if (!adminEmails.includes(admin.email)) {
@@ -188,8 +170,7 @@ export default function Admin({ darkMode = true }) {
     if (!isAuthorized) return;
     
     const unsubscribe = subscribeToUsers((supabaseUsers) => {
-      console.log('Users updated from Supabase:', supabaseUsers.length);
-      setUsers(supabaseUsers);
+            setUsers(supabaseUsers);
     });
     
     return () => unsubscribe();
@@ -200,69 +181,70 @@ export default function Admin({ darkMode = true }) {
     if (!isAuthorized) return;
     
     const unsubscribe = subscribeToOrders((supabaseOrders) => {
-      console.log('Orders updated from Supabase:', supabaseOrders.length);
-      setOrders(supabaseOrders || []);
+            setOrders(supabaseOrders || []);
     });
     
     return () => unsubscribe();
   }, [isAuthorized]);
 
-  // 🆕 Load admin notifications
+  // Load admin notifications
   useEffect(() => {
-    const loadNotifications = () => {
-      const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
-      setNotifications(adminNotifications);
+    const loadNotifications = async () => {
+      try {
+        const adminNotifications = await getAllNotificationsFromSupabase(100, 0);
+        setNotifications(adminNotifications);
+      } catch (error) {
+        console.error('Error loading admin notifications from Supabase:', error);
+      }
     };
 
     loadNotifications();
-
-    // Subscribe to storage events to update notifications
-    const handleStorageChange = () => {
-      loadNotifications();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // 🆕 Function to mark notification as read
-  const markNotificationAsRead = (notificationId) => {
-    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
-    const updatedNotifications = adminNotifications.map(notif => 
-      notif.id === notificationId ? { ...notif, read: true } : notif
-    );
-    localStorage.setItem('admin_notifications', JSON.stringify(updatedNotifications));
-    setNotifications(updatedNotifications);
+  // Function to mark notification as read
+  const markNotificationAsRead = async (notificationId) => {
+    try {
+      await markNotificationAsReadInSupabase(notificationId);
+      const updatedNotifications = notifications.map(notif => 
+        notif.id === notificationId ? { ...notif, read: true } : notif
+      );
+      setNotifications(updatedNotifications);
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
-  // 🆕 Function to delete notification
-  const deleteNotification = (notificationId) => {
-    const adminNotifications = JSON.parse(localStorage.getItem('admin_notifications') || '[]');
-    const updatedNotifications = adminNotifications.filter(notif => notif.id !== notificationId);
-    localStorage.setItem('admin_notifications', JSON.stringify(updatedNotifications));
-    setNotifications(updatedNotifications);
+  // Function to delete notification
+  const deleteNotification = async (notificationId) => {
+    try {
+      await deleteNotificationFromSupabase(notificationId);
+      const updatedNotifications = notifications.filter(notif => notif.id !== notificationId);
+      setNotifications(updatedNotifications);
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
   };
 
   const deleteUser = async (userId) => {
     const userToDelete = users.find(user => user.id === userId);
-    
+
     if (!userToDelete) {
       showToast('User not found!', 'error');
       return;
     }
 
-    const protectedAdmins = ['yahiapro400@gmail.com'];
+    const superAdmin = 'yahiapro400@gmail.com';
     const currentUserEmail = localStorage.getItem('currentUserEmail');
-    
-    if (protectedAdmins.includes(userToDelete.email)) {
-      showToast('❌ Cannot delete protected admin accounts!\n\nOnly yahiapro400@gmail.com can delete protected admins.', 'error');
+
+    // Only super admin can delete users
+    if (currentUserEmail !== superAdmin) {
+      showToast('❌ Only yahiapro400@gmail.com can delete admin accounts!', 'error');
       return;
     }
 
-    const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    
-    if (adminEmails.includes(userToDelete.email) && !protectedAdmins.includes(currentUserEmail)) {
-      showToast('❌ Only protected admins can delete other admin accounts!\n\nContact yahiapro400@gmail.com to delete admin accounts.', 'error');
+    // Super admin cannot be deleted
+    if (userToDelete.email === superAdmin) {
+      showToast('❌ Cannot delete the super admin account!', 'error');
       return;
     }
 
@@ -270,11 +252,9 @@ export default function Admin({ darkMode = true }) {
       try {
         // Delete from Supabase first
         await deleteUserFromSupabase(userId);
-        console.log('✅ Deleted from Supabase');
-      } catch (error) {
-        console.warn('⚠️ Could not delete from Supabase:', error.message);
-      }
-      
+              } catch (error) {
+              }
+
       // Delete from localStorage
       const success = database.deleteUser(userId);
       if (success) {
@@ -287,12 +267,18 @@ export default function Admin({ darkMode = true }) {
   };
 
   const handleEditUser = (user) => {
-    // Check edit permissions
-    const protectedAdmins = ['yahiapro400@gmail.com'];
+    const superAdmin = 'yahiapro400@gmail.com';
     const currentUserEmail = localStorage.getItem('currentUserEmail');
-    
-    if (protectedAdmins.includes(user.email) && !protectedAdmins.includes(currentUserEmail)) {
-      showToast('❌ Only protected admins can edit admin accounts!\n\nContact yahiapro400@gmail.com for changes.', 'error');
+
+    // Only super admin can edit users
+    if (currentUserEmail !== superAdmin) {
+      showToast('❌ Only yahiapro400@gmail.com can edit admin accounts!', 'error');
+      return;
+    }
+
+    // Super admin cannot be edited
+    if (user.email === superAdmin) {
+      showToast('❌ Cannot edit the super admin account!', 'error');
       return;
     }
 
@@ -309,31 +295,59 @@ export default function Admin({ darkMode = true }) {
     }
   };
 
+  const handleMakeAdmin = async (user) => {
+    const currentUserEmail = localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail');
+    const superAdmin = 'yahiapro400@gmail.com';
+
+    // Only super admin can make users admin
+    if (currentUserEmail !== superAdmin) {
+      showToast('❌ Only yahiapro400@gmail.com can make users admin!', 'error');
+      return;
+    }
+
+    // Check if user is already an admin
+    const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
+    if (adminEmails.includes(user.email)) {
+      showToast('User is already an admin!', 'warning');
+      return;
+    }
+
+    // Add user to admin list
+    adminEmails.push(user.email);
+    localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
+
+    showToast(`✅ ${user.email} is now an admin!`, 'success');
+    loadData();
+  };
+
   const rejectOrder = async (orderId) => {
     const orderToReject = orders.find(order => order.id === orderId);
     if (!orderToReject) return;
-    
+
     // Check if already rejected (prevent double stock restoration)
     if (orderToReject.status === 'rejected') {
       showToast('Order is already rejected!', 'warning');
       return;
     }
 
-    console.log('=== REJECTING ORDER ===');
-    console.log('Order to reject:', orderToReject);
-    console.log('Order items:', orderToReject.items);
+    // Ask for rejection reason
+    const rejectionReason = prompt('Please enter the reason for rejecting this order:');
+    if (!rejectionReason) {
+      showToast('Rejection cancelled. No reason provided.', 'warning');
+      return;
+    }
 
+                
     const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status: 'rejected' } : order
+      order.id === orderId ? { ...order, status: 'rejected', rejectionReason } : order
     );
     setOrders(updatedOrders);
     localStorage.setItem('ecommerce_orders', JSON.stringify(updatedOrders));
-    
+
     // Restore product quantities to Supabase (sync across all devices)
-    console.log('🔄 Restoring product quantities...');
-    await restoreProductQuantities(orderToReject);
-    
-    addRejectionNotification(orderToReject);
+        await restoreProductQuantities(orderToReject);
+
+    addRejectionNotification(orderToReject, rejectionReason);
     showToast(`Order #${orderToReject.orderNumber} has been rejected. Products returned to stock.`, 'success');
   };
 
@@ -382,10 +396,8 @@ export default function Admin({ darkMode = true }) {
       // Delete from Supabase
       try {
         await deleteOrderFromSupabase(orderId);
-        console.log('✅ Order deleted from Supabase:', orderId);
-      } catch (error) {
-        console.error('❌ Error deleting order from Supabase:', error);
-      }
+              } catch (error) {
+              }
       
       // Update local state
       const updatedOrders = orders.filter(order => order.id !== orderId);
@@ -398,32 +410,60 @@ export default function Admin({ darkMode = true }) {
     }
   };
 
-  const addRejectionNotification = (order) => {
-    const notifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const notification = {
-      id: Date.now(),
-      type: 'rejection',
-      message: `Your order #${order.orderNumber} has been rejected.`,
-      date: new Date().toISOString(),
-      userEmail: order.userEmail,
-      read: false
-    };
-    notifications.push(notification);
-    localStorage.setItem('order_notifications', JSON.stringify(notifications));
+  const addRejectionNotification = async (order, reason = '') => {
+    // Get userEmail from order or find it from users list using userId
+    let userEmail = order.userEmail;
+    if (!userEmail && order.userId) {
+      const users = database.getUsers();
+      const user = users.find(u => u.id === order.userId);
+      if (user) {
+        userEmail = user.email;
+      }
+    }
+
+    if (!userEmail) {
+      return;
+    }
+
+    try {
+      const { addNotificationToSupabase } = await import('../utils/supabase');
+      await addNotificationToSupabase({
+        userEmail: userEmail,
+        type: 'rejection',
+        message: `Your order #${order.orderNumber} has been rejected. Reason: ${reason}`,
+        read: false
+      });
+    } catch (error) {
+      console.error('Error adding rejection notification to Supabase:', error);
+    }
   };
 
-  const addDeletionNotification = (order) => {
-    const notifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const notification = {
-      id: Date.now(),
-      type: 'deletion',
-      message: `Your order #${order.orderNumber} has been deleted.`,
-      date: new Date().toISOString(),
-      userEmail: order.userEmail,
-      read: false
-    };
-    notifications.push(notification);
-    localStorage.setItem('order_notifications', JSON.stringify(notifications));
+  const addDeletionNotification = async (order) => {
+    // Get userEmail from order or find it from users list using userId
+    let userEmail = order.userEmail;
+    if (!userEmail && order.userId) {
+      const users = database.getUsers();
+      const user = users.find(u => u.id === order.userId);
+      if (user) {
+        userEmail = user.email;
+      }
+    }
+
+    if (!userEmail) {
+      return;
+    }
+
+    try {
+      const { addNotificationToSupabase } = await import('../utils/supabase');
+      await addNotificationToSupabase({
+        userEmail: userEmail,
+        type: 'deletion',
+        message: `Your order #${order.orderNumber} has been deleted.`,
+        read: false
+      });
+    } catch (error) {
+      console.error('Error adding deletion notification to Supabase:', error);
+    }
   };
 
   const clearDatabase = () => {
@@ -463,15 +503,8 @@ export default function Admin({ darkMode = true }) {
 
           users.push(newAdminUser);
           addedCount++;
-
-          if (!adminEmails.includes(admin.email)) {
-            adminEmails.push(admin.email);
-          }
         } else {
-          if (!adminEmails.includes(admin.email)) {
-            adminEmails.push(admin.email);
-            addedCount++;
-          }
+          addedCount++;
         }
       });
 
@@ -638,9 +671,16 @@ export default function Admin({ darkMode = true }) {
           <div className="notifications-section">
             <div className="section-header">
               <h2>🔔 Notifications ({notifications.filter(n => !n.read).length})</h2>
-              <button className="clear-all-btn" onClick={() => {
-                localStorage.setItem('admin_notifications', '[]');
-                setNotifications([]);
+              <button className="clear-all-btn" onClick={async () => {
+                try {
+                  const notificationsToDelete = notifications.map(n => n.id);
+                  for (const id of notificationsToDelete) {
+                    await deleteNotificationFromSupabase(id);
+                  }
+                  setNotifications([]);
+                } catch (error) {
+                  console.error('Error clearing notifications:', error);
+                }
               }}>
                 Clear All
               </button>
@@ -779,33 +819,43 @@ export default function Admin({ darkMode = true }) {
                   <thead>
                     <tr>
                       <th>Email</th>
+                      <th>Role</th>
                       <th>Joined Date</th>
                       <th>Orders Count</th>
-                      <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map(user => (
-                      <tr key={user.id}>
-                        <td className="user-email">{user.email}</td>
-                        <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
-                        <td>{user.orders?.length || 0}</td>
-                        <td>
-                          <span className={`status-badge ${user.orders?.length > 0 ? 'active' : 'inactive'}`}>
-                            {user.orders?.length > 0 ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td>
-                          <button 
-                            className="delete-user-btn"
-                            onClick={() => handleDeleteUser(user)}
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {users.map(user => {
+                      const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
+                      const isAdmin = adminEmails.includes(user.email) || user.email === 'yahiapro400@gmail.com';
+                      return (
+                        <tr key={user.id}>
+                          <td className="user-email">{user.email}</td>
+                          <td>
+                            <span className={`role-badge ${isAdmin ? 'admin' : 'user'}`}>
+                              {isAdmin ? 'Admin' : 'User'}
+                            </span>
+                          </td>
+                          <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                          <td>{user.orders?.length || 0}</td>
+                          <td>
+                            <button
+                              className="make-admin-btn"
+                              onClick={() => handleMakeAdmin(user)}
+                            >
+                              Make Admin
+                            </button>
+                            <button
+                              className="delete-user-btn"
+                              onClick={() => handleDeleteUser(user)}
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -813,135 +863,16 @@ export default function Admin({ darkMode = true }) {
           </div>
         )}
 
-        {activeTab === 'manage-admins' && (
-          <div className="manage-admins-section">
+        {activeTab === 'stats' && (
+          <div className="stats-section">
             <div className="section-header">
-              <h2>👥 Manage Admins</h2>
+              <h2>📊 Advanced Stats</h2>
               <button className="refresh-btn" onClick={loadData}>
                 Refresh Data
               </button>
             </div>
-            
-            <div className="add-admin-form">
-              <h3>Add New Admin</h3>
-              <div className="form-group">
-                <label htmlFor="adminEmail">Admin Email:</label>
-                <input
-                  type="email"
-                  id="adminEmail"
-                  className="admin-input"
-                  placeholder="Enter admin email"
-                  value={newAdmin.email}
-                  onChange={(e) => setNewAdmin({...newAdmin, email: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="adminPassword">Password:</label>
-                <input
-                  type="password"
-                  id="adminPassword"
-                  className="admin-input"
-                  placeholder="Enter password"
-                  value={newAdmin.password}
-                  onChange={(e) => setNewAdmin({...newAdmin, password: e.target.value})}
-                />
-              </div>
-              <div className="form-group">
-                <label htmlFor="adminName">Name:</label>
-                <input
-                  type="text"
-                  id="adminName"
-                  className="admin-input"
-                  placeholder="Enter admin name"
-                  value={newAdmin.name}
-                  onChange={(e) => setNewAdmin({...newAdmin, name: e.target.value})}
-                />
-              </div>
-              <button className="add-admin-btn" onClick={() => {
-                if (newAdmin.email && newAdmin.password && newAdmin.name) {
-                  try {
-                    database.registerUser(newAdmin);
-                    const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-                    if (!adminEmails.includes(newAdmin.email)) {
-                      adminEmails.push(newAdmin.email);
-                      localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
-                    }
-                    setNewAdmin({ email: '', password: '', name: '' });
-                    alert('Admin added successfully!');
-                    loadData();
-                  } catch (error) {
-                    alert('Error adding admin: ' + error.message);
-                  }
-                } else {
-                  alert('Please fill all fields');
-                }
-              }}>
-                Add Admin
-              </button>
-              {addAdminError && <div className="admin-message error">{addAdminError}</div>}
-            </div>
 
-            <div className="current-admins">
-              <h3>Current Admins</h3>
-              <div className="admins-list">
-                {(() => {
-                  const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-                  const defaultAdmins = ['yahiapro400@gmail.com'];
-                  const allAdmins = adminEmails.length > 0 ? adminEmails : defaultAdmins;
-                  
-                  return allAdmins.map((email, index) => (
-                    <div key={index} className="admin-item">
-                      <span className="admin-email">{email}</span>
-                      <span className="admin-status">Active</span>
-                    </div>
-                  ));
-                })()}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'analytics' && (
-          <div className="analytics-section">
-            <div className="section-header">
-              <h2>📈 Real-time Analytics</h2>
-              <button className="refresh-btn" onClick={loadData}>
-                Update Analytics
-              </button>
-            </div>
-            
             <div className="analytics-grid">
-              <div className="analytics-card">
-                <h3>🔥 Top Performing Products</h3>
-                <div className="top-products">
-                  {(() => {
-                    const productStats = {};
-                    orders.forEach(order => {
-                      order.items.forEach(item => {
-                        if (!productStats[item.name]) {
-                          productStats[item.name] = { quantity: 0, revenue: 0 };
-                        }
-                        productStats[item.name].quantity += item.quantity;
-                        productStats[item.name].revenue += item.price * item.quantity;
-                      });
-                    });
-                    
-                    const topProducts = Object.entries(productStats)
-                      .sort(([,a], [,b]) => b.revenue - a.revenue)
-                      .slice(0, 5);
-                    
-                    return topProducts.map(([name, stats], index) => (
-                      <div key={name} className="product-stat">
-                        <span className="rank">#{index + 1}</span>
-                        <span className="name">{name}</span>
-                        <span className="quantity">Sold: {stats.quantity}</span>
-                        <span className="revenue">${stats.revenue.toFixed(2)}</span>
-                      </div>
-                    ));
-                  })()}
-                </div>
-              </div>
-
               <div className="analytics-card">
                 <h3>📅 Recent Activity</h3>
                 <div className="recent-activity">

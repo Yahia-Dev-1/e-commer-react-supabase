@@ -3,18 +3,23 @@ import { Link } from 'react-router-dom';
 import '../styles/Orders.css';
 import { useToast } from '../contexts/ToastContext';
 import database from '../utils/database';
-import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities, addReviewToSupabase } from '../utils/supabase';
-
-
+import { updateProductInSupabase, getOrdersFromSupabase, subscribeToOrders, restoreProductQuantities, addReviewToSupabase, deleteOrderFromSupabase } from '../utils/supabase';
 export default function Orders({ user, orders = [] }) {
   const showToast = useToast();
   const [loading, setLoading] = useState(true);
   const [showTracking, setShowTracking] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [userOrders, setUserOrders] = useState([]);
+  const [eventBookings, setEventBookings] = useState([]);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [activeTab, setActiveTab] = useState('orders');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState(null);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const loadOrders = async () => {
@@ -22,31 +27,42 @@ export default function Orders({ user, orders = [] }) {
         try {
           // Get orders from Supabase
           const { data: allOrders } = await getOrdersFromSupabase(100, 0);
-          console.log('=== ORDERS FROM SUPABASE (USER PAGE) ===');
-          console.log('📥 Orders loaded from Supabase:', allOrders.length);
-          console.log('All orders data:', allOrders);
-          
+                              
           // Show all orders (no filtering since userEmail not in database)
           setUserOrders(allOrders || []);
         } catch (error) {
-          console.log('=== ERROR LOADING ORDERS (USER PAGE) ===');
-          console.log('Using localStorage orders:', error.message);
-          console.log('Error:', error);
-          // Fallback to localStorage
+                                        // Fallback to localStorage
           const orders = database.getUserOrders(user.id);
           setUserOrders(orders);
+        }
+
+        // Load event bookings from Supabase
+        try {
+          const { getEventBookingsByUser } = await import('../utils/supabase');
+          const userEvents = await getEventBookingsByUser(user.email);
+          setEventBookings(userEvents);
+        } catch (error) {
+          console.error('Error loading event bookings from Supabase:', error);
+        }
+
+        // Load notifications from Supabase
+        try {
+          const { getNotificationsForUser } = await import('../utils/supabase');
+          const userNotifications = await getNotificationsForUser(user.email);
+          setNotifications(userNotifications);
+        } catch (error) {
+          console.error('Error loading notifications from Supabase:', error);
         }
       }
       setLoading(false);
     };
-    
+
     loadOrders();
 
     // Real-time subscription for orders
     const unsubscribe = subscribeToOrders((supabaseOrders) => {
       if (!user) return;
-      
-      console.log('🔄 Orders updated from Supabase:', supabaseOrders.length);
+
       
       // Show all orders (no filtering since userEmail not in database)
       setUserOrders(supabaseOrders || []);
@@ -111,6 +127,33 @@ export default function Orders({ user, orders = [] }) {
     setReviewData({ rating: 5, comment: '' });
   };
 
+  const handleDeleteOrder = async (orderId) => {
+    setOrderToDelete(orderId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteOrder = async () => {
+    if (!orderToDelete) return;
+
+    try {
+      await deleteOrderFromSupabase(orderToDelete);
+      setUserOrders(userOrders.filter(order => order.id !== orderToDelete));
+      setShowDeleteModal(false);
+      setOrderToDelete(null);
+      if (showToast && typeof showToast === 'function') {
+        showToast('Order deleted successfully', 'success');
+      } else {
+        alert('Order deleted successfully');
+      }
+    } catch (error) {
+            if (showToast && typeof showToast === 'function') {
+        showToast('Failed to delete order', 'error');
+      } else {
+        alert('Failed to delete order');
+      }
+    }
+  };
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     try {
@@ -121,11 +164,9 @@ export default function Orders({ user, orders = [] }) {
         rating: reviewData.rating,
         comment: reviewData.comment
       });
-      console.log('✅ Review submitted successfully');
-      handleCloseReviewModal();
+            handleCloseReviewModal();
     } catch (error) {
-      console.error('Error submitting review:', error);
-    }
+          }
   };
 
   // 🆕 Function to cancel order for user
@@ -135,7 +176,11 @@ export default function Orders({ user, orders = [] }) {
 
     // Only orders in Processing status can be cancelled
     if (orderToCancel.status !== 'Processing') {
-      showToast('❌ You can only cancel orders that are still being processed.', 'error');
+      if (showToast && typeof showToast === 'function') {
+        showToast('❌ You can only cancel orders that are still being processed.', 'error');
+      } else {
+        alert('You can only cancel orders that are still being processed.');
+      }
       return;
     }
 
@@ -146,7 +191,35 @@ export default function Orders({ user, orders = [] }) {
       // Update local state
       setUserOrders(prev => prev.filter(o => o.id !== orderId));
 
-      showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');
+      if (showToast && typeof showToast === 'function') {
+        showToast('✅ Order cancelled successfully. Products returned to stock.', 'success');
+      } else {
+        alert('Order cancelled successfully. Products returned to stock.');
+      }
+    }
+  };
+
+  // Function to cancel event booking for user
+  const handleCancelEventBooking = async (index) => {
+    if (window.confirm('Are you sure you want to cancel this event booking?')) {
+      try {
+        const { updateEventBookingStatus } = await import('../utils/supabase');
+        await updateEventBookingStatus(eventBookings[index].id, 'rejected', 'Cancelled by user');
+        
+        // Reload event bookings from Supabase
+        const { getEventBookingsByUser } = await import('../utils/supabase');
+        const userEvents = await getEventBookingsByUser(user.email);
+        setEventBookings(userEvents);
+        
+        if (showToast && typeof showToast === 'function') {
+          showToast('Event booking cancelled successfully', 'success');
+        }
+      } catch (error) {
+        console.error('Error cancelling event booking:', error);
+        if (showToast && typeof showToast === 'function') {
+          showToast('Failed to cancel event booking', 'error');
+        }
+      }
     }
   };
 
@@ -176,7 +249,92 @@ export default function Orders({ user, orders = [] }) {
     <div className="orders-container">
       <div className="orders-header">
         <h1>My Orders</h1>
-        <p>Welcome back, {user?.name || 'User'}!</p>
+        <p>Track your orders and event bookings</p>
+      </div>
+
+      {/* Notifications Section */}
+      {notifications.length > 0 && (
+        <div className="notifications-section">
+          <div className="section-header">
+            <h2>🔔 Notifications ({notifications.filter(n => !n.read).length})</h2>
+            <button className="clear-all-btn" onClick={async () => {
+              try {
+                const { markAllNotificationsAsReadInSupabase } = await import('../utils/supabase');
+                await markAllNotificationsAsReadInSupabase(user.email);
+                const updatedNotifications = notifications.map(n => ({ ...n, read: true }));
+                setNotifications(updatedNotifications);
+              } catch (error) {
+                console.error('Error marking all notifications as read:', error);
+              }
+            }}>
+              Mark All as Read
+            </button>
+          </div>
+          <div className="notifications-list">
+            {notifications.map(notification => (
+              <div
+                key={notification.id}
+                className={`notification-item ${!notification.read ? 'unread' : ''}`}
+                onClick={async () => {
+                  try {
+                    const { markNotificationAsReadInSupabase } = await import('../utils/supabase');
+                    await markNotificationAsReadInSupabase(notification.id);
+                    const updatedNotifications = notifications.map(n =>
+                      n.id === notification.id ? { ...n, read: true } : n
+                    );
+                    setNotifications(updatedNotifications);
+                  } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                  }
+                }}
+              >
+                <div className="notification-content">
+                  <span className="notification-icon">
+                    {notification.type === 'rejection' ? '❌' : notification.type === 'deletion' ? '🗑️' : '📦'}
+                  </span>
+                  <span className="notification-message">{notification.message}</span>
+                  <span className="notification-time">
+                    {new Date(notification.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <button
+                  className="delete-notification-btn"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      const { deleteNotificationFromSupabase } = await import('../utils/supabase');
+                      await deleteNotificationFromSupabase(notification.id);
+                      const updatedNotifications = notifications.filter(n => n.id !== notification.id);
+                      setNotifications(updatedNotifications);
+                    } catch (error) {
+                      console.error('Error deleting notification:', error);
+                    }
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab Buttons */}
+      <div className="tab-buttons">
+        <button
+          className={`tab-btn ${activeTab === 'orders' ? 'active' : ''}`}
+          onClick={() => setActiveTab('orders')}
+        >
+          Orders
+          <span className="tab-count">{userOrders.filter(order => order.status !== 'rejected').length}</span>
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'rejected' ? 'active' : ''}`}
+          onClick={() => setActiveTab('rejected')}
+        >
+          ❌ Rejected Orders
+          <span className="tab-count">{userOrders.filter(order => order.status === 'rejected').length}</span>
+        </button>
       </div>
 
       {userOrders.length === 0 ? (
@@ -187,34 +345,48 @@ export default function Orders({ user, orders = [] }) {
           <Link to="/" className="start-shopping-btn">Start Shopping</Link>
         </div>
       ) : (
-        <div className="orders-list">
-          {userOrders.map((order) => (
-            <div key={order.id} className="order-card">
-              <div className="order-header">
-                <div className="order-info">
-                  <h3>{order.orderNumber}</h3>
-                  <p className="order-date">{formatDate(order.date)}</p>
-                </div>
-                <div className="order-status">
-                  <span 
-                    className="status-badge"
-                    style={{ backgroundColor: getStatusColor(order.status) }}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-              </div>
+        <>
+          {/* Regular Orders */}
+          {activeTab === 'orders' && userOrders.filter(order => order.status !== 'rejected').length > 0 && (
+            <div className="orders-list">
+              <h3 style={{ color: '#e0e0e0', marginBottom: '20px' }}>Your Orders</h3>
+              {userOrders.filter(order => order.status !== 'rejected').map((order) => (
+                <div key={order.id} className={`order-card ${order.status === 'rejected' ? 'rejected' : ''}`} onClick={() => {
+                  if (order.status === 'rejected' && order.rejectionReason) {
+                    setRejectionReason(order.rejectionReason);
+                    setShowRejectionModal(true);
+                  }
+                }}>
+                  <div className="order-header">
+                    <div className="order-info">
+                      <h3>Order #{order.orderNumber || order.id}</h3>
+                      <p className="order-date">{formatDate(order.date || order.created_at)}</p>
+                    </div>
+                    <div className="order-status">
+                      {order.status === 'rejected' ? (
+                        <span className="status-badge rejected-badge">
+                          ❌ Cancelled
+                        </span>
+                      ) : (
+                        <span
+                          className="status-badge"
+                          style={{ backgroundColor: getStatusColor(order.status) }}
+                        >
+                          {order.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-              <div className="order-items">
-                {(() => {
-                  let items = order.items || [];
-                  if (!items.length && order.shipping) {
-                    try {
-                      const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
+                  <div className="order-items">
+                    {(() => {
+                      let items = order.items || [];
+                      if (!items.length && order.shipping) {
+                        try {
+                          const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
                       items = shippingData.items || [];
                     } catch (error) {
-                      console.error('Error parsing shipping data:', error);
-                    }
+                                          }
                   }
                   return items.length > 0 ? items.map((item, index) => (
                     <div key={index} className="order-item">
@@ -291,8 +463,7 @@ export default function Orders({ user, orders = [] }) {
                         const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
                         items = shippingData.items || [];
                       } catch (error) {
-                        console.error('Error parsing shipping data:', error);
-                      }
+                                              }
                     }
                     return items.length > 0 ? (
                       <button
@@ -304,6 +475,92 @@ export default function Orders({ user, orders = [] }) {
                     ) : null;
                   })()}
                 </div>
+              </div>
+            </div>
+          ))}
+        </div>
+          )}
+
+          {/* Event Bookings Section */}
+      {activeTab === 'orders' && eventBookings.filter(booking => booking.status !== 'rejected').length > 0 && (
+        <div className="orders-list">
+          <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>🎉 Event Bookings</h3>
+          {eventBookings.filter(booking => booking.status !== 'rejected').map((booking, index) => (
+            <div key={index} className={`order-card ${booking.status === 'rejected' ? 'rejected' : ''}`} onClick={() => {
+              if (booking.status === 'rejected' && booking.rejectionReason) {
+                setRejectionReason(booking.rejectionReason);
+                setShowRejectionModal(true);
+              }
+            }}>
+              <div className="order-header">
+                <div className="order-info">
+                  <h3>🎉 Event Booking</h3>
+                  <p className="order-date">{formatDate(booking.createdAt)}</p>
+                </div>
+                <div className="order-status">
+                  {booking.status === 'rejected' ? (
+                    <span className="status-badge rejected-badge">
+                      ❌ Cancelled
+                    </span>
+                  ) : (
+                    <span
+                      className="status-badge"
+                      style={{ backgroundColor: '#9333ea' }}
+                    >
+                      {booking.status}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="event-details">
+                <h4>📅 Event Information</h4>
+                <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
+                <p><strong>Place:</strong> {booking.eventPlace}</p>
+                {booking.orderDetails && (
+                  <p><strong>Details:</strong> {booking.orderDetails}</p>
+                )}
+              </div>
+
+              <div className="order-items">
+                <h4>📦 Products</h4>
+                {booking.products && booking.products.map((product, pIndex) => (
+                  <div key={pIndex} className="order-item">
+                    <div className="item-image">
+                      <img
+                        src={product.image || 'https://via.placeholder.com/60x60?text=No+Image'}
+                        alt={product.title}
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                        }}
+                      />
+                    </div>
+                    <div className="item-details">
+                      <h5>{product.title}</h5>
+                      <p>Price: ${product.price}</p>
+                      <p>Quantity: {product.quantity}</p>
+                      <p>Total: ${(product.price * product.quantity).toFixed(2)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="order-details">
+                <div className="order-total">
+                  <span>Total:</span>
+                  <strong>${booking.total.toFixed(2)}</strong>
+                </div>
+                {booking.status !== 'rejected' && (
+                  <button
+                    className="cancel-order-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCancelEventBooking(index);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -403,8 +660,210 @@ export default function Orders({ user, orders = [] }) {
           </div>
         </div>
       )}
+      </>
+      )}
 
+      {/* Rejected Orders Section */}
+      {activeTab === 'rejected' && userOrders.filter(order => order.status === 'rejected').length > 0 && (
+        <div className="orders-list">
+          <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>❌ Rejected Orders</h3>
+          {userOrders.filter(order => order.status === 'rejected').map((order) => (
+            <div key={order.id} className="order-card rejected-order-card" onClick={() => {
+              if (order.rejectionReason) {
+                setRejectionReason(order.rejectionReason);
+                setShowRejectionModal(true);
+              }
+            }}>
+              <div className="order-header">
+                <div className="order-info">
+                  <h3>Order #{order.orderNumber || order.id}</h3>
+                  <p className="order-date">{formatDate(order.date || order.created_at)}</p>
+                </div>
+                <div className="order-status">
+                  <span className="status-badge rejected-badge">
+                    ❌ Rejected
+                  </span>
+                </div>
+              </div>
+
+              {order.rejectionReason && (
+                <div className="rejection-info">
+                  <p><strong>Reason:</strong> {order.rejectionReason}</p>
+                </div>
+              )}
+
+              <div className="order-items">
+                {(() => {
+                  let items = order.items || [];
+                  if (!items.length && order.shipping) {
+                    try {
+                      const shippingData = typeof order.shipping === 'string' ? JSON.parse(order.shipping) : order.shipping;
+                      items = shippingData.items || [];
+                    } catch (error) {
+                                          }
+                  }
+                  return items.length > 0 ? items.map((item, index) => (
+                    <div key={index} className="order-item">
+                      <div className="item-image">
+                        <img
+                          src={item.image || 'https://via.placeholder.com/60x60?text=No+Image'}
+                          alt={item.name || 'Product'}
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/60x60?text=No+Image';
+                          }}
+                        />
+                      </div>
+                      <div className="item-details">
+                        <h4>{item.name || item.title || 'Unknown Product'}</h4>
+                        <p className="item-price">Price: ${item.price || '0.00'}</p>
+                        <p className="item-quantity">Quantity: {item.quantity || 0}</p>
+                      </div>
+                    </div>
+                  )) : null;
+                })()}
+              </div>
+
+              <div className="order-actions">
+                <button
+                  className="delete-order-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteOrder(order.id);
+                  }}
+                >
+                  Delete Permanently
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Rejected Event Bookings Section */}
+      {activeTab === 'rejected' && eventBookings.filter(booking => booking.status === 'rejected').length > 0 && (
+        <div className="orders-list">
+          <h3 style={{ color: '#e0e0e0', marginBottom: '20px', marginTop: '30px' }}>❌ Rejected Event Bookings</h3>
+          {eventBookings.filter(booking => booking.status === 'rejected').map((booking, index) => (
+            <div key={index} className="order-card rejected-order-card" onClick={() => {
+              if (booking.rejectionReason) {
+                setRejectionReason(booking.rejectionReason);
+                setShowRejectionModal(true);
+              }
+            }}>
+              <div className="order-header">
+                <div className="order-info">
+                  <h3>🎉 Event Booking</h3>
+                  <p className="order-date">{formatDate(booking.createdAt)}</p>
+                </div>
+                <div className="order-status">
+                  <span className="status-badge rejected-badge">
+                    ❌ Rejected
+                  </span>
+                </div>
+              </div>
+
+              {booking.rejectionReason && (
+                <div className="rejection-info">
+                  <p><strong>Reason:</strong> {booking.rejectionReason}</p>
+                </div>
+              )}
+
+              <div className="event-details">
+                <h4>📅 Event Information</h4>
+                <p><strong>Date & Time:</strong> {formatDate(booking.eventDate)}</p>
+                <p><strong>Place:</strong> {booking.eventPlace}</p>
+                {booking.orderDetails && (
+                  <p><strong>Details:</strong> {booking.orderDetails}</p>
+                )}
+              </div>
+
+              <div className="order-actions">
+                <button
+                  className="delete-order-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Delete event booking from localStorage
+                    const eventBookings = JSON.parse(localStorage.getItem('eventBookings') || '[]');
+                    const updatedBookings = eventBookings.filter((b, i) => i !== index);
+                    localStorage.setItem('eventBookings', JSON.stringify(updatedBookings));
+                    setEventBookings(updatedBookings);
+                    if (showToast && typeof showToast === 'function') {
+                      showToast('Event booking deleted successfully', 'success');
+                    } else {
+                      alert('Event booking deleted successfully');
+                    }
+                  }}
+                >
+                  Delete Permanently
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="tracking-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="tracking-modal review-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="tracking-header">
+              <h2>Delete Order</h2>
+              <button className="close-tracking-btn" onClick={() => setShowDeleteModal(false)}>×</button>
+            </div>
+
+            <div className="rejection-content">
+              <p>Are you sure you want to permanently delete this order? This action cannot be undone.</p>
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="cancel-order-btn"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="track-order-btn"
+                onClick={confirmDeleteOrder}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rejection Modal */}
+      {showRejectionModal && (
+        <div className="tracking-modal-overlay" onClick={() => setShowRejectionModal(false)}>
+          <div className="tracking-modal review-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="tracking-header">
+              <h2>❌ Order Rejected</h2>
+              <button className="close-tracking-btn" onClick={() => setShowRejectionModal(false)}>×</button>
+            </div>
+
+            <div className="rejection-content">
+              <div className="form-group">
+                <label>Reason for Rejection:</label>
+                <p className="rejection-reason">{rejectionReason}</p>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button
+                type="button"
+                className="track-order-btn"
+                onClick={() => setShowRejectionModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );
-} 
+}

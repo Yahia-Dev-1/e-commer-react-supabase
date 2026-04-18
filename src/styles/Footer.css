@@ -1,7 +1,7 @@
 /* Simple Footer Styles */
 .footer {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-top: none;
+  border-top: 1px solid rgba(102, 126, 234, 0.3);
   position: relative;
   overflow: hidden;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -10,8 +10,9 @@
   margin-right: calc(-50vw + 50%);
   margin-top: 20px;
   margin-bottom: 0;
-  padding-bottom: 0;
-  box-sizing: border-box;
+  padding: 40px 20px 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .footer::before {
@@ -96,7 +97,7 @@
 
 .footer-contact-info .contact-link i {
   font-size: 0.9rem;
-  color: #667eea;
+  color: #ffffff;
 }
 
 .footer-contact-info .contact-text {
@@ -114,7 +115,7 @@
 
 .footer-contact-info .contact-text i {
   font-size: 0.9rem;
-  color: #667eea;
+  color: #ffffff;
 }
 
 .footer-bottom-row {

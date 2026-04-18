@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Notifications.css';
 
-export default function Notifications({ onNotificationsUpdate, darkMode = false }) {
+export default function Notifications({ userEmail, onNotificationsUpdate, darkMode = false }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -10,45 +10,46 @@ export default function Notifications({ onNotificationsUpdate, darkMode = false 
     // Check for new notifications every 30 seconds
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [userEmail]);
 
-  const loadNotifications = () => {
-    const currentUserEmail = localStorage.getItem('currentUserEmail');
-    if (!currentUserEmail) return;
+  const loadNotifications = async () => {
+    if (!userEmail) return;
 
-    const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const userNotifications = allNotifications.filter(notification => 
-      notification.userEmail === currentUserEmail
-    );
-    
-    setNotifications(userNotifications);
-    setUnreadCount(userNotifications.filter(n => !n.read).length);
-  };
-
-  const markAsRead = (notificationId) => {
-    const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const updatedNotifications = allNotifications.map(notification =>
-      notification.id === notificationId ? { ...notification, read: true } : notification
-    );
-    localStorage.setItem('order_notifications', JSON.stringify(updatedNotifications));
-    loadNotifications();
-    if (onNotificationsUpdate) {
-      onNotificationsUpdate();
+    try {
+      const { getNotificationsForUser } = await import('../utils/supabase');
+      const userNotifications = await getNotificationsForUser(userEmail);
+      setNotifications(userNotifications);
+      setUnreadCount(userNotifications.filter(n => !n.read).length);
+    } catch (error) {
+      console.error('Error loading notifications from Supabase:', error);
     }
   };
 
-  const markAllAsRead = () => {
-    const currentUserEmail = localStorage.getItem('currentUserEmail');
-    if (!currentUserEmail) return;
+  const markAsRead = async (notificationId) => {
+    try {
+      const { markNotificationAsReadInSupabase } = await import('../utils/supabase');
+      await markNotificationAsReadInSupabase(notificationId);
+      loadNotifications();
+      if (onNotificationsUpdate) {
+        onNotificationsUpdate();
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
 
-    const allNotifications = JSON.parse(localStorage.getItem('order_notifications') || '[]');
-    const updatedNotifications = allNotifications.map(notification =>
-      notification.userEmail === currentUserEmail ? { ...notification, read: true } : notification
-    );
-    localStorage.setItem('order_notifications', JSON.stringify(updatedNotifications));
-    loadNotifications();
-    if (onNotificationsUpdate) {
-      onNotificationsUpdate();
+  const markAllAsRead = async () => {
+    if (!userEmail) return;
+
+    try {
+      const { markAllNotificationsAsReadInSupabase } = await import('../utils/supabase');
+      await markAllNotificationsAsReadInSupabase(userEmail);
+      loadNotifications();
+      if (onNotificationsUpdate) {
+        onNotificationsUpdate();
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
     }
   };
 

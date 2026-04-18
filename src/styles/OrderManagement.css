@@ -10,12 +10,12 @@
 
 .order-management-header h1 {
   font-size: 2rem;
-  color: #333;
+  color: #ffffff;
   margin-bottom: 10px;
 }
 
 .order-management-header p {
-  color: #666;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .order-management-header h1 {
@@ -23,10 +23,10 @@
 }
 
 .order-management-container.dark-mode .order-management-header p {
-  color: #ccc;
+  color: #ffffff;
 }
 
-.loading {
+.order-management-container .loading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -34,7 +34,7 @@
   padding: 60px 20px;
 }
 
-.spinner {
+.order-management-container .spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
@@ -49,35 +49,38 @@
   100% { transform: rotate(360deg); }
 }
 
-.no-orders {
+.order-management-container .no-orders {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: #ffffff;
 }
 
-.orders-list {
+.order-management-container .orders-list {
   display: grid;
   gap: 20px;
 }
 
-.order-card {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+.order-management-container .order-card {
+  background: rgba(26, 26, 46, 0.95);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(10px);
 }
 
-.order-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.order-management-container .order-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.6);
 }
 
 .order-management-container.dark-mode .order-card {
   background: #2d2d2d;
 }
 
-.order-header {
+.order-management-container .order-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -90,27 +93,28 @@
   border-bottom-color: #444;
 }
 
-.order-info h3 {
+.order-management-container .order-info h3 {
   margin: 0 0 5px 0;
-  color: #333;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .order-info h3 {
   color: #fff;
 }
 
-.order-date, .order-user {
+.order-management-container .order-date,
+.order-management-container .order-user {
   margin: 0;
-  color: #666;
+  color: #ffffff;
   font-size: 0.9rem;
 }
 
 .order-management-container.dark-mode .order-date,
 .order-management-container.dark-mode .order-user {
-  color: #ccc;
+  color: #ffffff;
 }
 
-.status-badge {
+.order-management-container .status-badge {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 20px;
@@ -119,27 +123,27 @@
   font-weight: 500;
 }
 
-.order-details {
+.order-management-container .order-details {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
 }
 
-.order-total {
+.order-management-container .order-total {
   font-size: 1.1rem;
 }
 
-.order-total span {
-  color: #666;
+.order-management-container .order-total span {
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .order-total span {
-  color: #ccc;
+  color: #ffffff;
 }
 
-.order-total strong {
-  color: #333;
+.order-management-container .order-total strong {
+  color: #ffffff;
   margin-left: 10px;
 }
 
@@ -147,61 +151,101 @@
   color: #fff;
 }
 
-.estimated-delivery {
+.order-management-container .estimated-delivery {
   font-size: 1rem;
   margin-top: 10px;
 }
 
-.estimated-delivery span {
-  color: #666;
+.order-management-container .estimated-delivery span {
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .estimated-delivery span {
-  color: #ccc;
+  color: #ffffff;
 }
 
-.estimated-delivery strong {
-  color: #667eea;
+.order-management-container .estimated-delivery strong {
+  color: #ffffff;
   margin-left: 10px;
 }
 
 .order-management-container.dark-mode .estimated-delivery strong {
-  color: #667eea;
+  color: #ffffff;
 }
 
-.order-actions {
+.order-management-container .order-actions {
   display: flex;
   gap: 10px;
 }
 
-.edit-order-btn, .delete-order-btn {
+.order-management-container .edit-order-btn,
+.order-management-container .delete-order-btn,
+.order-management-container .reject-order-btn,
+.order-management-container .cancel-order-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
 }
 
-.edit-order-btn {
-  background-color: #667eea;
+.order-management-container .edit-order-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.edit-order-btn:hover {
-  background-color: #5568d3;
+.order-management-container .edit-order-btn:hover {
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-.delete-order-btn {
-  background-color: #ff5252;
+.order-management-container .delete-order-btn {
+  background: linear-gradient(135deg, #ff5252 0%, #ff1744 100%);
   color: #fff;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
 }
 
-.delete-order-btn:hover {
-  background-color: #ff3d3d;
+.order-management-container .delete-order-btn:hover {
+  background: linear-gradient(135deg, #ff3d3d 0%, #d50000 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
 }
 
-.order-timeline {
+.order-management-container .reject-order-btn {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.order-management-container .reject-order-btn:hover {
+  background: linear-gradient(135deg, #ff5252 0%, #d63031 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.order-management-container .cancel-order-btn {
+  background: linear-gradient(135deg, #ffa726 0%, #ff9800 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(255, 167, 38, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.order-management-container .cancel-order-btn:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 167, 38, 0.4);
+}
+
+.order-management-container .order-timeline {
   background: #f9f9f9;
   padding: 15px;
   border-radius: 6px;
@@ -213,28 +257,28 @@
 }
 
 /* Delete Reason Modal Styles */
-.delete-reason-form {
+.order-management-container .delete-reason-form {
   padding: 20px;
 }
 
-.delete-reason-form p {
+.order-management-container .delete-reason-form p {
   margin-bottom: 20px;
   font-size: 1rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .delete-reason-form p {
   color: #fff;
 }
 
-.reason-options {
+.order-management-container .reason-options {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
 }
 
-.reason-option {
+.order-management-container .reason-option {
   display: flex;
   align-items: flex-start;
   gap: 12px;
@@ -245,7 +289,7 @@
   transition: all 0.2s;
 }
 
-.reason-option:hover {
+.order-management-container .reason-option:hover {
   background-color: #f5f5f5;
   border-color: #667eea;
 }
@@ -259,46 +303,46 @@
   border-color: #667eea;
 }
 
-.reason-option input[type="radio"] {
+.order-management-container .reason-option input[type="radio"] {
   margin-top: 2px;
   cursor: pointer;
 }
 
-.reason-option span {
+.order-management-container .reason-option span {
   font-size: 0.95rem;
-  color: #333;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .reason-option span {
-  color: #fff;
+  color: #ffffff;
 }
 
-.delete-btn {
+.order-management-container .delete-btn {
   background-color: #ff5252;
   color: #fff;
 }
 
-.delete-btn:hover {
+.order-management-container .delete-btn:hover {
   background-color: #ff3d3d;
 }
 
-.delete-btn:disabled {
-  background-color: #ccc;
+.order-management-container .delete-btn:disabled {
+  background-color: #e0e0e0;
   cursor: not-allowed;
 }
 
 .order-management-container.dark-mode .delete-btn:disabled {
-  background-color: #555;
+  background-color: #e0e0e0;
 }
 
 /* Search Bar Styles */
-.search-container {
+.order-management-container .search-container {
   margin: 20px 0;
   position: relative;
   max-width: 600px;
 }
 
-.search-input {
+.order-management-container .search-input {
   width: 100%;
   padding: 12px 40px 12px 16px;
   border: 1px solid #ddd;
@@ -307,7 +351,7 @@
   transition: all 0.2s;
 }
 
-.search-input:focus {
+.order-management-container .search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -323,14 +367,14 @@
   border-color: #667eea;
 }
 
-.clear-search {
+.order-management-container .clear-search {
   position: absolute;
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: #666;
+  color: #ffffff;
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0;
@@ -341,12 +385,12 @@
   justify-content: center;
 }
 
-.clear-search:hover {
-  color: #333;
+.order-management-container .clear-search:hover {
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .clear-search {
-  color: #999;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .clear-search:hover {
@@ -354,7 +398,7 @@
 }
 
 /* Order Items Styles */
-.order-items {
+.order-management-container .order-items {
   background: #f9f9f9;
   padding: 15px;
   border-radius: 6px;
@@ -365,24 +409,72 @@
   background: #2a2a2a;
 }
 
-.order-items h4 {
+.order-management-container .order-items h4 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1rem;
 }
 
-.order-management-container.dark-mode .order-items h4 {
-  color: #fff;
+/* Rejected Order Card */
+.rejected-order-card {
+  border: 2px solid rgba(255, 82, 82, 0.3);
+  background: rgba(255, 82, 82, 0.05);
 }
 
-.order-item {
+.rejected-order-card:hover {
+  border-color: rgba(255, 82, 82, 0.5);
+  box-shadow: 0 8px 20px rgba(255, 82, 82, 0.2);
+}
+
+.order-management-container.dark-mode .rejected-order-card {
+  border-color: rgba(255, 82, 82, 0.5);
+  background: rgba(255, 82, 82, 0.1);
+}
+
+.order-management-container.dark-mode .rejected-order-card:hover {
+  border-color: rgba(255, 82, 82, 0.7);
+  box-shadow: 0 8px 20px rgba(255, 82, 82, 0.3);
+}
+
+.rejection-info {
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin: 10px 0;
+}
+
+.rejection-info p {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.rejection-info strong {
+  color: #ffffff;
+}
+
+.order-management-container.dark-mode .rejection-info {
+  background: rgba(255, 82, 82, 0.2);
+  border-color: rgba(255, 82, 82, 0.5);
+}
+
+.order-management-container.dark-mode .rejection-info p {
+  color: #ffffff;
+}
+
+.order-management-container.dark-mode .rejection-info strong {
+  color: #ffffff;
+}
+
+.order-management-container .order-item {
   display: flex;
   gap: 15px;
   padding: 10px;
-  background: #fff;
+  background: rgba(26, 26, 46, 0.95);
   border-radius: 6px;
   margin-bottom: 10px;
-  border: 1px solid #eee;
+  border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .order-management-container.dark-mode .order-item {
@@ -390,22 +482,22 @@
   border-color: #444;
 }
 
-.item-image {
-  width: 60px;
-  height: 60px;
+.order-management-container .item-image {
+  width: 50px;
+  height: 50px;
   flex-shrink: 0;
 }
 
-.item-image img {
+.order-management-container .item-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   border-radius: 4px;
 }
 
-.item-details h5 {
+.order-management-container .item-details h5 {
   margin: 0 0 5px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -413,31 +505,33 @@
   color: #fff;
 }
 
-.item-details p {
+.order-management-container .item-details p {
   margin: 2px 0;
-  color: #666;
+  color: #ffffff;
   font-size: 0.85rem;
 }
 
 .order-management-container.dark-mode .item-details p {
-  color: #aaa;
+  color: #ffffff;
 }
 
 /* Shipping Details Styles */
-.order-shipping {
-  background: #f0f4ff;
+.order-management-container .order-shipping {
+  background: #ffffff;
   padding: 15px;
   border-radius: 6px;
   margin: 15px 0;
+  border: 1px solid #e0e0e0;
 }
 
 .order-management-container.dark-mode .order-shipping {
   background: #1a1f3a;
+  border-color: #ffffff;
 }
 
-.order-shipping h4 {
+.order-management-container .order-shipping h4 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1rem;
 }
 
@@ -445,32 +539,33 @@
   color: #fff;
 }
 
-.order-shipping p {
+.order-management-container .order-shipping p {
   margin: 5px 0;
-  color: #555;
+  color: #ffffff;
   font-size: 0.9rem;
 }
 
 .order-management-container.dark-mode .order-shipping p {
-  color: #ccc;
+  color: #ffffff;
 }
 
-.order-shipping pre {
-  background: #fff;
+.order-management-container .order-shipping pre {
+  background: rgba(26, 26, 46, 0.95);
   padding: 10px;
   border-radius: 4px;
   overflow-x: auto;
   font-size: 0.85rem;
-  color: #333;
+  color: #ffffff;
+  border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .order-management-container.dark-mode .order-shipping pre {
   background: #2a2a2a;
-  color: #fff;
+  color: #ffffff;
 }
 
 /* View Details Button */
-.view-details-btn {
+.order-management-container .view-details-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
@@ -484,31 +579,31 @@
   margin-top: 8px;
 }
 
-.view-details-btn:hover {
+.order-management-container .view-details-btn:hover {
   background: linear-gradient(135deg, #5a67d8 0%, #6b46a1 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* Product Details Modal */
-.product-details-modal {
+.order-management-container .product-details-modal {
   max-width: 600px;
 }
 
-.product-details-content {
+.order-management-container .product-details-content {
   display: flex;
   gap: 24px;
   align-items: center;
   padding: 20px;
 }
 
-.product-details-image {
+.order-management-container .product-details-image {
   width: 200px;
   height: 200px;
   flex-shrink: 0;
 }
 
-.product-details-image img {
+.order-management-container .product-details-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -516,13 +611,13 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.product-details-info {
+.order-management-container .product-details-info {
   flex: 1;
 }
 
-.product-details-info h3 {
+.order-management-container .product-details-info h3 {
   margin: 0 0 20px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1.3rem;
 }
 
@@ -530,7 +625,7 @@
   color: #fff;
 }
 
-.detail-item {
+.order-management-container .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -542,23 +637,23 @@
   border-bottom-color: #444;
 }
 
-.detail-item:last-child {
+.order-management-container .detail-item:last-child {
   border-bottom: none;
 }
 
-.detail-label {
+.order-management-container .detail-label {
   font-weight: 600;
-  color: #666;
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
 .order-management-container.dark-mode .detail-label {
-  color: #aaa;
+  color: #ffffff;
 }
 
-.detail-value {
+.order-management-container .detail-value {
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
   font-size: 1.1rem;
 }
 
@@ -566,31 +661,31 @@
   color: #fff;
 }
 
-.detail-value span {
-  color: #667eea;
+.order-management-container .detail-value span {
+  color: #ffffff;
 }
 
-.order-timeline h4 {
+.order-management-container .order-timeline h4 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .order-timeline h4 {
   color: #fff;
 }
 
-.order-timeline p {
+.order-management-container .order-timeline p {
   margin: 5px 0;
-  color: #666;
+  color: #ffffff;
   font-size: 0.9rem;
 }
 
 .order-management-container.dark-mode .order-timeline p {
-  color: #ccc;
+  color: #ffffff;
 }
 
 /* Modal Styles */
-.modal-overlay {
+.order-management-container .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -603,7 +698,7 @@
   z-index: 1000;
 }
 
-.modal-content {
+.order-management-container .modal-content {
   background: #2a2a2a;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
@@ -614,7 +709,7 @@
   overflow-y: auto;
 }
 
-.modal-header {
+.order-management-container .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -623,12 +718,13 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.modal-header h2 {
+.order-management-container .modal-header h2 {
   margin: 0;
   color: #ffffff;
+  font-size: 1.2rem;
 }
 
-.close-btn {
+.order-management-container .close-btn {
   background: none;
   border: none;
   font-size: 24px;
@@ -636,32 +732,33 @@
   color: #ffffff;
 }
 
-.close-btn:hover {
-  color: #ccc;
+.order-management-container .close-btn:hover {
+  color: #ffffff;
 }
 
-.edit-order-form {
+.order-management-container .edit-order-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-.form-group {
+.order-management-container .form-group {
   display: flex;
   flex-direction: column;
   gap: 5px;
 }
 
-.form-group label {
+.order-management-container .form-group label {
   font-weight: 500;
-  color: #333;
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .form-group label {
   color: #fff;
 }
 
-.form-group input, .form-group select {
+.order-management-container .form-group input,
+.order-management-container .form-group select {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
@@ -671,23 +768,24 @@
 .order-management-container.dark-mode .form-group input,
 .order-management-container.dark-mode .form-group select {
   background: #3d3d3d;
-  border-color: #555;
+  border-color: #e0e0e0;
   color: #fff;
 }
 
-.form-row {
+.order-management-container .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
 }
 
-.form-actions {
+.order-management-container .form-actions {
   display: flex;
   gap: 10px;
   margin-top: 10px;
 }
 
-.save-btn, .cancel-btn {
+.order-management-container .save-btn,
+.order-management-container .cancel-btn {
   padding: 12px 24px;
   border: none;
   border-radius: 6px;
@@ -696,29 +794,100 @@
   flex: 1;
 }
 
-.save-btn {
+.order-management-container .save-btn {
   background-color: #667eea;
   color: #fff;
 }
 
-.save-btn:hover {
+.order-management-container .save-btn:hover {
   background-color: #5568d3;
 }
 
-.cancel-btn {
-  background-color: #ccc;
-  color: #333;
+.order-management-container .cancel-btn {
+  background-color: #666666;
+  color: #ffffff;
 }
 
-.cancel-btn:hover {
-  background-color: #bbb;
+.order-management-container .cancel-btn:hover {
+  background-color: #555555;
 }
 
 .order-management-container.dark-mode .cancel-btn {
-  background-color: #555;
-  color: #fff;
+  background-color: #666666;
+  color: #ffffff;
+}
+
+/* Tab Buttons */
+.tab-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  padding: 12px 30px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  border-radius: 25px;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.tab-btn:hover {
+  background: rgba(102, 126, 234, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+/* Rejected Order Card */
+.rejected-order-card {
+  border: 2px solid rgba(255, 82, 82, 0.3);
+  background: rgba(255, 82, 82, 0.05);
+}
+
+.rejected-order-card:hover {
+  border-color: rgba(255, 82, 82, 0.5);
+  box-shadow: 0 8px 20px rgba(255, 82, 82, 0.2);
+}
+
+.rejection-info {
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin: 10px 0;
+}
+
+.rejection-info p {
+  margin: 0;
+  color: #ff6b6b;
+  font-size: 0.9rem;
+}
+
+.rejection-info strong {
+  color: #ffffff;
 }
 
 .order-management-container.dark-mode .cancel-btn:hover {
-  background-color: #666;
+  background-color: #555555;
 }

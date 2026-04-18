@@ -11,8 +11,8 @@
 
 /* Floating Button Base Styles */
 .floating-btn {
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
@@ -40,10 +40,19 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.cart-float-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: white;
+.cart-float-btn i {
+  font-size: 24px;
+  color: white;
+}
+
+/* Chat Float Button */
+.chat-float-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.chat-float-btn i {
+  font-size: 20px;
+  color: white;
 }
 
 /* Notification Float Button */
@@ -54,7 +63,7 @@
 .notification-float-btn svg {
   width: 24px;
   height: 24px;
-  stroke: white;
+  stroke: currentColor;
 }
 
 /* Floating Badges */

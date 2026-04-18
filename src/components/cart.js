@@ -53,8 +53,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
       
       return 0
     } catch (error) {
-      console.error('Error checking available quantity:', error)
-      return 0
+            return 0
     }
   }
 
@@ -64,10 +63,14 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
       updateQuantity(itemId, 0)
       return
     }
-    
+
     const availableQuantity = checkAvailableQuantity(itemId, newQuantity)
     if (availableQuantity < newQuantity) {
-      showToast(`Sorry, only ${availableQuantity} items available for this product.`, 'warning')
+      if (showToast && typeof showToast === 'function') {
+        showToast(`Sorry, only ${availableQuantity} items available for this product.`, 'warning')
+      } else {
+        alert(`Sorry, only ${availableQuantity} items available for this product.`)
+      }
       updateQuantity(itemId, availableQuantity)
     } else {
       updateQuantity(itemId, newQuantity)
@@ -107,9 +110,7 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
       return
     }
     
-    console.log('✅ Form validation passed')
-    console.log('Shipping data:', shippingData)
-    
+            
     setShowAnimation(true)
     setTimeout(() => {
       createOrder(shippingData) // Pass shipping data to createOrder
@@ -333,11 +334,6 @@ export default function Cart({ cartItems, updateQuantity, clearCart, createOrder
                   <h3>{item.title}</h3>
                   <p>{item.description}</p>
                   <div className="item-price">${item.price}</div>
-                  <div className="item-availability">
-                    <span className={`availability-badge ${checkAvailableQuantity(item.id) > 0 ? 'in-stock' : 'out-of-stock'}`}>
-                      {checkAvailableQuantity(item.id) > 0 ? `${checkAvailableQuantity(item.id)} Available` : ''}
-                    </span>
-                  </div>
                 </div>
                 <div className="item-quantity">
                   <button 

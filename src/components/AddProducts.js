@@ -39,7 +39,11 @@ export default function AddProducts({ darkMode = false }) {
     price: '',
     quantity: 1,
     image: '',
-    description: ''
+    description: '',
+    bookAnEvent: false,
+    place: '',
+    date: '',
+    orderDetails: ''
   })
   const [editingProduct, setEditingProduct] = useState(null)
 
@@ -133,11 +137,9 @@ export default function AddProducts({ darkMode = false }) {
       if (products.length > 50) {
         const limitedProducts = products.slice(-50)
         localStorage.setItem('ecommerce_products', JSON.stringify(limitedProducts))
-        console.log('Clean up: Reduced products from', products.length, 'to', limitedProducts.length)
-      }
+              }
     } catch (error) {
-      console.error('Error during auto-cleanup:', error)
-    }
+          }
 
     // Clean up storage to prevent memory issues
     cleanupStorage()
@@ -165,39 +167,19 @@ export default function AddProducts({ darkMode = false }) {
 
   const loadProducts = async () => {
     try {
-      // Fetch from Supabase first
+      // Fetch from Supabase only
       const { getProductsFromSupabase } = await import('../utils/supabase')
       const { data: supabaseProducts } = await getProductsFromSupabase(100, 0)
-      
+
       if (supabaseProducts && supabaseProducts.length > 0) {
-        setProducts(supabaseProducts)
-        // Also save to localStorage for fallback
-        try {
-          localStorage.setItem('ecommerce_products', JSON.stringify(supabaseProducts))
-        } catch (e) {
-          console.warn('localStorage quota exceeded')
-        }
-        console.log('📥 Loaded products from Supabase:', supabaseProducts.length)
-      } else {
-        // Fallback to localStorage
-        const storedProducts = localStorage.getItem('ecommerce_products')
-        if (storedProducts) {
-          const parsedProducts = JSON.parse(storedProducts)
-          setProducts(parsedProducts)
-        }
+        // Remove duplicates by ID
+        const uniqueProducts = supabaseProducts.filter((product, index, self) =>
+          index === self.findIndex(p => p.id === product.id)
+        )
+        setProducts(uniqueProducts)
       }
     } catch (error) {
-      console.error('Error loading products:', error)
-      // Fallback to localStorage
-      try {
-        const storedProducts = localStorage.getItem('ecommerce_products')
-        if (storedProducts) {
-          const parsedProducts = JSON.parse(storedProducts)
-          setProducts(parsedProducts)
-        }
-      } catch (e) {
-        setProducts([])
-      }
+      console.error('Error loading products from Supabase:', error)
     }
   }
 
@@ -215,21 +197,17 @@ export default function AddProducts({ darkMode = false }) {
         try {
           localStorage.removeItem(key)
         } catch (e) {
-          console.warn(`Failed to remove ${key}:`, e)
-        }
+                  }
       })
       
       // Clean up sessionStorage
       try {
         sessionStorage.clear()
       } catch (e) {
-        console.warn('Failed to clear sessionStorage:', e)
-      }
+              }
       
-      console.log('✅ Storage cleanup completed')
-    } catch (error) {
-      console.error('Error during storage cleanup:', error)
-    }
+          } catch (error) {
+          }
   }
 
   const handleInputChange = (e) => {
@@ -264,36 +242,33 @@ export default function AddProducts({ darkMode = false }) {
       quantity: parseInt(newProduct.quantity),
       image: newProduct.image,
       description: newProduct.description || '',
-      createdBy: `${localStorage.getItem('currentUserEmail') || 'Admin'}`,
+      bookAnEvent: newProduct.bookAnEvent || false,
+      place: newProduct.place || '',
+      date: newProduct.date || '',
+      orderDetails: newProduct.orderDetails || '',
+      createdBy: 'Admin',
       isProtected: isProtectedAdmin()
     }
 
     try {
       // Save to Supabase ONLY
-      console.log('📝 Saving product to Supabase:', productData)
       const savedProduct = await addProductToSupabase(productData)
-      console.log('✅ Saved to Supabase:', savedProduct)
-      
+
       // Add to local state
       if (savedProduct && savedProduct.id) {
         const updatedProducts = [...products, savedProduct]
         setProducts(updatedProducts)
-        
-        // Save to localStorage for persistence
-        localStorage.setItem('ecommerce_products', JSON.stringify(updatedProducts))
-        
+
         setMessage(`✅ Product "${productData.title}" saved to database!`)
         clearForm()
-        
+
         // 🆕 Trigger update event for Home page
         window.dispatchEvent(new Event('productsUpdated'))
-        console.log('🔄 Triggered productsUpdated event for Home page')
       } else {
         throw new Error('Invalid response from Supabase')
       }
-      
+
     } catch (error) {
-      console.error('❌ Error saving product:', error)
       showToast('❌ Failed to save product to database. Please check Supabase connection.', 'error')
     }
   }
@@ -307,7 +282,7 @@ export default function AddProducts({ darkMode = false }) {
     }
 
     if (editingProduct.isProtected && !canModifyProtectedAdmin()) {
-      showToast('❌ Cannot edit protected products!\n\nOnly yahiapro400@gmail.com can edit protected products.', 'error')
+      showToast(' Cannot edit protected products!\n\nOnly yahiapro400@gmail.com can edit protected products.', 'error')
       return
     }
 
@@ -317,44 +292,42 @@ export default function AddProducts({ darkMode = false }) {
       quantity: parseInt(editingProduct.quantity),
       title: editingProduct.title,
       image: editingProduct.image,
-      description: editingProduct.description
+      description: editingProduct.description,
+      bookAnEvent: editingProduct.bookAnEvent || false,
+      place: editingProduct.place || '',
+      date: editingProduct.date || '',
+      orderDetails: editingProduct.orderDetails || ''
     }
 
     // Update in Supabase
     try {
       await updateProductInSupabase(editingProduct.id, updatedProductData)
-      console.log('✅ Updated in Supabase:', editingProduct.id)
     } catch (error) {
-      console.error('Supabase update error:', error)
+      showToast(' Failed to update product', 'error')
+      return
     }
-
-    // Update locally
-    const updatedProductLocal = {
-      ...editingProduct,
-      ...updatedProductData
-    }
-    const updatedProductsLocal = products.map(product => product.id === editingProduct.id ? updatedProductLocal : product)
-    setProducts(updatedProductsLocal)
-    try { localStorage.setItem('ecommerce_products', JSON.stringify(updatedProductsLocal)) } catch {}
 
     // Reload products from Supabase to get the latest data
     await loadProducts()
 
     window.dispatchEvent(new Event('productsUpdated'))
-    setMessage(`✅ Product "${editingProduct.title}" updated`)
+    setMessage(` Product "${editingProduct.title}" updated`)
     setEditingProduct(null)
     setShowForm(false)
     setTimeout(() => setMessage(''), 3000)
   }
 
-  // Function to clear form manually
   const clearForm = () => {
     setNewProduct({
       title: '',
       price: '',
       quantity: 1,
       image: '',
-      description: ''
+      description: '',
+      bookAnEvent: false,
+      place: '',
+      date: '',
+      orderDetails: ''
     })
     setMessage('Form cleared successfully!')
     setTimeout(() => setMessage(''), 3000)
@@ -591,6 +564,63 @@ export default function AddProducts({ darkMode = false }) {
             />
           </div>
 
+          <div className="form-group">
+            <label>
+              <input
+                type="checkbox"
+                name="bookAnEvent"
+                checked={editingProduct ? editingProduct.bookAnEvent : newProduct.bookAnEvent}
+                onChange={(e) => {
+                  if (editingProduct) {
+                    setEditingProduct(prev => ({ ...prev, bookAnEvent: e.target.checked }))
+                  } else {
+                    setNewProduct(prev => ({ ...prev, bookAnEvent: e.target.checked }))
+                  }
+                }}
+              />
+              Book an Event
+            </label>
+          </div>
+
+          {(editingProduct ? editingProduct.bookAnEvent : newProduct.bookAnEvent) && (
+            <>
+              <div className="form-group">
+                <label htmlFor="place">Place</label>
+                <input
+                  type="text"
+                  id="place"
+                  name="place"
+                  value={editingProduct ? editingProduct.place : newProduct.place}
+                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
+                  placeholder="Enter event location"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="date">Date</label>
+                <input
+                  type="date"
+                  id="date"
+                  name="date"
+                  value={editingProduct ? editingProduct.date : newProduct.date}
+                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="orderDetails">Order Details</label>
+                <textarea
+                  id="orderDetails"
+                  name="orderDetails"
+                  value={editingProduct ? editingProduct.orderDetails : newProduct.orderDetails}
+                  onChange={editingProduct ? handleEditInputChange : handleInputChange}
+                  rows="3"
+                  placeholder="Enter order details"
+                />
+              </div>
+            </>
+          )}
+
             <div className="form-actions">
               <button type="submit" className="submit-btn">
                 {editingProduct ? 'Update Product' : 'Add Product'}
@@ -698,7 +728,11 @@ export default function AddProducts({ darkMode = false }) {
                         setEditingProduct({
                           ...product,
                           price: product.price.toString(),
-                          quantity: product.quantity.toString()
+                          quantity: product.quantity.toString(),
+                          bookAnEvent: product.bookAnEvent || false,
+                          place: product.place || '',
+                          date: product.date || '',
+                          orderDetails: product.orderDetails || ''
                         })
                         setShowForm(true)
                       }}
@@ -722,10 +756,8 @@ export default function AddProducts({ darkMode = false }) {
                           if (productToDelete.id) {
                             try {
                               await deleteProductFromSupabase(productToDelete.id)
-                              console.log('✅ Deleted from Supabase:', productToDelete.id)
-                            } catch (sbError) {
-                              console.warn('⚠️ Could not delete from Supabase:', sbError.message)
-                            }
+                                                          } catch (sbError) {
+                                                          }
                           }
 
                           // Also delete locally
