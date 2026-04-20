@@ -8,8 +8,8 @@ export default function Footer({ darkMode = true }) {
         <div className="footer-contact-section">
           <h3 className="footer-section-title">Contact Us</h3>
           <div className="footer-contact-info">
-            <a href="mailto:yahiapro400@gmail.com" className="contact-link">
-              <i className="fa fa-envelope"></i> yahiapro400@gmail.com
+            <a href={`mailto:${process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com'}`} className="contact-link">
+              <i className="fa fa-envelope"></i> {process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com'}
             </a>
             <a href="tel:+201273445173" className="contact-link">
               <i className="fa fa-phone"></i> +20 127 344 5173

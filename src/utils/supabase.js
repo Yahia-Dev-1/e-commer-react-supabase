@@ -1,8 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
 // REPLACE WITH YOUR SUPABASE URL AND KEY
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://pmcqryrwpsacyehmedla.supabase.co';
-const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || 'sb_publishable_39dbjDLc4vkU6TXsfqRx2w_JghYcvuy';
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase credentials. Please set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_KEY in your .env file.');
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -572,7 +576,7 @@ export const getAllConversations = async () => {
     if (error) throw error;
 
     // Get unique user emails (excluding admin)
-    const adminEmail = 'yahiapro400@gmail.com';
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com';
     const uniqueUsers = new Map();
 
     data.forEach(msg => {
@@ -608,7 +612,7 @@ export const getAllConversations = async () => {
 
 export const deleteConversation = async (userEmail) => {
   try {
-    const adminEmail = 'yahiapro400@gmail.com';
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com';
     const { error } = await supabase
       .from('messages')
       .delete()

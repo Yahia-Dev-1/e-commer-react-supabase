@@ -15,7 +15,7 @@ export default function Chat({ user }) {
   const messagesEndRef = useRef(null);
   const [alertModal, setAlertModal] = useState({ isOpen: false, title: '', message: '' });
 
-  const adminEmail = 'yahiapro400@gmail.com';
+  const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com';
   const isAdmin = user?.email === adminEmail;
 
   useEffect(() => {
