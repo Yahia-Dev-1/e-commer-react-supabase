@@ -191,6 +191,7 @@ export default function Login({ onLogin, darkMode = false }) {
               placeholder="Enter your password"
               required
               disabled={isLoading}
+              autoComplete="current-password"
             />
           </div>
 
