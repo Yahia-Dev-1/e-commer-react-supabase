@@ -11,7 +11,7 @@ const isCurrentUserAdmin = () => {
   if (!currentUserEmail) return false;
 
   const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-  const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'];
+  const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL];
   const allAdminEmails = adminEmails.length > 0 ? adminEmails : defaultAdminEmails;
 
   return allAdminEmails.includes(currentUserEmail);

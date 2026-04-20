@@ -7,7 +7,7 @@ class Database {
     this.usersKey = 'ecommerce_users';
     this.ordersKey = 'ecommerce_orders';
     this.lastSaveKey = 'ecommerce_lastSave';
-    this.protectedAdmins = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'];
+    this.protectedAdmins = [process.env.REACT_APP_ADMIN_EMAIL];
     
     // Initialize enhanced storage - temporarily disabled
     // initializeStorage();
@@ -23,9 +23,9 @@ class Database {
         const defaultUsers = [
           {
             id: 1,
-            email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-            password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-            name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro',
+            email: process.env.REACT_APP_ADMIN_EMAIL,
+            password: process.env.REACT_APP_ADMIN_PASSWORD,
+            name: process.env.REACT_APP_ADMIN_NAME,
             createdAt: new Date().toISOString(),
             orders: [],
             isProtected: true
@@ -34,7 +34,7 @@ class Database {
         localStorage.setItem(this.usersKey, JSON.stringify(defaultUsers));
 
         // Add to admin list
-        const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'];
+        const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL];
         localStorage.setItem('admin_emails', JSON.stringify(adminEmails));
       } else {
         // Ensure protected admins exist even if users already exist
@@ -66,9 +66,9 @@ class Database {
       const protectedAdmins = [
         {
           id: 1,
-          email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-          password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-          name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro',
+          email: process.env.REACT_APP_ADMIN_EMAIL,
+          password: process.env.REACT_APP_ADMIN_PASSWORD,
+          name: process.env.REACT_APP_ADMIN_NAME,
           isProtected: true
         }
       ];
@@ -234,7 +234,7 @@ class Database {
       if (this.isProtectedAdmin(userData.email)) {
         // Check if this is a protected admin trying to register with correct password
         const protectedAdminPasswords = {
-          [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com']: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562'
+          [process.env.REACT_APP_ADMIN_EMAIL]: process.env.REACT_APP_ADMIN_PASSWORD
         };
 
         if (protectedAdminPasswords[userData.email] === userData.password) {
@@ -480,16 +480,16 @@ class Database {
 
       // Remove existing protected admins
       const filteredUsers = users.filter(user =>
-        user.email !== (process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com')
+        user.email !== (process.env.REACT_APP_ADMIN_EMAIL)
       );
 
       // Add fresh protected admins
       const protectedAdmins = [
         {
           id: Date.now() + 1,
-          email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-          password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-          name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro',
+          email: process.env.REACT_APP_ADMIN_EMAIL,
+          password: process.env.REACT_APP_ADMIN_PASSWORD,
+          name: process.env.REACT_APP_ADMIN_NAME,
           createdAt: new Date().toISOString(),
           orders: [],
           isProtected: true
@@ -503,9 +503,9 @@ class Database {
 
       // Update admin emails list
       const updatedAdminEmails = adminEmails.filter(email =>
-        email !== (process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com')
+        email !== (process.env.REACT_APP_ADMIN_EMAIL)
       );
-      updatedAdminEmails.push(process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com');
+      updatedAdminEmails.push(process.env.REACT_APP_ADMIN_EMAIL);
 
       // Save to localStorage
       localStorage.setItem(this.usersKey, JSON.stringify(filteredUsers));

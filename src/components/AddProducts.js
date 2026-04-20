@@ -49,7 +49,7 @@ export default function AddProducts({ darkMode = false }) {
 
   // Protected admin emails
   const protectedAdmins = [
-    process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
+    process.env.REACT_APP_ADMIN_EMAIL,
   ]
 
   const isProtectedAdmin = () => {
@@ -104,7 +104,7 @@ export default function AddProducts({ darkMode = false }) {
     
     if (!currentUser) {
       // If user not found in users array, check if it's an admin email
-      const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com']
+      const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL]
       if (adminEmails.includes(currentUserEmail)) {
         setUser({ email: currentUserEmail })
         loadProducts()
@@ -116,7 +116,7 @@ export default function AddProducts({ darkMode = false }) {
     }
 
     // Check if user is admin
-    const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com']
+    const adminEmails = [process.env.REACT_APP_ADMIN_EMAIL]
     if (!adminEmails.includes(currentUser.email)) {
       navigate('/')
       return

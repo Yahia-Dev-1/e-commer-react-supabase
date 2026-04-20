@@ -101,7 +101,7 @@ export default function Nav({ cartItemsCount = 0, user = null, onLogout = null, 
             <Link to='/event-booking' onClick={closeMenu}>🎉 Event Booking</Link>
 
             {/* Admin Links - Only for specific admin accounts */}
-            {[process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'].includes(user.email) && (
+            {[process.env.REACT_APP_ADMIN_EMAIL].includes(user.email) && (
               <>
                 <Link to='/admin' onClick={closeMenu} className="admin-link">Admin</Link>
                 <Link to='/add-products' onClick={closeMenu} className="admin-link">Add Products</Link>

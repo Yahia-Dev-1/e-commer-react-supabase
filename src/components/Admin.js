@@ -22,7 +22,7 @@ export default function Admin({ darkMode = true }) {
 
   const checkAuthorization = useCallback(() => {
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'];
+    const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL];
     const adminEmails = savedAdminEmails.length > 0 ? savedAdminEmails : defaultAdminEmails;
     
     const currentUserEmail = localStorage.getItem('currentUserEmail');
@@ -67,9 +67,9 @@ export default function Admin({ darkMode = true }) {
     
     const protectedAdmins = [
       {
-        email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-        password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-        name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro'
+        email: process.env.REACT_APP_ADMIN_EMAIL,
+        password: process.env.REACT_APP_ADMIN_PASSWORD,
+        name: process.env.REACT_APP_ADMIN_NAME
       }
     ];
 
@@ -105,7 +105,7 @@ export default function Admin({ darkMode = true }) {
 
     const updatedUsers = database.getUsers();
     const savedAdminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-    const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'];
+    const defaultAdminEmails = [process.env.REACT_APP_ADMIN_EMAIL];
     const finalAdminEmails = savedAdminEmails.length > 0 ? savedAdminEmails : defaultAdminEmails;
     const filteredUsers = updatedUsers.filter(user => finalAdminEmails.includes(user.email));
     
@@ -120,9 +120,9 @@ export default function Admin({ darkMode = true }) {
     const initializeProtectedAdmins = () => {
       const protectedAdmins = [
         {
-          email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-          password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-          name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro'
+          email: process.env.REACT_APP_ADMIN_EMAIL,
+          password: process.env.REACT_APP_ADMIN_PASSWORD,
+          name: process.env.REACT_APP_ADMIN_NAME
         }
       ];
 
@@ -233,7 +233,7 @@ export default function Admin({ darkMode = true }) {
       return;
     }
 
-    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com';
+    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL;
     const currentUserEmail = localStorage.getItem('currentUserEmail');
 
     // Only super admin can delete users
@@ -267,7 +267,7 @@ export default function Admin({ darkMode = true }) {
   };
 
   const handleEditUser = (user) => {
-    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com';
+    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL;
     const currentUserEmail = localStorage.getItem('currentUserEmail');
 
     // Only super admin can edit users
@@ -297,7 +297,7 @@ export default function Admin({ darkMode = true }) {
 
   const handleMakeAdmin = async (user) => {
     const currentUserEmail = localStorage.getItem('currentUserEmail') || localStorage.getItem('loggedInUser') || localStorage.getItem('userEmail');
-    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com';
+    const superAdmin = process.env.REACT_APP_ADMIN_EMAIL;
 
     // Only super admin can make users admin
     if (currentUserEmail !== superAdmin) {
@@ -479,9 +479,9 @@ export default function Admin({ darkMode = true }) {
     try {
       const protectedAdmins = [
         {
-          email: process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com',
-          password: process.env.REACT_APP_ADMIN_PASSWORD || 'ylyr5767ykm34562',
-          name: process.env.REACT_APP_ADMIN_NAME || 'Yahia Pro'
+          email: process.env.REACT_APP_ADMIN_EMAIL,
+          password: process.env.REACT_APP_ADMIN_PASSWORD,
+          name: process.env.REACT_APP_ADMIN_NAME
         }
       ];
 
@@ -567,7 +567,7 @@ export default function Admin({ darkMode = true }) {
             <div className="unauthorized-info">
               <h3>Authorized Admin Accounts:</h3>
               <ul>
-                <li>{process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com'}</li>
+                <li>{process.env.REACT_APP_ADMIN_EMAIL}</li>
               </ul>
             </div>
             <div className="unauthorized-actions">
@@ -828,7 +828,7 @@ export default function Admin({ darkMode = true }) {
                   <tbody>
                     {users.map(user => {
                       const adminEmails = JSON.parse(localStorage.getItem('admin_emails') || '[]');
-                      const isAdmin = adminEmails.includes(user.email) || user.email === (process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com');
+                      const isAdmin = adminEmails.includes(user.email) || user.email === (process.env.REACT_APP_ADMIN_EMAIL);
                       return (
                         <tr key={user.id}>
                           <td className="user-email">{user.email}</td>
