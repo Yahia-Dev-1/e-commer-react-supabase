@@ -576,7 +576,7 @@ export const getAllConversations = async () => {
     if (error) throw error;
 
     // Get unique user emails (excluding admin)
-    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com';
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com';
     const uniqueUsers = new Map();
 
     data.forEach(msg => {
@@ -612,7 +612,7 @@ export const getAllConversations = async () => {
 
 export const deleteConversation = async (userEmail) => {
   try {
-    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@example.com';
+    const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'yahiapro400@gmail.com';
     const { error } = await supabase
       .from('messages')
       .delete()
